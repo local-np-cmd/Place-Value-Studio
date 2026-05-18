@@ -2,679 +2,129 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Place Value Studio - Bilingual Words</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Place Value Studio</title>
   <style>
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
-      user-select: none;
     }
-
     body {
       background: #eef2fa;
       font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, sans-serif;
-      margin: 0;
-      padding: 24px 20px;
+      padding: 40px 20px;
     }
-
-    .main-container {
-      max-width: 1300px;
+    .container {
+      max-width: 1200px;
       margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #0e3b4f;
+      margin-bottom: 10px;
+    }
+    .sub {
+      text-align: center;
+      color: #2c7aa0;
+      margin-bottom: 40px;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      justify-items: center;
+      align-items: stretch;
+    }
+    .card {
       background: white;
       border-radius: 2rem;
-      box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.25);
-      overflow: hidden;
-    }
-
-    .top-bar {
-      background: linear-gradient(135deg, #0e3b4f, #1f6a8c);
-      padding: 1rem 1.8rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-      color: rgb(255, 254, 254);
-    }
-
-    .lang-group {
-      display: flex;
-      gap: 12px;
-      background: #ffffff30;
-      padding: 5px 14px;
-      border-radius: 60px;
-    }
-
-    .lang-btn {
-      background: transparent;
-      border: 1px solid #ffcd7e;
-      padding: 5px 18px;
-      border-radius: 40px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #ffefcf;
-      transition: 0.1s;
-    }
-
-    .lang-btn.active {
-      background: #ffcd7e;
+      padding: 28px 20px;
+      text-align: center;
+      text-decoration: none;
       color: #1e4b61;
-      border-color: white;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 350px;
     }
-
-    /* Increased height & better font for Nepali readability */
-    .theme-selector {
-      background: white;
-      padding: 8px 18px;
-      border-radius: 40px;
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 30px rgba(0,0,0,0.15);
+    }
+    .card-icon {
+      font-size: 3.5rem;
+    }
+    .card-title {
+      font-size: 1.6rem;
       font-weight: bold;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-      min-width: 190px;
+    }
+    .card-desc {
+      font-size: 0.9rem;
+      color: #5a6e7a;
       line-height: 1.4;
     }
-    .theme-selector option {
-      font-size: 0.95rem;
-      padding: 6px;
-    }
-
-    .example-area {
-      display: flex;
-      gap: 10px;
-      background: #ffffff30;
-      padding: 4px 16px;
-      border-radius: 60px;
-      align-items: center;
-    }
-
-    .example-btn {
-      background: #ffe0b5;
-      border: none;
-      border-radius: 32px;
-      padding: 6px 16px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: 0.05s linear;
-    }
-
-    .example-btn:active {
-      transform: scale(0.96);
-    }
-
-    .search-row {
-      background: #f9f6ef;
-      margin: 18px 24px 0 24px;
-      border-radius: 80px;
-      padding: 10px 20px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .number-input {
-      font-size: 1.5rem;
-      width: 160px;
+    .footer {
+      margin-top: 50px;
       text-align: center;
-      font-weight: bold;
-      border-radius: 48px;
-      border: 2px solid #ffaa44;
-      padding: 8px 12px;
-      font-family: monospace;
+      color: #6c8a9c;
+      font-size: 0.85rem;
     }
-
-    .update-btn {
-      background: #e67e22;
-      border: none;
-      border-radius: 40px;
-      padding: 8px 22px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.05s;
-      color: white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    @media (max-width: 800px) {
+      .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
-
-    .update-btn:active {
-      transform: scale(0.97);
-      background: #d35400;
+    @media (max-width: 550px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
     }
-
-    .table-wrapper {
-      padding: 0 24px 16px 24px;
-      overflow-x: auto;
-    }
-
-    .place-table {
-      width: 100%;
-      border-collapse: collapse;
-      border: 3px solid black;
-      background: white;
-    }
-
-    .place-table th, .place-table td {
-      border: 2px solid black;
-      padding: 16px 10px;
-      vertical-align: middle;
-      text-align: center;
-    }
-
-    .place-table th {
-      background: #2b5e7a;
-      color: white;
-      font-size: 1.1rem;
-    }
-
-    .number-display-cell {
-      background: #e3f0fa;
-      font-size: 2rem;
-      font-weight: 800;
-      cursor: pointer;
-      transition: 0.05s linear;
-    }
-
-    .number-display-cell:active {
-      background: #c9e2f5;
-    }
-
-    .blocks-group {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
-    }
-
-    .block {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-      text-shadow: 0 1px 1px black;
-      box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
-      border-radius: 14px;
-      cursor: pointer;
-      transition: 0.05s linear;
-      flex-shrink: 0;
-    }
-
-    .block:active {
-      transform: translateY(2px);
-    }
-
-    .block.block-disabled {
-      opacity: 0.45;
-      filter: grayscale(0.2);
-      cursor: not-allowed;
-      pointer-events: none;
-      transform: none;
-    }
-
-    .hundred-block { width: 88px; height: 88px; font-size: 1rem; }
-    .ten-block { width: 96px; height: 48px; font-size: 0.95rem; }
-    .one-block { width: 52px; height: 52px; font-size: 1rem; }
-
-    .classic-hundred {
-      background-color: #1f6392;
-      background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10)), repeating-linear-gradient(to right, transparent, transparent calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10));
-    }
-    .classic-ten {
-      background-color: #368bc1;
-      background-image: repeating-linear-gradient(90deg, rgba(255,250,210,0.9), rgba(255,250,210,0.9) 1.5px, transparent 1.5px, transparent calc(100% / 10));
-    }
-    .classic-one { background-color: #5ea9d9; }
-    .solid-hundred { background: #2c7aa0; }
-    .solid-ten { background: #4797c2; }
-    .solid-one { background: #6db4db; }
   </style>
 </head>
 <body>
-<div class="main-container">
-  <div class="top-bar">
-    <div class="lang-group">
-      <button id="langEn" class="lang-btn active">🇬🇧 English</button>
-      <button id="langNp" class="lang-btn">🇳🇵 नेपाली</button>
-    </div>
-    <select id="themeSelect" class="theme-selector">
-      <option value="classic">📦 Classic (Grids)</option>
-      <option value="rupee">💵 Nepali Rupees</option>
-      <option value="apple">🍎 Apple</option>
-      <option value="mango">🥭 Mango</option>
-      <option value="flower">🌸 Flower</option>
-      <option value="orange">🍊 Orange</option>
-    </select>
-    <div class="example-area">
-      <span id="exampleLabel">📘 Example:</span>
-      <button data-val="597" class="example-btn" id="example597">597</button>
-      <button data-val="604" class="example-btn" id="example604">604</button>
-      <button data-val="382" class="example-btn" id="example382">382</button>
-    </div>
+<div class="container">
+  <h1>🏛️ Place Value Studio</h1>
+  <div class="sub">Interactive tools to explore numbers, addition, subtraction, multiplication & division</div>
+  <div class="card-grid">
+    <a href="single.html" class="card">
+      <div class="card-icon">🔢</div>
+      <div class="card-title">Single Number</div>
+      <div class="card-desc">Every digit’s place gives it value – a hundred is always 100, no matter where it sits!</div>
+    </a>
+    <a href="addition.html" class="card">
+      <div class="card-icon">➕</div>
+      <div class="card-title">Addition Lab</div>
+      <div class="card-desc">Addition is putting groups together – and regrouping 10 ones makes a whole new ten!</div>
+    </a>
+    <a href="subtraction.html" class="card">
+      <div class="card-icon">➖</div>
+      <div class="card-title">Subtraction Lab</div>
+      <div class="card-desc">When you don’t have enough ones, you can “borrow” a ten – like exchanging a coin for smaller ones.</div>
+    </a>
+    <a href="multiplication.html" class="card">
+      <div class="card-icon">✖️</div>
+      <div class="card-title">Multiplication Lab</div>
+      <div class="card-desc">Multiplication is repeated addition – 4 × 3 means 4 groups of 3, which is the same as 3+3+3+3!</div>
+    </a>
+    <a href="division.html" class="card">
+      <div class="card-icon">➗</div>
+      <div class="card-title">Division Lab</div>
+      <div class="card-desc">Division splits a number into equal groups – sometimes a few leftovers (remainder) stay behind.</div>
+    </a>
+    <a href="custom-test.html" class="card">
+      <div class="card-icon">📝</div>
+      <div class="card-title">Custom Test</div>
+      <div class="card-desc">Create your own test paper! Choose any operation (+, -, ×, ÷) and set the difficulty – then challenge yourself.</div>
+    </a>
   </div>
-
-  <div class="search-row">
-    <span id="numberLabel">🔢 Number (0–999):</span>
-    <input type="number" id="numberInput" class="number-input" value="597" min="0" max="999" step="1">
-    <button id="updateBtn" class="update-btn">✨ Update</button>
-  </div>
-
-  <div class="table-wrapper">
-    <table class="place-table" id="mainTable">
-      <thead>
-        <tr><th id="thNumber">🔢 Number</th><th id="thHundreds">🏛️ Hundreds (100s)</th><th id="thTens">📏 Tens (10s)</th><th id="thOnes">🟦 Ones (1s)</th></tr>
-      </thead>
-      <tbody id="placeTableBody"></tbody>
-    </table>
+  <div class="footer">
+    🌍 Bilingual (English / नेपाली) • 🎨 Multiple themes • 🔊 Speech supported
   </div>
 </div>
-
-<script>
-  // ---------- NEPALI NUMBER WORDS (1 to 100 from given table) ----------
-  const nepaliWords = {
-    0: 'शून्य',
-    1: 'एक', 2: 'दुई', 3: 'तीन', 4: 'चार', 5: 'पाँच',
-    6: 'छ', 7: 'सात', 8: 'आठ', 9: 'नौ', 10: 'दस',
-    11: 'एघार', 12: 'बाह्र', 13: 'तेह्र', 14: 'चौध', 15: 'पन्ध्र',
-    16: 'सोह्र', 17: 'सत्र', 18: 'अठार', 19: 'उन्नाइस', 20: 'बीस',
-    21: 'एक्काइस', 22: 'बाइस', 23: 'तेइस', 24: 'चौबीस', 25: 'पच्चीस',
-    26: 'छब्बीस', 27: 'सत्ताइस', 28: 'अठ्ठाइस', 29: 'उनन्तीस', 30: 'तीस',
-    31: 'एकतीस', 32: 'बत्तीस', 33: 'तेत्तीस', 34: 'चौँतीस', 35: 'पैँतीस',
-    36: 'छत्तीस', 37: 'सैँतीस', 38: 'अठतीस', 39: 'उनन्चालीस', 40: 'चालीस',
-    41: 'एकचालीस', 42: 'बयालीस', 43: 'त्रिचालीस', 44: 'चवालीस', 45: 'पैँतालीस',
-    46: 'छयालीस', 47: 'सच्चालीस', 48: 'अठचालीस', 49: 'उनन्चास', 50: 'पचास',
-    51: 'एकाउन्न', 52: 'बाउन्न', 53: 'त्रिपन्न', 54: 'चौवन्न', 55: 'पचपन्न',
-    56: 'छपन्न', 57: 'सन्ताउन्न', 58: 'अन्ठाउन्न', 59: 'उनन्साठी', 60: 'साठी',
-    61: 'एकसट्ठी', 62: 'बयसट्ठी', 63: 'त्रिसट्ठी', 64: 'चौसट्ठी', 65: 'पैंसट्ठी',
-    66: 'छैसट्ठी', 67: 'सत्सट्ठी', 68: 'अठसट्ठी', 69: 'उनन्सत्तरी', 70: 'सत्तरी',
-    71: 'एकहत्तर', 72: 'बहत्तर', 73: 'त्रिहत्तर', 74: 'चौहत्तर', 75: 'पचहत्तर',
-    76: 'छैहत्तर', 77: 'सतहत्तर', 78: 'अठहत्तर', 79: 'उनासी', 80: 'असी',
-    81: 'एकासी', 82: 'बयासी', 83: 'त्रियासी', 84: 'चौरासी', 85: 'पचासी',
-    86: 'छयासी', 87: 'सतासी', 88: 'अठासी', 89: 'उनान्नब्बे', 90: 'नब्बे',
-    91: 'एकान्नब्बे', 92: 'बयान्नब्बे', 93: 'त्रियान्नब्बे', 94: 'चौरान्नब्बे',
-    95: 'पन्चान्नब्बे', 96: 'छयान्नब्बे', 97: 'सन्तान्नब्बे', 98: 'अन्ठान्नब्बे',
-    99: 'उनान्सय', 100: 'सय'
-  };
-
-  function getNepaliNumberWord(num) {
-    if (num < 0 || num > 999) return String(num);
-    if (num <= 100) return nepaliWords[num];
-    const hundreds = Math.floor(num / 100);
-    const remainder = num % 100;
-    let hundredsWord = '';
-    if (hundreds === 1) hundredsWord = 'एक सय';
-    else if (hundreds === 2) hundredsWord = 'दुई सय';
-    else if (hundreds === 3) hundredsWord = 'तीन सय';
-    else if (hundreds === 4) hundredsWord = 'चार सय';
-    else if (hundreds === 5) hundredsWord = 'पाँच सय';
-    else if (hundreds === 6) hundredsWord = 'छ सय';
-    else if (hundreds === 7) hundredsWord = 'सात सय';
-    else if (hundreds === 8) hundredsWord = 'आठ सय';
-    else if (hundreds === 9) hundredsWord = 'नौ सय';
-    if (remainder === 0) return hundredsWord;
-    const remainderWord = (remainder <= 100) ? nepaliWords[remainder] : getNepaliNumberWord(remainder);
-    return `${hundredsWord} ${remainderWord}`;
-  }
-
-  // ---------- GLOBALS ----------
-  let currentLang = 'en';
-  let currentTheme = 'classic';
-  let currentNumber = 597;
-
-  // Counters for clicked blocks
-  let hundredClicked = 0;
-  let tenClicked = 0;
-  let oneClicked = 0;
-  let maxHundreds = 0, maxTens = 0, maxOnes = 0;
-
-  // DOM elements
-  const langEnBtn = document.getElementById('langEn');
-  const langNpBtn = document.getElementById('langNp');
-  const themeSelect = document.getElementById('themeSelect');
-  const numberInput = document.getElementById('numberInput');
-  const updateBtn = document.getElementById('updateBtn');
-  const tableBody = document.getElementById('placeTableBody');
-  const example597 = document.getElementById('example597');
-  const example604 = document.getElementById('example604');
-  const example382 = document.getElementById('example382');
-  const numberLabelSpan = document.getElementById('numberLabel');
-  const exampleLabelSpan = document.getElementById('exampleLabel');
-  const thNumber = document.getElementById('thNumber');
-  const thHundreds = document.getElementById('thHundreds');
-  const thTens = document.getElementById('thTens');
-  const thOnes = document.getElementById('thOnes');
-
-  // Helper: Nepali digits
-  function toNepaliDigits(num) {
-    const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
-    return num.toString().split('').map(d => nepaliDigits[parseInt(d)]).join('');
-  }
-
-  function formatNumberDisplay(num) {
-    if (currentLang === 'np') return toNepaliDigits(num);
-    return num.toString();
-  }
-
-  function convertNumbersToNepali(text) {
-    if (currentLang !== 'np') return text;
-    return text.replace(/\d+/g, match => toNepaliDigits(parseInt(match)));
-  }
-
-  function updateUIText() {
-    if (currentLang === 'en') {
-      numberLabelSpan.innerText = '🔢 Number (0–999):';
-      exampleLabelSpan.innerText = '📘 Example:';
-      updateBtn.innerText = '✨ Update';
-      example597.innerText = '597';
-      example604.innerText = '604';
-      example382.innerText = '382';
-      thNumber.innerText = '🔢 Number';
-      thHundreds.innerText = '🏛️ Hundreds (100s)';
-      thTens.innerText = '📏 Tens (10s)';
-      thOnes.innerText = '🟦 Ones (1s)';
-      const opts = themeSelect.options;
-      opts[0].text = '📦 Classic (Grids)';
-      opts[1].text = '💵 Nepali Rupees';
-      opts[2].text = '🍎 Apple';
-      opts[3].text = '🥭 Mango';
-      opts[4].text = '🌸 Flower';
-      opts[5].text = '🍊 Orange';
-    } else {
-      numberLabelSpan.innerText = '🔢 संख्या (०–९९९):';
-      exampleLabelSpan.innerText = '📘 उदाहरण:';
-      updateBtn.innerText = '✨ अपडेट गर्नुहोस्';
-      example597.innerText = toNepaliDigits(597);
-      example604.innerText = toNepaliDigits(604);
-      example382.innerText = toNepaliDigits(382);
-      thNumber.innerText = '🔢 संख्या';
-      thHundreds.innerText = '🏛️ सय (१००)';
-      thTens.innerText = '📏 दश (१०)';
-      thOnes.innerText = '🟦 एक (१)';
-      const opts = themeSelect.options;
-      opts[0].text = '📦 क्लासिक (ग्रिड)';
-      opts[1].text = '💵 नेपाली रुपैयाँ';
-      opts[2].text = '🍎 स्याउ';
-      opts[3].text = '🥭 आँप';
-      opts[4].text = '🌸 फूल';
-      opts[5].text = '🍊 सुन्तला';
-    }
-  }
-
-  // Speech functions
-  function speakNow(text, lang) {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = (lang === 'en') ? 'en-US' : 'ne-NP';
-    utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
-  }
-
-  function speakCumulativeValue(placeType, clickedCount, unitValue) {
-    let totalValue = clickedCount * unitValue;
-    if (totalValue === 0) return;
-    if (currentLang === 'en') {
-      speakNow(totalValue.toString(), 'en');
-    } else {
-      let nepaliText = '';
-      if (totalValue <= 100) {
-        nepaliText = getNepaliNumberWord(totalValue);
-      } else if (totalValue % 100 === 0 && totalValue <= 900) {
-        const hundredsDigit = totalValue / 100;
-        if (hundredsDigit === 1) nepaliText = 'एक सय';
-        else if (hundredsDigit === 2) nepaliText = 'दुई सय';
-        else if (hundredsDigit === 3) nepaliText = 'तीन सय';
-        else if (hundredsDigit === 4) nepaliText = 'चार सय';
-        else if (hundredsDigit === 5) nepaliText = 'पाँच सय';
-        else if (hundredsDigit === 6) nepaliText = 'छ सय';
-        else if (hundredsDigit === 7) nepaliText = 'सात सय';
-        else if (hundredsDigit === 8) nepaliText = 'आठ सय';
-        else if (hundredsDigit === 9) nepaliText = 'नौ सय';
-      } else {
-        nepaliText = totalValue.toString();
-      }
-      speakNow(nepaliText, 'np');
-    }
-  }
-
-  function numberToWords(num, lang) {
-    if (num === 0) return lang === 'en' ? 'zero' : 'शून्य';
-    if (lang === 'en') {
-      const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
-      const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-      const teens = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
-      const h = Math.floor(num / 100);
-      const r = num % 100;
-      let str = '';
-      if (h > 0) str += ones[h] + ' hundred';
-      if (r > 0) {
-        if (str) str += ' ';
-        if (r < 10) str += ones[r];
-        else if (r < 20) str += teens[r - 10];
-        else {
-          const ten = Math.floor(r / 10);
-          const one = r % 10;
-          str += tens[ten];
-          if (one > 0) str += '-' + ones[one];
-        }
-      }
-      return str;
-    } else {
-      return getNepaliNumberWord(num);
-    }
-  }
-
-  // ----- Block click handler (HYBRID: only disables block, updates counters, no full re-render) -----
-  function attachBlockClick(block, placeType) {
-    block.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (block.classList.contains('block-disabled')) return;
-
-      let canClick = false;
-      if (placeType === 'hundred' && hundredClicked < maxHundreds) canClick = true;
-      else if (placeType === 'ten' && tenClicked < maxTens) canClick = true;
-      else if (placeType === 'one' && oneClicked < maxOnes) canClick = true;
-
-      if (!canClick) return;
-
-      // Disable this block immediately
-      block.classList.add('block-disabled');
-
-      // Update counter and speak
-      if (placeType === 'hundred') {
-        hundredClicked++;
-        speakCumulativeValue(placeType, hundredClicked, 100);
-      } else if (placeType === 'ten') {
-        tenClicked++;
-        speakCumulativeValue(placeType, tenClicked, 10);
-      } else {
-        oneClicked++;
-        speakCumulativeValue(placeType, oneClicked, 1);
-      }
-    });
-  }
-
-  // Generate blocks HTML without attaching events (will attach after insertion)
-  function generateBlocksHTML(theme, type, count, clickedSoFar) {
-    if (count === 0) return `<div class="blocks-group"><span style="color:#777;">—</span></div>`;
-    let sizeClass = '', valueNum = 0;
-    if (type === 'hundred') { sizeClass = 'hundred-block'; valueNum = 100; }
-    else if (type === 'ten') { sizeClass = 'ten-block'; valueNum = 10; }
-    else { sizeClass = 'one-block'; valueNum = 1; }
-    const themeCls = (theme === 'classic') 
-      ? (type === 'hundred' ? 'classic-hundred' : (type === 'ten' ? 'classic-ten' : 'classic-one'))
-      : (type === 'hundred' ? 'solid-hundred' : (type === 'ten' ? 'solid-ten' : 'solid-one'));
-
-    let html = '<div class="blocks-group">';
-    for (let i = 0; i < count; i++) {
-      const isDisabled = (i < clickedSoFar);
-      const disabledClass = isDisabled ? 'block-disabled' : '';
-      let baseLabel = '';
-      if (theme === 'classic') baseLabel = valueNum.toString();
-      else if (theme === 'rupee') baseLabel = valueNum === 100 ? 'रू १००' : (valueNum === 10 ? 'रू १०' : 'रू १');
-      else if (theme === 'apple') baseLabel = valueNum === 100 ? '🍎100' : (valueNum === 10 ? '🍎10' : '🍎1');
-      else if (theme === 'mango') baseLabel = valueNum === 100 ? '🥭100' : (valueNum === 10 ? '🥭10' : '🥭1');
-      else if (theme === 'flower') baseLabel = valueNum === 100 ? '🌸100' : (valueNum === 10 ? '🌸10' : '🌸1');
-      else if (theme === 'orange') baseLabel = valueNum === 100 ? '🍊100' : (valueNum === 10 ? '🍊10' : '🍊1');
-      else baseLabel = valueNum.toString();
-
-      if (currentLang === 'np' && theme === 'classic') {
-        baseLabel = convertNumbersToNepali(baseLabel);
-      } else if (currentLang === 'np' && theme !== 'classic') {
-        baseLabel = baseLabel.replace(/\d+/g, match => toNepaliDigits(parseInt(match)));
-      }
-      html += `<div class="block ${sizeClass} ${themeCls} ${disabledClass}" data-place-type="${type}" data-value="${valueNum}">${baseLabel}</div>`;
-    }
-    html += '</div>';
-    return html;
-  }
-
-  // Full render (initial or after number change / language / theme change)
-  function renderFullTable() {
-    let num = Math.min(999, Math.max(0, currentNumber));
-    currentNumber = num;
-    numberInput.value = num;
-
-    const hundredsDigit = Math.floor(num / 100);
-    const tensDigit = Math.floor((num % 100) / 10);
-    const onesDigit = num % 10;
-
-    maxHundreds = hundredsDigit;
-    maxTens = tensDigit;
-    maxOnes = onesDigit;
-
-    // Reset counters when a new number is loaded
-    hundredClicked = 0;
-    tenClicked = 0;
-    oneClicked = 0;
-
-    const displayNum = formatNumberDisplay(num);
-    const numberCell = `<td class="number-display-cell" data-fullnum="${num}">${displayNum}</td>`;
-
-    const hundredsHtml = generateBlocksHTML(currentTheme, 'hundred', hundredsDigit, 0);
-    const tensHtml = generateBlocksHTML(currentTheme, 'ten', tensDigit, 0);
-    const onesHtml = generateBlocksHTML(currentTheme, 'one', onesDigit, 0);
-
-    const blocksRow = `<tr id="blocksRow">${numberCell}<td>${hundredsHtml}</td><td>${tensHtml}</td><td>${onesHtml}</td></tr>`;
-
-    const hundredExpr = `${hundredsDigit} × 100 = ${hundredsDigit * 100}`;
-    const tenExpr = `${tensDigit} × 10 = ${tensDigit * 10}`;
-    const oneExpr = `${onesDigit} × 1 = ${onesDigit * 1}`;
-    let hundredFormatted = hundredExpr, tenFormatted = tenExpr, oneFormatted = oneExpr;
-    if (currentLang === 'np') {
-      hundredFormatted = convertNumbersToNepali(hundredExpr);
-      tenFormatted = convertNumbersToNepali(tenExpr);
-      oneFormatted = convertNumbersToNepali(oneExpr);
-    }
-    const timesRow = `<tr style="background:#faf3e0;"><td style="font-weight:bold;">📐 ${currentLang === 'en' ? 'Expanded' : 'विस्तृत रूप'}</td><td>${hundredFormatted}</td><td>${tenFormatted}</td><td>${oneFormatted}</td></tr>`;
-
-    const totalSum = (hundredsDigit * 100) + (tensDigit * 10) + onesDigit;
-    let finalExpression = '';
-    if (hundredsDigit === 0 && tensDigit === 0 && onesDigit === 0) {
-      finalExpression = `0 = 0`;
-    } else {
-      const parts = [];
-      if (hundredsDigit > 0) parts.push(`${hundredsDigit * 100}`);
-      if (tensDigit > 0) parts.push(`${tensDigit * 10}`);
-      if (onesDigit > 0) parts.push(`${onesDigit}`);
-      finalExpression = `${parts.join(' + ')} = ${totalSum}`;
-    }
-    if (currentLang === 'np') finalExpression = convertNumbersToNepali(finalExpression);
-    
-    // --- ADD WORDS IN THE LAST ROW ---
-    const wordForm = numberToWords(num, currentLang);
-    const wordDisplay = currentLang === 'en' 
-      ? ` (${wordForm})` 
-      : ` (${wordForm})`;   // Nepali already has script
-    const mergedRow = `<tr><td colspan="4" style="background:#e9f0f5; font-weight:bold; font-size:1.1rem; line-height:1.6;">
-      ✨ ${finalExpression}<br><span style="font-size:0.95rem; font-weight:normal;">📖 ${wordDisplay}</span>
-    </td></tr>`;
-
-    tableBody.innerHTML = blocksRow + timesRow + mergedRow;
-
-    // Attach click event to the number cell for full number speech
-    const numberCellElem = document.querySelector('.number-display-cell');
-    if (numberCellElem) {
-      numberCellElem.addEventListener('click', (e) => {
-        const fullNum = parseInt(numberCellElem.getAttribute('data-fullnum'), 10);
-        const words = numberToWords(fullNum, currentLang);
-        speakNow(words, currentLang);
-      });
-    }
-
-    // Attach hybrid block click handlers (only to blocks that are NOT disabled)
-    const allBlocks = document.querySelectorAll('.block:not(.block-disabled)');
-    allBlocks.forEach(block => {
-      const placeType = block.getAttribute('data-place-type');
-      if (placeType) attachBlockClick(block, placeType);
-    });
-  }
-
-  // Function to set number and speak it immediately
-  function setExampleNumber(num) {
-    currentNumber = num;
-    numberInput.value = num;
-    renderFullTable();
-    // Speak the new number aloud
-    const words = numberToWords(num, currentLang);
-    speakNow(words, currentLang);
-  }
-
-  // Refresh entire UI (after language or theme change)
-  function refresh() {
-    updateUIText();
-    renderFullTable();
-  }
-
-  // Update number from input
-  function updateFromInput() {
-    let val = parseInt(numberInput.value, 10);
-    if (isNaN(val)) val = 0;
-    val = Math.min(999, Math.max(0, val));
-    currentNumber = val;
-    renderFullTable();
-    // Also speak when update button is clicked
-    const words = numberToWords(val, currentLang);
-    speakNow(words, currentLang);
-  }
-
-  // Language switcher
-  function setLanguage(lang) {
-    currentLang = lang;
-    if (lang === 'en') {
-      langEnBtn.classList.add('active');
-      langNpBtn.classList.remove('active');
-    } else {
-      langNpBtn.classList.add('active');
-      langEnBtn.classList.remove('active');
-    }
-    refresh();
-  }
-
-  function setTheme(theme) {
-    currentTheme = theme;
-    refresh();
-  }
-
-  // Event listeners
-  langEnBtn.addEventListener('click', () => setLanguage('en'));
-  langNpBtn.addEventListener('click', () => setLanguage('np'));
-  themeSelect.addEventListener('change', (e) => setTheme(e.target.value));
-  updateBtn.addEventListener('click', updateFromInput);
-  numberInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') updateFromInput(); });
-
-  example597.addEventListener('click', () => setExampleNumber(597));
-  example604.addEventListener('click', () => setExampleNumber(604));
-  example382.addEventListener('click', () => setExampleNumber(382));
-
-  // Initial render
-  renderFullTable();
-  updateUIText();
-  // Speak initial number on load
-  setTimeout(() => {
-    const words = numberToWords(currentNumber, currentLang);
-    speakNow(words, currentLang);
-  }, 500);
-</script>
 </body>
 </html>

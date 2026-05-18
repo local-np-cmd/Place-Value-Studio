@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Subtraction Lab - Move & Discover | Place Value Studio</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: #eef2fa;
+      font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, sans-serif;
+      margin: 0;
+      padding: 24px 20px;
+    }
+
+    .main-container {
+      max-width: 1300px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 2rem;
+      box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+    }
+
+    .top-bar {
+      background: linear-gradient(135deg, #0e3b4f, #1f6a8c);
+      padding: 1rem 1.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      color: white;
+    }
+
+    .home-btn {
+      background: #ffcd7e;
+      color: #1e4b61;
+      text-decoration: none;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      transition: 0.1s;
+    }
+    .home-btn:hover {
+      background: #ffe0b5;
+    }
+
+    .lang-group {
+      display: flex;
+      gap: 12px;
+      background: #ffffff30;
+      padding: 5px 14px;
+      border-radius: 60px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: 1px solid #ffcd7e;
+      padding: 5px 18px;
+      border-radius: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #ffefcf;
+      transition: 0.1s;
+    }
+
+    .lang-btn.active {
+      background: #ffcd7e;
+      color: #1e4b61;
+      border-color: white;
+    }
+
+    .theme-selector {
+      background: white;
+      padding: 8px 18px;
+      border-radius: 40px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      min-width: 190px;
+      line-height: 1.4;
+    }
+
+    .example-area {
+      display: flex;
+      gap: 10px;
+      background: #ffffff30;
+      padding: 4px 16px;
+      border-radius: 60px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .example-btn {
+      background: #ffe0b5;
+      border: none;
+      border-radius: 32px;
+      padding: 6px 16px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .search-row {
+      background: #f9f6ef;
+      margin: 18px 24px 0 24px;
+      border-radius: 80px;
+      padding: 10px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .number-input {
+      font-size: 1.5rem;
+      width: 130px;
+      text-align: center;
+      font-weight: bold;
+      border-radius: 48px;
+      border: 2px solid #ffaa44;
+      padding: 8px 12px;
+      font-family: monospace;
+    }
+
+    .reset-btn, .random-btn, .action-btn {
+      background: #e67e22;
+      border: none;
+      border-radius: 40px;
+      padding: 8px 22px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .reset-btn {
+      background: #2c7aa0;
+    }
+    .action-btn {
+      background: #4caf50;
+      margin: 4px;
+      font-size: 0.8rem;
+      padding: 4px 12px;
+    }
+    .borrow-btn {
+      background: #f39c12;
+    }
+
+    .table-wrapper {
+      padding: 0 24px 16px 24px;
+      overflow-x: auto;
+    }
+
+    .place-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 3px solid black;
+      background: white;
+    }
+
+    .place-table th, .place-table td {
+      border: 2px solid black;
+      padding: 16px 10px;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .place-table th {
+      background: #2b5e7a;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .blocks-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      min-height: 100px;
+      align-items: center;
+    }
+
+    .block {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 1px 1px black;
+      box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: 0.05s linear;
+      flex-shrink: 0;
+    }
+
+    .block:active {
+      transform: translateY(2px);
+    }
+
+    .hundred-block { width: 88px; height: 88px; font-size: 1rem; }
+    .ten-block { width: 96px; height: 48px; font-size: 0.95rem; }
+    .one-block { width: 52px; height: 52px; font-size: 1rem; }
+
+    .classic-hundred {
+      background-color: #1f6392;
+      background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10)), repeating-linear-gradient(to right, transparent, transparent calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10));
+    }
+    .classic-ten {
+      background-color: #368bc1;
+      background-image: repeating-linear-gradient(90deg, rgba(255,250,210,0.9), rgba(255,250,210,0.9) 1.5px, transparent 1.5px, transparent calc(100% / 10));
+    }
+    .classic-one { background-color: #5ea9d9; }
+    .solid-hundred { background: #2c7aa0; }
+    .solid-ten { background: #4797c2; }
+    .solid-one { background: #6db4db; }
+
+    .col-complete {
+      background-color: #d4edda !important;
+    }
+    .progress-text {
+      font-size: 0.9rem;
+      margin-top: 8px;
+      font-weight: bold;
+      background: #f0f0f0;
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <div class="top-bar">
+    <a href="index.html" class="home-btn">🏠 Home</a>
+    <div class="lang-group">
+      <button id="langEn" class="lang-btn active">🇬🇧 English</button>
+      <button id="langNp" class="lang-btn">🇳🇵 नेपाली</button>
+    </div>
+    <select id="themeSelect" class="theme-selector">
+      <option value="classic">📦 Classic (Grids)</option>
+      <option value="rupee">💵 Nepali Rupees</option>
+      <option value="apple">🍎 Apple</option>
+      <option value="mango">🥭 Mango</option>
+      <option value="flower">🌸 Flower</option>
+      <option value="orange">🍊 Orange</option>
+    </select>
+    <div class="example-area" id="exampleArea">
+      <span id="exampleLabel">📘 Examples:</span>
+    </div>
+  </div>
+
+  <div class="search-row">
+    <span>First Number:</span>
+    <input type="number" id="firstNum" class="number-input" value="523" min="0" max="999" step="1">
+    <span>Second Number:</span>
+    <input type="number" id="secondNum" class="number-input" value="179" min="0" max="999" step="1">
+    <button id="resetBtn" class="reset-btn">🔄 Reset</button>
+    <button id="randomBtn" class="random-btn">🎲 Random</button>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="place-table">
+      <thead><tr><th></th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr></thead>
+      <tbody id="subTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // ---------- BILINGUAL SUPPORT ----------
+  const nepaliWords = {
+    0:'शून्य',1:'एक',2:'दुई',3:'तीन',4:'चार',5:'पाँच',
+    6:'छ',7:'सात',8:'आठ',9:'नौ',10:'दस',11:'एघार',12:'बाह्र',
+    13:'तेह्र',14:'चौध',15:'पन्ध्र',16:'सोह्र',17:'सत्र',18:'अठार',
+    19:'उन्नाइस',20:'बीस',21:'एक्काइस',22:'बाइस',23:'तेइस',24:'चौबीस',
+    25:'पच्चीस',26:'छब्बीस',27:'सत्ताइस',28:'अठ्ठाइस',29:'उनन्तीस',
+    30:'तीस',31:'एकतीस',32:'बत्तीस',33:'तेत्तीस',34:'चौँतीस',35:'पैँतीस',
+    36:'छत्तीस',37:'सैँतीस',38:'अठतीस',39:'उनन्चालीस',40:'चालीस',
+    41:'एकचालीस',42:'बयालीस',43:'त्रिचालीस',44:'चवालीस',45:'पैँतालीस',
+    46:'छयालीस',47:'सच्चालीस',48:'अठचालीस',49:'उनन्चास',50:'पचास',
+    51:'एकाउन्न',52:'बाउन्न',53:'त्रिपन्न',54:'चौवन्न',55:'पचपन्न',
+    56:'छपन्न',57:'सन्ताउन्न',58:'अन्ठाउन्न',59:'उनन्साठी',60:'साठी',
+    61:'एकसट्ठी',62:'बयसट्ठी',63:'त्रिसट्ठी',64:'चौसट्ठी',65:'पैंसट्ठी',
+    66:'छैसट्ठी',67:'सत्सट्ठी',68:'अठसट्ठी',69:'उनन्सत्तरी',70:'सत्तरी',
+    71:'एकहत्तर',72:'बहत्तर',73:'त्रिहत्तर',74:'चौहत्तर',75:'पचहत्तर',
+    76:'छैहत्तर',77:'सतहत्तर',78:'अठहत्तर',79:'उनासी',80:'असी',
+    81:'एकासी',82:'बयासी',83:'त्रियासी',84:'चौरासी',85:'पचासी',
+    86:'छयासी',87:'सतासी',88:'अठासी',89:'उनान्नब्बे',90:'नब्बे',
+    91:'एकान्नब्बे',92:'बयान्नब्बे',93:'त्रियान्नब्बे',94:'चौरान्नब्बे',
+    95:'पन्चान्नब्बे',96:'छयान्नब्बे',97:'सन्तान्नब्बे',98:'अन्ठान्नब्बे',
+    99:'उनान्सय',100:'सय'
+  };
+  function getNepaliNumberWord(num) {
+    if (num<0||num>999) return String(num);
+    if (num<=100) return nepaliWords[num];
+    const h=Math.floor(num/100), r=num%100;
+    const hw = ['','एक सय','दुई सय','तीन सय','चार सय','पाँच सय','छ सय','सात सय','आठ सय','नौ सय'][h];
+    if (r===0) return hw;
+    return `${hw} ${nepaliWords[r]}`;
+  }
+
+  let currentLang = 'en';
+  let currentTheme = 'classic';
+  let firstNumber = 523, secondNumber = 179;
+  let firstH = 0, firstT = 0, firstO = 0;
+  let secondH = 0, secondT = 0, secondO = 0;
+  let targetH = 0, targetT = 0, targetO = 0;
+  let celebrationPlayed = false;
+
+  const langEnBtn = document.getElementById('langEn');
+  const langNpBtn = document.getElementById('langNp');
+  const themeSelect = document.getElementById('themeSelect');
+  const firstNumInput = document.getElementById('firstNum');
+  const secondNumInput = document.getElementById('secondNum');
+  const resetBtn = document.getElementById('resetBtn');
+  const randomBtn = document.getElementById('randomBtn');
+  const subTableBody = document.getElementById('subTableBody');
+  const exampleArea = document.getElementById('exampleArea');
+
+  function toNepaliDigits(num) {
+    const digits = ['०','१','२','३','४','५','६','७','८','९'];
+    return num.toString().split('').map(d => digits[parseInt(d)]).join('');
+  }
+  function formatNumberDisplay(num) {
+    return currentLang === 'np' ? toNepaliDigits(num) : num.toString();
+  }
+  function convertNumbersToNepali(text) {
+    if (currentLang !== 'np') return text;
+    return text.replace(/\d+/g, m => toNepaliDigits(parseInt(m)));
+  }
+  function speakNow(text, lang) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang === 'en' ? 'en-US' : 'ne-NP';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  }
+  function numberToWords(num, lang) {
+    if (num === 0) return lang === 'en' ? 'zero' : 'शून्य';
+    if (lang === 'en') {
+      const ones = ['','one','two','three','four','five','six','seven','eight','nine'];
+      const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+      const teens = ['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+      const h = Math.floor(num/100), r = num%100;
+      let str = '';
+      if (h>0) str += ones[h] + ' hundred';
+      if (r>0) {
+        if (str) str += ' ';
+        if (r<10) str += ones[r];
+        else if (r<20) str += teens[r-10];
+        else { const ten = Math.floor(r/10), one = r%10; str += tens[ten]; if (one>0) str += '-' + ones[one]; }
+      }
+      return str;
+    } else return getNepaliNumberWord(num);
+  }
+
+  function speakMove(place, currentMoved, target) {
+    let msg = '';
+    if (currentLang === 'en') {
+      msg = `Moved 1 ${place}. ${currentMoved} out of ${target} moved.`;
+    } else {
+      msg = `१ ${place === 'hundred' ? 'सय' : (place === 'ten' ? 'दश' : 'एक')} सारियो। ${target} मध्ये ${currentMoved} सारियो।`;
+    }
+    speakNow(msg, currentLang);
+  }
+  function speakBorrow(from) {
+    let msg = '';
+    if (currentLang === 'en') {
+      if (from === 'hundred') msg = 'Borrowed 1 hundred → 10 tens';
+      else msg = 'Borrowed 1 ten → 10 ones';
+    } else {
+      if (from === 'hundred') msg = '१ सय उधारो → १० दश';
+      else msg = '१ दश उधारो → १० एक';
+    }
+    speakNow(msg, currentLang);
+  }
+  function speakCelebration(remaining) {
+    let msg = '';
+    if (currentLang === 'en') {
+      msg = `Good job! Your remaining blocks are ${numberToWords(remaining, 'en')}.`;
+    } else {
+      msg = `बधाई छ! तपाईंको बाँकी ब्लकहरू ${numberToWords(remaining, 'np')} हुन्।`;
+    }
+    speakNow(msg, currentLang);
+  }
+
+  function borrowFromHundred() {
+    if (firstH > 0) {
+      firstH--;
+      firstT += 10;
+      speakBorrow('hundred');
+      renderSubtraction();
+    } else {
+      speakNow(currentLang === 'en' ? 'No hundreds to borrow!' : 'सय उधारो गर्न सकिएन!', currentLang);
+    }
+  }
+  function borrowFromTen() {
+    if (firstT > 0) {
+      firstT--;
+      firstO += 10;
+      speakBorrow('ten');
+      renderSubtraction();
+    } else {
+      speakNow(currentLang === 'en' ? 'No tens to borrow!' : 'दश उधारो गर्न सकिएन!', currentLang);
+    }
+  }
+
+  function moveBlock(place) {
+    let canMove = false;
+    if (place === 'hundred' && firstH > 0 && secondH < targetH) {
+      firstH--; secondH++; canMove = true;
+      speakMove('hundred', secondH, targetH);
+    } else if (place === 'ten' && firstT > 0 && secondT < targetT) {
+      firstT--; secondT++; canMove = true;
+      speakMove('ten', secondT, targetT);
+    } else if (place === 'one' && firstO > 0 && secondO < targetO) {
+      firstO--; secondO++; canMove = true;
+      speakMove('one', secondO, targetO);
+    }
+    if (canMove) renderSubtraction();
+  }
+
+  function createBlock(place, value, clickHandler = null) {
+    let sizeClass = place === 'hundred' ? 'hundred-block' : (place === 'ten' ? 'ten-block' : 'one-block');
+    const themeCls = (currentTheme === 'classic') 
+      ? (place === 'hundred' ? 'classic-hundred' : (place === 'ten' ? 'classic-ten' : 'classic-one'))
+      : (place === 'hundred' ? 'solid-hundred' : (place === 'ten' ? 'solid-ten' : 'solid-one'));
+    let label = '';
+    if (currentTheme === 'classic') label = value.toString();
+    else if (currentTheme === 'rupee') label = value===100 ? 'रू १००' : (value===10 ? 'रू १०' : 'रू १');
+    else if (currentTheme === 'apple') label = value===100 ? '🍎100' : (value===10 ? '🍎10' : '🍎1');
+    else if (currentTheme === 'mango') label = value===100 ? '🥭100' : (value===10 ? '🥭10' : '🥭1');
+    else if (currentTheme === 'flower') label = value===100 ? '🌸100' : (value===10 ? '🌸10' : '🌸1');
+    else if (currentTheme === 'orange') label = value===100 ? '🍊100' : (value===10 ? '🍊10' : '🍊1');
+    else label = value.toString();
+    if (currentLang === 'np' && currentTheme === 'classic') label = convertNumbersToNepali(label);
+    else if (currentLang === 'np' && currentTheme !== 'classic') label = label.replace(/\d+/g, m => toNepaliDigits(parseInt(m)));
+    const div = document.createElement('div');
+    div.className = `block ${sizeClass} ${themeCls}`;
+    div.textContent = label;
+    if (clickHandler) {
+      div.style.cursor = 'pointer';
+      div.addEventListener('click', clickHandler);
+    }
+    return div;
+  }
+
+  function fillBlocks(container, place, count, clickHandler = null) {
+    const group = document.createElement('div');
+    group.className = 'blocks-group';
+    for (let i=0; i<count; i++) {
+      const value = place === 'hundred' ? 100 : (place === 'ten' ? 10 : 1);
+      group.appendChild(createBlock(place, value, clickHandler ? () => clickHandler(place) : null));
+    }
+    container.innerHTML = '';
+    container.appendChild(group);
+  }
+
+  function renderSubtraction() {
+    subTableBody.innerHTML = '';
+
+    // --- ROW 0: Borrow (top) ---
+    const needH = targetH - secondH;
+    const needT = targetT - secondT;
+    const needO = targetO - secondO;
+    const rowBorrow = document.createElement('tr');
+    const borrowLabel = document.createElement('td');
+    borrowLabel.innerText = '⚡ Borrow';
+    rowBorrow.appendChild(borrowLabel);
+    const borrowHCell = document.createElement('td');
+    const borrowTCell = document.createElement('td');
+    const borrowOCell = document.createElement('td');
+    rowBorrow.appendChild(borrowHCell); rowBorrow.appendChild(borrowTCell); rowBorrow.appendChild(borrowOCell);
+    let needsBorrow = false;
+    if (needT > 0 && firstT < needT && firstH > 0) {
+      const btn = document.createElement('button');
+      btn.className = 'action-btn borrow-btn';
+      btn.innerText = currentLang === 'en' ? 'Borrow 1 Hundred → 10 Tens' : '१ सय उधारो → १० दश';
+      btn.onclick = borrowFromHundred;
+      borrowHCell.appendChild(btn);
+      needsBorrow = true;
+    }
+    if (needO > 0 && firstO < needO && firstT > 0) {
+      const btn = document.createElement('button');
+      btn.className = 'action-btn borrow-btn';
+      btn.innerText = currentLang === 'en' ? 'Borrow 1 Ten → 10 Ones' : '१ दश उधारो → १० एक';
+      btn.onclick = borrowFromTen;
+      borrowTCell.appendChild(btn);
+      needsBorrow = true;
+    }
+    if (needsBorrow) subTableBody.appendChild(rowBorrow);
+
+    // --- ROW 1: First Number ---
+    const row1 = document.createElement('tr');
+    const label1 = document.createElement('td');
+    label1.className = 'number-label';
+    label1.innerText = `First: ${formatNumberDisplay(firstNumber)}`;
+    row1.appendChild(label1);
+    const firstHCell = document.createElement('td');
+    const firstTCell = document.createElement('td');
+    const firstOCell = document.createElement('td');
+    row1.appendChild(firstHCell); row1.appendChild(firstTCell); row1.appendChild(firstOCell);
+    subTableBody.appendChild(row1);
+    fillBlocks(firstHCell, 'hundred', firstH, (place) => moveBlock(place));
+    fillBlocks(firstTCell, 'ten', firstT, (place) => moveBlock(place));
+    fillBlocks(firstOCell, 'one', firstO, (place) => moveBlock(place));
+
+    // --- ROW 2: Need to move (progress) ---
+    const rowProgress = document.createElement('tr');
+    const progLabel = document.createElement('td');
+    progLabel.innerText = '📊 Need to move:';
+    rowProgress.appendChild(progLabel);
+    const progHCell = document.createElement('td');
+    const progTCell = document.createElement('td');
+    const progOCell = document.createElement('td');
+    rowProgress.appendChild(progHCell); rowProgress.appendChild(progTCell); rowProgress.appendChild(progOCell);
+    progHCell.innerHTML = `<span class="progress-text">${needH > 0 ? needH : '✓'}</span>`;
+    progTCell.innerHTML = `<span class="progress-text">${needT > 0 ? needT : '✓'}</span>`;
+    progOCell.innerHTML = `<span class="progress-text">${needO > 0 ? needO : '✓'}</span>`;
+    subTableBody.appendChild(rowProgress);
+
+    // --- ROW 3: Second Number (blocks moved so far) ---
+    const row2 = document.createElement('tr');
+    const label2 = document.createElement('td');
+    label2.className = 'number-label';
+    label2.innerText = `Second: ${formatNumberDisplay(secondNumber)}`;
+    row2.appendChild(label2);
+    const secondHCell = document.createElement('td');
+    const secondTCell = document.createElement('td');
+    const secondOCell = document.createElement('td');
+    row2.appendChild(secondHCell); row2.appendChild(secondTCell); row2.appendChild(secondOCell);
+    subTableBody.appendChild(row2);
+    fillBlocks(secondHCell, 'hundred', secondH, null);
+    fillBlocks(secondTCell, 'ten', secondT, null);
+    fillBlocks(secondOCell, 'one', secondO, null);
+
+    // Highlight only the cells that are complete (no more blocks needed)
+    if (needH === 0) secondHCell.classList.add('col-complete');
+    if (needT === 0) secondTCell.classList.add('col-complete');
+    if (needO === 0) secondOCell.classList.add('col-complete');
+
+    // --- ROW 4: Difference (remaining blocks in First) ---
+    const row3 = document.createElement('tr');
+    const label3 = document.createElement('td');
+    label3.className = 'number-label';
+    const diffValue = firstH*100 + firstT*10 + firstO;
+    label3.innerText = `Difference: ${formatNumberDisplay(diffValue)}`;
+    row3.appendChild(label3);
+    const diffHCell = document.createElement('td');
+    const diffTCell = document.createElement('td');
+    const diffOCell = document.createElement('td');
+    row3.appendChild(diffHCell); row3.appendChild(diffTCell); row3.appendChild(diffOCell);
+    row3.style.background = '#e0f0e8';
+    subTableBody.appendChild(row3);
+    fillBlocks(diffHCell, 'hundred', firstH, null);
+    fillBlocks(diffTCell, 'ten', firstT, null);
+    fillBlocks(diffOCell, 'one', firstO, null);
+
+    // --- ROW 5: Expanded form ---
+    const rowExp = document.createElement('tr');
+    const expLabel = document.createElement('td');
+    expLabel.style.fontWeight = 'bold';
+    expLabel.innerText = '📐 Expanded';
+    rowExp.appendChild(expLabel);
+    const expH = document.createElement('td');
+    const expT = document.createElement('td');
+    const expO = document.createElement('td');
+    rowExp.appendChild(expH); rowExp.appendChild(expT); rowExp.appendChild(expO);
+    subTableBody.appendChild(rowExp);
+    expH.innerText = convertNumbersToNepali(`${firstH} × 100 = ${firstH*100}`);
+    expT.innerText = convertNumbersToNepali(`${firstT} × 10 = ${firstT*10}`);
+    expO.innerText = convertNumbersToNepali(`${firstO} × 1 = ${firstO}`);
+
+    // --- ROW 6: Final words ---
+    const rowFinal = document.createElement('tr');
+    const finalCell = document.createElement('td');
+    finalCell.colSpan = 4;
+    finalCell.style.background = '#e9f0f5';
+    finalCell.style.fontWeight = 'bold';
+    finalCell.style.padding = '16px';
+    rowFinal.appendChild(finalCell);
+    subTableBody.appendChild(rowFinal);
+    const sumSpan = document.createElement('div');
+    const wordsSpan = document.createElement('div');
+    finalCell.appendChild(sumSpan);
+    finalCell.appendChild(wordsSpan);
+    const total = firstH*100 + firstT*10 + firstO;
+    const parts = [];
+    if (firstH>0) parts.push(`${firstH*100}`);
+    if (firstT>0) parts.push(`${firstT*10}`);
+    if (firstO>0) parts.push(`${firstO}`);
+    const expr = parts.length ? parts.join(' + ') + ` = ${total}` : '0 = 0';
+    sumSpan.innerHTML = `✨ ${convertNumbersToNepali(expr)}`;
+    wordsSpan.innerHTML = `📖 ${numberToWords(total, currentLang)}`;
+
+    // Celebration when all needed blocks moved
+    if (needH === 0 && needT === 0 && needO === 0 && !celebrationPlayed) {
+      celebrationPlayed = true;
+      speakCelebration(total);
+    } else if ((needH !== 0 || needT !== 0 || needO !== 0)) {
+      celebrationPlayed = false;
+    }
+  }
+
+  function resetSubtraction() {
+    const h1 = Math.floor(firstNumber/100);
+    const t1 = Math.floor((firstNumber%100)/10);
+    const o1 = firstNumber % 10;
+    firstH = h1; firstT = t1; firstO = o1;
+    secondH = 0; secondT = 0; secondO = 0;
+    targetH = Math.floor(secondNumber/100);
+    targetT = Math.floor((secondNumber%100)/10);
+    targetO = secondNumber % 10;
+    celebrationPlayed = false;
+    renderSubtraction();
+  }
+
+  function updateNumbers() {
+    let f = parseInt(firstNumInput.value); if (isNaN(f)) f = 0; f = Math.min(999, Math.max(0, f));
+    let s = parseInt(secondNumInput.value); if (isNaN(s)) s = 0; s = Math.min(999, Math.max(0, s));
+    firstNumber = f;
+    secondNumber = s;
+    resetSubtraction();
+  }
+
+  function randomNumbers() {
+    let f = Math.floor(Math.random() * 900) + 100;
+    let s = Math.floor(Math.random() * (f - 1)) + 1;
+    firstNumInput.value = f;
+    secondNumInput.value = s;
+    updateNumbers();
+  }
+
+  function updateUIText() {
+    const exampleBtns = document.querySelectorAll('.example-btn');
+    if (currentLang === 'en') {
+      document.getElementById('exampleLabel').innerText = '📘 Examples:';
+      randomBtn.innerText = '🎲 Random';
+      resetBtn.innerText = '🔄 Reset';
+      if (exampleBtns.length) {
+        exampleBtns[0].innerText = '523-179';
+        exampleBtns[1].innerText = '402-178';
+        exampleBtns[2].innerText = '300-123';
+      }
+    } else {
+      document.getElementById('exampleLabel').innerText = '📘 उदाहरण:';
+      randomBtn.innerText = '🎲 अनियमित';
+      resetBtn.innerText = '🔄 रिसेट';
+      if (exampleBtns.length) {
+        exampleBtns[0].innerText = toNepaliDigits(523)+'-'+toNepaliDigits(179);
+        exampleBtns[1].innerText = toNepaliDigits(402)+'-'+toNepaliDigits(178);
+        exampleBtns[2].innerText = toNepaliDigits(300)+'-'+toNepaliDigits(123);
+      }
+    }
+    renderSubtraction();
+  }
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    langEnBtn.classList.toggle('active', lang === 'en');
+    langNpBtn.classList.toggle('active', lang === 'np');
+    updateUIText();
+  }
+  function setTheme(theme) { currentTheme = theme; renderSubtraction(); updateUIText(); }
+
+  langEnBtn.onclick = () => setLanguage('en');
+  langNpBtn.onclick = () => setLanguage('np');
+  themeSelect.onchange = (e) => setTheme(e.target.value);
+  resetBtn.onclick = resetSubtraction;
+  randomBtn.onclick = randomNumbers;
+  firstNumInput.onchange = updateNumbers;
+  secondNumInput.onchange = updateNumbers;
+
+  exampleArea.innerHTML = '<span id="exampleLabel">📘 Examples:</span><button class="example-btn" data-f="523" data-s="179">523-179</button><button class="example-btn" data-f="402" data-s="178">402-178</button><button class="example-btn" data-f="300" data-s="123">300-123</button>';
+  document.querySelectorAll('.example-btn').forEach(btn => {
+    btn.onclick = () => {
+      firstNumInput.value = btn.getAttribute('data-f');
+      secondNumInput.value = btn.getAttribute('data-s');
+      updateNumbers();
+    };
+  });
+
+  updateNumbers();
+</script>
+</body>
+</html>

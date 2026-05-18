@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Division Studio - Learn • Practice • Test (with Remainder)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body {
+      background: #eef2fa;
+      font-family: 'Segoe UI', 'Roboto', 'Noto Sans', sans-serif;
+      margin: 0;
+      padding: 24px 20px;
+    }
+    .main-container {
+      max-width: 1300px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 2rem;
+      box-shadow: 0 25px 40px -12px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    .top-bar {
+      background: linear-gradient(135deg, #0e3b4f, #1f6a8c);
+      padding: 1rem 1.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      color: white;
+    }
+    .home-btn {
+      background: #ffcd7e;
+      color: #1e4b61;
+      text-decoration: none;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-weight: bold;
+    }
+    .lang-group {
+      display: flex;
+      gap: 12px;
+      background: #ffffff30;
+      padding: 5px 14px;
+      border-radius: 60px;
+    }
+    .lang-btn {
+      background: transparent;
+      border: 1px solid #ffcd7e;
+      padding: 5px 18px;
+      border-radius: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #ffefcf;
+    }
+    .lang-btn.active {
+      background: #ffcd7e;
+      color: #1e4b61;
+    }
+    .mode-selector, .theme-selector {
+      background: white;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    .control-bar {
+      background: #f9f6ef;
+      margin: 18px 24px 0 24px;
+      border-radius: 80px;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      padding: 5px 18px;
+      border-radius: 60px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .stepper button {
+      background: #e67e22;
+      border: none;
+      border-radius: 30px;
+      width: 40px;
+      height: 40px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+    }
+    .value-display {
+      font-size: 1.6rem;
+      font-weight: bold;
+      min-width: 60px;
+      text-align: center;
+      background: #fff;
+      padding: 4px 8px;
+      border-radius: 40px;
+    }
+    .random-btn, .action-btn {
+      background: #2c7aa0;
+      border: none;
+      border-radius: 40px;
+      padding: 8px 22px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+    }
+    .action-btn {
+      background: #4caf50;
+    }
+    .remove-btn {
+      background: #e67e22;
+      border: none;
+      border-radius: 30px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      margin-top: 5px;
+    }
+    .build-area {
+      padding: 20px 24px;
+      min-height: 400px;
+    }
+    .groups-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin: 20px 0;
+      background: #fef9e6;
+      border-radius: 2rem;
+      padding: 20px;
+    }
+    .group-card {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 15px;
+      text-align: center;
+      min-width: 120px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .group-title { font-weight: bold; margin-bottom: 10px; color: #1e4b61; }
+    .group-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .item-icon { font-size: 1.8rem; pointer-events: none; }
+    .total-items {
+      background: #e9f0f5;
+      margin: 10px 24px;
+      padding: 12px;
+      border-radius: 2rem;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .info-row, .expanded-row, .feedback {
+      margin: 15px 24px;
+      padding: 12px;
+      border-radius: 2rem;
+      text-align: center;
+      font-weight: bold;
+    }
+    .info-row { background: #e9f0f5; font-size: 1.2rem; }
+    .expanded-row { background: #f9f3e0; }
+    .feedback { background: #e9f0f5; }
+    .question-box {
+      background: #fff3e0;
+      margin: 20px 24px;
+      padding: 25px;
+      border-radius: 2rem;
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    .options-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 24px;
+    }
+    .option-btn {
+      background: #e0e7ff;
+      border: 2px solid #1e4b61;
+      border-radius: 60px;
+      padding: 10px 25px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .answer-input {
+      font-size: 1.5rem;
+      padding: 10px 20px;
+      width: 150px;
+      text-align: center;
+      border-radius: 60px;
+      border: 2px solid #ffaa44;
+      margin: 15px auto;
+      display: block;
+    }
+    .score {
+      background: #2c7aa0;
+      display: inline-block;
+      padding: 6px 20px;
+      border-radius: 60px;
+      color: white;
+      font-weight: bold;
+    }
+    .mode-container {
+      display: none;
+    }
+    .mode-container.active {
+      display: block;
+    }
+    @media (max-width: 600px) {
+      .item-icon { font-size: 1.4rem; }
+      .option-btn { font-size: 1rem; padding: 6px 15px; }
+      .stepper button { width: 36px; height: 36px; font-size: 1.1rem; }
+      .value-display { font-size: 1.3rem; min-width: 50px; }
+    }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <div class="top-bar">
+    <a href="index.html" class="home-btn">🏠 Home</a>
+    <div class="lang-group">
+      <button id="langEn" class="lang-btn active">🇬🇧 English</button>
+      <button id="langNp" class="lang-btn">🇳🇵 नेपाली</button>
+    </div>
+    <select id="modeSelect" class="mode-selector">
+      <option value="learn">📖 Learn</option>
+      <option value="practice">✏️ Practice</option>
+      <option value="test">📝 Test</option>
+    </select>
+    <select id="themeSelect" class="theme-selector">
+      <option value="star">⭐ Star</option><option value="apple">🍎 Apple</option><option value="flower">🌸 Flower</option>
+    </select>
+  </div>
+
+  <!-- ================= LEARN MODE ================= -->
+  <div id="learnMode" class="mode-container active">
+    <div class="control-bar">
+      <div class="control-group"><label id="totalLabelLearn">Total:</label><div class="stepper"><button id="decTotalLearn">−</button><span id="totalValueLearn" class="value-display">12</span><button id="incTotalLearn">+</button></div></div>
+      <div class="control-group"><label id="groupsLabelLearn">Groups:</label><div class="stepper"><button id="decGroupsLearn">−</button><span id="groupsValueLearn" class="value-display">3</span><button id="incGroupsLearn">+</button></div></div>
+      <button id="randomLearnBtn" class="random-btn">🎲 Random</button>
+    </div>
+    <div id="learnTotalDisplay" class="total-items">Total items: 12</div>
+    <div id="learnVisualization" class="build-area"></div>
+    <div class="info-row" id="divisionInfoLearn">12 ÷ 3 = 4</div>
+    <div class="expanded-row" id="remainderInfoLearn"></div>
+    <div class="expanded-row" id="wordsRowLearn">📖 twelve divided by three equals four</div>
+  </div>
+
+  <!-- ================= PRACTICE MODE ================= -->
+  <div id="practiceMode" class="mode-container">
+    <div class="control-bar">
+      <div class="control-group"><label id="totalLabelPractice">Total:</label><div class="stepper"><button id="decTotalPractice">−</button><span id="totalValuePractice" class="value-display">12</span><button id="incTotalPractice">+</button></div></div>
+      <div class="control-group"><label id="groupsLabelPractice">Groups:</label><div class="stepper"><button id="decGroupsPractice">−</button><span id="groupsValuePractice" class="value-display">3</span><button id="incGroupsPractice">+</button></div></div>
+      <button id="randomPracticeBtn" class="random-btn">🎲 Random</button>
+    </div>
+    <div id="practiceTotalDisplay" class="total-items">Remaining items: 12</div>
+    <div id="practiceBuildArea" class="build-area"></div>
+    <div id="practiceFeedback" class="feedback">✨ Click on group cards to add items. Use remove button to take items away.</div>
+    <div style="text-align:center"><button id="checkPracticeBtn" class="action-btn">✅ Check Division</button></div>
+    <div id="practiceResult" class="feedback" style="display:none"></div>
+  </div>
+
+  <!-- ================= TEST MODE ================= -->
+  <div id="testMode" class="mode-container">
+    <div class="control-bar">
+      <select id="testTypeSelect" class="test-type-selector" style="background:white; padding:6px 14px; border-radius:40px;">
+        <option value="pictorial">🎨 Pictorial (Build Groups)</option>
+        <option value="fillblank">📝 Fill in the Blanks</option>
+      </select>
+      <button id="newTestQuestionBtn" class="random-btn">🎲 New Question</button>
+      <div class="score" id="testScore">Score: 0 / 0</div>
+    </div>
+    <div id="testQuestionArea" class="question-box">12 ÷ 3 = ?</div>
+    <div id="testTotalDisplay" class="total-items" style="display:none">Remaining items: 12</div>
+    <div id="testBuildArea" class="build-area" style="display:none"></div>
+    <div id="testOptionsArea" class="options-container" style="display:none"></div>
+    <div id="testDirectInput" style="display:none; text-align:center">
+      <input type="number" id="testAnswerInput" class="answer-input" placeholder="?" autocomplete="off">
+    </div>
+    <div id="testFeedback" class="feedback"></div>
+    <div style="text-align:center"><button id="testSubmitBtn" class="action-btn" style="display:none">✅ Submit Answer</button></div>
+  </div>
+</div>
+
+<script>
+  // ---------- COMMON BILINGUAL & NUMBER WORDS (CORRECT) ----------
+  function englishNumberWord(num) {
+    if (num === 0) return 'zero';
+    const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+    const teens = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+    const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+    if (num < 10) return ones[num];
+    if (num < 20) return teens[num - 10];
+    if (num < 100) {
+      let t = Math.floor(num / 10);
+      let o = num % 10;
+      return tens[t] + (o ? '-' + ones[o] : '');
+    }
+    if (num < 1000) {
+      let h = Math.floor(num / 100);
+      let r = num % 100;
+      return ones[h] + ' hundred' + (r ? ' ' + englishNumberWord(r) : '');
+    }
+    return num.toString();
+  }
+  const nepaliWords = {0:'शून्य',1:'एक',2:'दुई',3:'तीन',4:'चार',5:'पाँच',6:'छ',7:'सात',8:'आठ',9:'नौ',10:'दस',11:'एघार',12:'बाह्र',13:'तेह्र',14:'चौध',15:'पन्ध्र',16:'सोह्र',17:'सत्र',18:'अठार',19:'उन्नाइस',20:'बीस',21:'एक्काइस',22:'बाइस',23:'तेइस',24:'चौबीस',25:'पच्चीस',26:'छब्बीस',27:'सत्ताइस',28:'अठ्ठाइस',29:'उनन्तीस',30:'तीस',31:'एकतीस',32:'बत्तीस',33:'तेत्तीस',34:'चौँतीस',35:'पैँतीस',36:'छत्तीस',37:'सैँतीस',38:'अठतीस',39:'उनन्चालीस',40:'चालीस',41:'एकचालीस',42:'बयालीस',43:'त्रिचालीस',44:'चवालीस',45:'पैँतालीस',46:'छयालीस',47:'सच्चालीस',48:'अठचालीस',49:'उनन्चास',50:'पचास',51:'एकाउन्न',52:'बाउन्न',53:'त्रिपन्न',54:'चौवन्न',55:'पचपन्न',56:'छपन्न',57:'सन्ताउन्न',58:'अन्ठाउन्न',59:'उनन्साठी',60:'साठी',61:'एकसट्ठी',62:'बयसट्ठी',63:'त्रिसट्ठी',64:'चौसट्ठी',65:'पैंसट्ठी',66:'छैसट्ठी',67:'सत्सट्ठी',68:'अठसट्ठी',69:'उनन्सत्तरी',70:'सत्तरी',71:'एकहत्तर',72:'बहत्तर',73:'त्रिहत्तर',74:'चौहत्तर',75:'पचहत्तर',76:'छैहत्तर',77:'सतहत्तर',78:'अठहत्तर',79:'उनासी',80:'असी',81:'एकासी',82:'बयासी',83:'त्रियासी',84:'चौरासी',85:'पचासी',86:'छयासी',87:'सतासी',88:'अठासी',89:'उनान्नब्बे',90:'नब्बे',91:'एकान्नब्बे',92:'बयान्नब्बे',93:'त्रियान्नब्बे',94:'चौरान्नब्बे',95:'पन्चान्नब्बे',96:'छयान्नब्बे',97:'सन्तान्नब्बे',98:'अन्ठान्नब्बे',99:'उनान्सय',100:'सय'};
+  function getNepaliNumberWord(num) { if (num<=100) return nepaliWords[num] || num.toString(); return num.toString(); }
+
+  let currentLang = 'en', currentTheme = 'star', currentMode = 'learn';
+  function toNepaliDigits(num) { const d=['०','१','२','३','४','५','६','७','८','९']; return num.toString().split('').map(c=>d[parseInt(c)]).join(''); }
+  function formatNumber(num) { return currentLang==='np'?toNepaliDigits(num):num.toString(); }
+  function numberToWords(num) { return currentLang==='en'?englishNumberWord(num):getNepaliNumberWord(num); }
+  function speakNow(text, lang) { 
+    if(window.speechSynthesis){ 
+      window.speechSynthesis.cancel(); 
+      let u=new SpeechSynthesisUtterance(text); 
+      u.lang=lang==='en'?'en-US':'ne-NP'; 
+      u.rate=0.9; 
+      window.speechSynthesis.speak(u); 
+    } 
+  }
+  function speakAfterDelay(text, lang, delay=100) {
+    setTimeout(() => speakNow(text, lang), delay);
+  }
+  function getIcon() { return currentTheme==='star'?'⭐':(currentTheme==='apple'?'🍎':'🌸'); }
+
+  // ========== LEARN MODE (with remainder and random) ==========
+  let learnTotal=12, learnGroups=3;
+  function getQuotientAndRemainder(total, groups) {
+    let quotient = Math.floor(total / groups);
+    let remainder = total % groups;
+    return { quotient, remainder };
+  }
+  function renderLearn() {
+    const icon=getIcon();
+    const { quotient, remainder } = getQuotientAndRemainder(learnTotal, learnGroups);
+    let html='<div class="groups-container">';
+    for(let i=1;i<=learnGroups;i++){
+      html+=`<div class="group-card"><div class="group-title">${currentLang==='en'?'Group':'समूह'} ${formatNumber(i)}</div><div class="group-items">`;
+      for(let j=0;j<quotient;j++) html+=`<span class="item-icon">${icon}</span>`;
+      if(quotient===0) html+=`<span style="opacity:0.3">⬚</span>`;
+      html+=`</div></div>`;
+    }
+    html+='</div>';
+    document.getElementById('learnVisualization').innerHTML=html;
+    document.getElementById('learnTotalDisplay').innerHTML = `${currentLang==='en'?'Total items:':'जम्मा वस्तु:'} ${formatNumber(learnTotal)}`;
+    let divisionText = currentLang==='en' ? `${learnTotal} ÷ ${learnGroups} = ${quotient}` : `${formatNumber(learnTotal)} ÷ ${formatNumber(learnGroups)} = ${formatNumber(quotient)}`;
+    if(remainder>0) divisionText += currentLang==='en' ? ` remainder ${remainder}` : ` शेष ${formatNumber(remainder)}`;
+    document.getElementById('divisionInfoLearn').innerHTML = divisionText;
+    let remainderText = '';
+    if(remainder>0){
+      remainderText = currentLang==='en' ? `Remainder: ${remainder} item(s) left` : `शेष: ${formatNumber(remainder)} वस्तु बाँकी`;
+    }
+    document.getElementById('remainderInfoLearn').innerHTML = remainderText;
+    let word = currentLang==='en' ? `${numberToWords(learnTotal)} divided by ${numberToWords(learnGroups)} equals ${numberToWords(quotient)}` : `${numberToWords(learnTotal)} लाई ${numberToWords(learnGroups)} ले भाग गर्दा ${numberToWords(quotient)}`;
+    if(remainder>0) word += currentLang==='en' ? ` remainder ${numberToWords(remainder)}` : ` शेष ${numberToWords(remainder)}`;
+    document.getElementById('wordsRowLearn').innerHTML = `📖 ${word}`;
+    document.getElementById('totalValueLearn').innerText = formatNumber(learnTotal);
+    document.getElementById('groupsValueLearn').innerText = formatNumber(learnGroups);
+    speakAfterDelay(currentLang==='en'?`${learnTotal} divided by ${learnGroups} equals ${quotient}${remainder>0?' remainder '+remainder:''}`:`${learnTotal} लाई ${learnGroups} ले भाग गर्दा ${quotient}${remainder>0?' शेष '+remainder:''}`, currentLang);
+  }
+  function changeLearnTotal(delta){ let n=learnTotal+delta; if(n>=1 && n<=100){ learnTotal=n; renderLearn(); } }
+  function changeLearnGroups(delta){ let n=learnGroups+delta; if(n>=1 && n<=12){ learnGroups=n; renderLearn(); } }
+  function randomLearn(){
+    learnTotal = Math.floor(Math.random() * 90) + 10; // 10-99
+    learnGroups = Math.floor(Math.random() * 12) + 1; // 1-12
+    if(learnGroups > learnTotal) learnGroups = learnTotal;
+    renderLearn();
+  }
+  document.getElementById('decTotalLearn').onclick=()=>changeLearnTotal(-1);
+  document.getElementById('incTotalLearn').onclick=()=>changeLearnTotal(1);
+  document.getElementById('decGroupsLearn').onclick=()=>changeLearnGroups(-1);
+  document.getElementById('incGroupsLearn').onclick=()=>changeLearnGroups(1);
+  document.getElementById('randomLearnBtn').onclick=randomLearn;
+  renderLearn();
+
+  // ========== PRACTICE MODE (with add/remove and check remainder) ==========
+  let practiceTotal=12, practiceGroups=3;
+  let practiceItems=[], practiceRemaining=0;
+  function resetPractice() {
+    practiceItems = Array(practiceGroups).fill(0);
+    practiceRemaining = practiceTotal;
+    renderPracticeBuild();
+    document.getElementById('practiceResult').style.display='none';
+    document.getElementById('practiceFeedback').innerHTML = currentLang==='en'?`✨ Distribute ${practiceTotal} items into ${practiceGroups} groups. Click on group cards to add items, use Remove button to take away.`:`✨ ${practiceTotal} वस्तुहरूलाई ${practiceGroups} समूहमा बाँड्नुहोस्। समूहमा क्लिक गर्नुहोस्, हटाउन रिमुभ बटन प्रयोग गर्नुहोस्।`;
+  }
+  function renderPracticeBuild() {
+    const icon=getIcon();
+    let html='<div class="groups-container">';
+    for(let i=0;i<practiceGroups;i++){
+      let filled=practiceItems[i];
+      html+=`<div class="group-card" data-group="${i}"><div class="group-title">${currentLang==='en'?'Group':'समूह'} ${formatNumber(i+1)} (${filled})</div><div class="group-items">`;
+      for(let j=0;j<filled;j++) html+=`<span class="item-icon">${icon}</span>`;
+      if(filled===0) html+=`<span style="opacity:0.3">⬚</span>`;
+      html+=`</div><button class="remove-btn" data-group="${i}">🗑 ${currentLang==='en'?'Remove one':'एक हटाउनुहोस्'}</button></div>`;
+    }
+    html+='</div>';
+    document.getElementById('practiceBuildArea').innerHTML=html;
+    document.getElementById('practiceTotalDisplay').innerHTML = `${currentLang==='en'?'Remaining items:':'बाँकी वस्तु:'} ${formatNumber(practiceRemaining)}`;
+    // Add click handlers for adding
+    document.querySelectorAll('#practiceBuildArea .group-card').forEach(card=>{
+      card.addEventListener('click',(e)=>{
+        if(e.target.classList.contains('remove-btn')) return;
+        if(practiceRemaining===0){
+          speakAfterDelay(currentLang==='en'?'All items already distributed!':'सबै वस्तु बाँडिसकियो!',currentLang);
+          return;
+        }
+        let idx=parseInt(card.dataset.group);
+        practiceItems[idx]++;
+        practiceRemaining--;
+        renderPracticeBuild();
+        if(practiceRemaining===0){
+          document.getElementById('practiceFeedback').innerHTML = currentLang==='en'?'✅ All items distributed! Click "Check Division".':'✅ सबै वस्तु बाँडियो! "भाग जाँच गर्नुहोस्" क्लिक गर्नुहोस्।';
+          speakAfterDelay(currentLang==='en'?'All items distributed. Now check your division.':'सबै वस्तु बाँडियो। अब भाग जाँच गर्नुहोस्।',currentLang);
+        }
+      });
+    });
+    // Add remove button handlers
+    document.querySelectorAll('#practiceBuildArea .remove-btn').forEach(btn=>{
+      btn.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        let idx=parseInt(btn.dataset.group);
+        if(practiceItems[idx]>0){
+          practiceItems[idx]--;
+          practiceRemaining++;
+          renderPracticeBuild();
+        } else {
+          speakAfterDelay(currentLang==='en'?'No items to remove from this group!':'यस समूहमा हटाउन वस्तु छैन!',currentLang);
+        }
+      });
+    });
+  }
+  function checkPractice() {
+    const totalDistributed = practiceItems.reduce((a,b)=>a+b,0);
+    const expectedTotal = practiceTotal;
+    if(totalDistributed !== expectedTotal){
+      document.getElementById('practiceResult').innerHTML = currentLang==='en'?`⚠️ You still have ${practiceRemaining} items left to distribute.`:`⚠️ अझै ${practiceRemaining} वस्तु बाँकी छ।`;
+      document.getElementById('practiceResult').style.display='block';
+      return;
+    }
+    const quotient = Math.floor(practiceTotal / practiceGroups);
+    const remainder = practiceTotal % practiceGroups;
+    // Check if each group has either quotient or quotient+1? For division with remainder, groups should have at most quotient+1, but standard division: each group gets quotient, remainder left.
+    // Better: The correct distribution is that all groups have exactly quotient items, and remainder items are left undistributed.
+    // But in our practice, the user can only add items to groups, not leave remainder in the "remaining" area. So to be correct, the remaining items should be exactly the remainder.
+    // Actually, the user distributes items by clicking groups. The remaining items counter shows what's left. For a correct distribution, after all items are distributed, the number in each group should be the same? No, if there is a remainder, you cannot distribute all items equally. So the only valid correct state is when all items are distributed (remaining=0) and each group has the same number? That would only be possible when remainder=0.
+    // To support remainder, we allow checking even when remaining > 0. The correct distribution is: each group has exactly quotient items, and the remaining items = remainder.
+    if(practiceRemaining !== remainder){
+      document.getElementById('practiceResult').innerHTML = currentLang==='en'?`⚠️ You have ${practiceRemaining} items left, but the correct remainder should be ${remainder}.`:`⚠️ तपाईंसँग ${practiceRemaining} वस्तु बाँकी छ, तर सही शेष ${remainder} हुनुपर्छ।`;
+      document.getElementById('practiceResult').style.display='block';
+      return;
+    }
+    const allGroupsHaveQuotient = practiceItems.every(val => val === quotient);
+    if(allGroupsHaveQuotient){
+      const factText = currentLang==='en'?`${practiceTotal} ÷ ${practiceGroups} = ${quotient}`:`${formatNumber(practiceTotal)} ÷ ${formatNumber(practiceGroups)} = ${formatNumber(quotient)}`;
+      let resultMsg = `🎉 Correct! ${factText}`;
+      if(remainder>0) resultMsg += currentLang==='en'?` remainder ${remainder}`:` शेष ${formatNumber(remainder)}`;
+      document.getElementById('practiceResult').innerHTML = resultMsg + `<br>📖 ${numberToWords(quotient)} each, ${remainder>0? numberToWords(remainder)+' left':''}`;
+      document.getElementById('practiceResult').style.display='block';
+      speakAfterDelay(currentLang==='en'?`${practiceTotal} divided by ${practiceGroups} equals ${quotient}${remainder>0?' remainder '+remainder:''}`:`${practiceTotal} लाई ${practiceGroups} ले भाग गर्दा ${quotient}${remainder>0?' शेष '+remainder:''}`, currentLang);
+    } else {
+      document.getElementById('practiceResult').innerHTML = currentLang==='en'?`❌ Not equal. Each group should have ${quotient} items.`:`❌ बराबर छैन। प्रत्येक समूहमा ${formatNumber(quotient)} वस्तु हुनुपर्छ।`;
+      document.getElementById('practiceResult').style.display='block';
+    }
+  }
+  function updatePracticeParams(){
+    document.getElementById('totalValuePractice').innerText = formatNumber(practiceTotal);
+    document.getElementById('groupsValuePractice').innerText = formatNumber(practiceGroups);
+    resetPractice();
+  }
+  function randomPractice(){
+    practiceTotal = Math.floor(Math.random() * 90) + 10;
+    practiceGroups = Math.floor(Math.random() * 12) + 1;
+    if(practiceGroups > practiceTotal) practiceGroups = practiceTotal;
+    updatePracticeParams();
+  }
+  document.getElementById('decTotalPractice').onclick=()=>{ practiceTotal=Math.max(1,practiceTotal-1); updatePracticeParams(); };
+  document.getElementById('incTotalPractice').onclick=()=>{ practiceTotal=Math.min(100,practiceTotal+1); updatePracticeParams(); };
+  document.getElementById('decGroupsPractice').onclick=()=>{ practiceGroups=Math.max(1,practiceGroups-1); updatePracticeParams(); };
+  document.getElementById('incGroupsPractice').onclick=()=>{ practiceGroups=Math.min(12,practiceGroups+1); updatePracticeParams(); };
+  document.getElementById('randomPracticeBtn').onclick=randomPractice;
+  document.getElementById('checkPracticeBtn').onclick=checkPractice;
+  resetPractice();
+
+  // ========== TEST MODE (with remainder support and speech delay) ==========
+  let testType='pictorial', testScore={correct:0,total:0};
+  let currentTestQuestion=null, testPracticeTotal=0, testPracticeGroups=0, testPracticeItems=[], testPracticeRemaining=0, testBuiltComplete=false;
+  function generateDistractors(correct){
+    let dist=new Set([correct]);
+    for(let i=1;i<=10;i++) if(correct+i<=100 && correct+i!==correct) dist.add(correct+i);
+    for(let i=1;i<=10;i++) if(correct-i>0 && correct-i!==correct) dist.add(correct-i);
+    while(dist.size<4) dist.add(Math.floor(Math.random()*100)+1);
+    let opts=Array.from(dist);
+    for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
+    return opts;
+  }
+  function generateTestQuestion(){
+    if(testType==='pictorial'){
+      let total = Math.floor(Math.random() * 90) + 10;
+      let groups = Math.floor(Math.random() * 12) + 1;
+      if(groups>total) groups=total;
+      let quotient = Math.floor(total / groups);
+      let remainder = total % groups;
+      currentTestQuestion={type:'pictorial', total:total, groups:groups, quotient:quotient, remainder:remainder};
+      let qText = currentLang==='en' ? `${total} ÷ ${groups} = ?` : `${formatNumber(total)} ÷ ${formatNumber(groups)} = ?`;
+      document.getElementById('testQuestionArea').innerText=qText;
+      testPracticeTotal=total; testPracticeGroups=groups;
+      testPracticeItems=Array(groups).fill(0);
+      testPracticeRemaining=total;
+      testBuiltComplete=false;
+      renderTestBuildArea();
+      document.getElementById('testTotalDisplay').style.display='block';
+      document.getElementById('testTotalDisplay').innerHTML = `${currentLang==='en'?'Remaining items:':'बाँकी वस्तु:'} ${formatNumber(testPracticeRemaining)}`;
+      document.getElementById('testBuildArea').style.display='block';
+      document.getElementById('testOptionsArea').style.display='none';
+      document.getElementById('testDirectInput').style.display='none';
+      document.getElementById('testSubmitBtn').style.display='none';
+      document.getElementById('testFeedback').innerHTML='';
+    } else {
+      let dividend = Math.floor(Math.random() * 90) + 10;
+      let divisor = Math.floor(Math.random() * 9) + 1;
+      let quotient = Math.floor(dividend / divisor);
+      let remainder = dividend % divisor;
+      let variant = Math.floor(Math.random() * 3);
+      let qText='', answer=0;
+      if(variant===0){ qText=`${dividend} ÷ ${divisor} = ?`; answer=quotient; currentTestQuestion={type:'fillblank', answer, dividend, divisor, quotient, remainder}; }
+      else if(variant===1){ qText=`${dividend} ÷ ? = ${quotient}`; answer=divisor; currentTestQuestion={type:'fillblank', answer, dividend, divisor, quotient, remainder}; }
+      else { qText=`? ÷ ${divisor} = ${quotient}`; answer=dividend; currentTestQuestion={type:'fillblank', answer, dividend, divisor, quotient, remainder}; }
+      if(currentLang==='np') qText=qText.replace(/\d+/g,m=>toNepaliDigits(parseInt(m)));
+      document.getElementById('testQuestionArea').innerText=qText;
+      document.getElementById('testBuildArea').style.display='none';
+      document.getElementById('testTotalDisplay').style.display='none';
+      document.getElementById('testOptionsArea').style.display='none';
+      document.getElementById('testDirectInput').style.display='block';
+      document.getElementById('testSubmitBtn').style.display='block';
+      document.getElementById('testAnswerInput').value='';
+      document.getElementById('testFeedback').innerHTML='';
+    }
+  }
+  function renderTestBuildArea(){
+    const icon=getIcon();
+    let html='<div class="groups-container">';
+    for(let i=0;i<testPracticeGroups;i++){
+      let filled=testPracticeItems[i];
+      html+=`<div class="group-card" data-group="${i}"><div class="group-title">${currentLang==='en'?'Group':'समूह'} ${formatNumber(i+1)} (${filled})</div><div class="group-items">`;
+      for(let j=0;j<filled;j++) html+=`<span class="item-icon">${icon}</span>`;
+      if(filled===0) html+=`<span style="opacity:0.3">⬚</span>`;
+      html+=`</div><button class="remove-btn" data-group="${i}">🗑 ${currentLang==='en'?'Remove one':'एक हटाउनुहोस्'}</button></div>`;
+    }
+    html+='</div>';
+    document.getElementById('testBuildArea').innerHTML=html;
+    // Add item to group
+    document.querySelectorAll('#testBuildArea .group-card').forEach(card=>{
+      card.addEventListener('click',(e)=>{
+        if(e.target.classList.contains('remove-btn')) return;
+        if(testPracticeRemaining===0){
+          speakAfterDelay(currentLang==='en'?'All items distributed!':'सबै वस्तु बाँडिसकियो!',currentLang);
+          return;
+        }
+        let idx=parseInt(card.dataset.group);
+        testPracticeItems[idx]++;
+        testPracticeRemaining--;
+        document.getElementById('testTotalDisplay').innerHTML = `${currentLang==='en'?'Remaining items:':'बाँकी वस्तु:'} ${formatNumber(testPracticeRemaining)}`;
+        renderTestBuildArea();
+        // Check if distribution is complete (no remaining items left)
+        if(testPracticeRemaining===0 && !testBuiltComplete){
+          testBuiltComplete=true;
+          let correct=currentTestQuestion.quotient;
+          let options=generateDistractors(correct);
+          let optsHtml='';
+          for(let opt of options) optsHtml+=`<button class="option-btn" data-value="${opt}">${formatNumber(opt)}</button>`;
+          document.getElementById('testOptionsArea').innerHTML=optsHtml;
+          document.getElementById('testOptionsArea').style.display='flex';
+          document.querySelectorAll('.option-btn').forEach(btn=>{
+            btn.addEventListener('click',()=>handleTestPictorialAnswer(parseInt(btn.dataset.value)));
+          });
+          document.getElementById('testFeedback').innerHTML=currentLang==='en'?'✅ Distribution complete! Choose the correct quotient.':'✅ बाँडफाँट पूरा! सही भागफल छान्नुहोस्।';
+        }
+      });
+    });
+    // Remove button
+    document.querySelectorAll('#testBuildArea .remove-btn').forEach(btn=>{
+      btn.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        let idx=parseInt(btn.dataset.group);
+        if(testPracticeItems[idx]>0){
+          testPracticeItems[idx]--;
+          testPracticeRemaining++;
+          document.getElementById('testTotalDisplay').innerHTML = `${currentLang==='en'?'Remaining items:':'बाँकी वस्तु:'} ${formatNumber(testPracticeRemaining)}`;
+          renderTestBuildArea();
+        } else {
+          speakAfterDelay(currentLang==='en'?'No items to remove from this group!':'यस समूहमा हटाउन वस्तु छैन!',currentLang);
+        }
+      });
+    });
+  }
+  function handleTestPictorialAnswer(selected){
+    let correct=currentTestQuestion.quotient;
+    let total=currentTestQuestion.total, groups=currentTestQuestion.groups, remainder=currentTestQuestion.remainder;
+    testScore.total++;
+    if(selected===correct){
+      testScore.correct++;
+      let msg = currentLang==='en' ? `🎉 Correct! ${total} ÷ ${groups} = ${correct}` : `🎉 सही! ${formatNumber(total)} ÷ ${formatNumber(groups)} = ${formatNumber(correct)}`;
+      if(remainder>0) msg += currentLang==='en' ? ` remainder ${remainder}` : ` शेष ${formatNumber(remainder)}`;
+      document.getElementById('testFeedback').innerHTML = msg;
+      speakAfterDelay(currentLang==='en'?`${total} divided by ${groups} equals ${correct}${remainder>0?' remainder '+remainder:''}`:`${total} लाई ${groups} ले भाग गर्दा ${correct}${remainder>0?' शेष '+remainder:''}`, currentLang);
+    } else {
+      let msg = currentLang==='en' ? `❌ Wrong. ${total} ÷ ${groups} = ${correct}` : `❌ गलत। ${formatNumber(total)} ÷ ${formatNumber(groups)} = ${formatNumber(correct)}`;
+      if(remainder>0) msg += currentLang==='en' ? ` remainder ${remainder}` : ` शेष ${formatNumber(remainder)}`;
+      document.getElementById('testFeedback').innerHTML = msg;
+      speakAfterDelay(currentLang==='en'?`${total} divided by ${groups} equals ${correct}${remainder>0?' remainder '+remainder:''}`:`${total} लाई ${groups} ले भाग गर्दा ${correct}${remainder>0?' शेष '+remainder:''}`, currentLang);
+    }
+    document.getElementById('testScore').innerHTML=`Score: ${testScore.correct} / ${testScore.total}`;
+    setTimeout(()=>{ generateTestQuestion(); }, 2800); // longer delay to let speech finish
+  }
+  function submitTestFillblank(){
+    let userVal=parseInt(document.getElementById('testAnswerInput').value);
+    if(isNaN(userVal)){ document.getElementById('testFeedback').innerHTML=currentLang==='en'?'Please enter a number!':'कृपया संख्या प्रविष्ट गर्नुहोस्!'; return; }
+    let correct=currentTestQuestion.answer, d1=currentTestQuestion.dividend, d2=currentTestQuestion.divisor, q=currentTestQuestion.quotient, r=currentTestQuestion.remainder;
+    testScore.total++;
+    if(userVal===correct){
+      testScore.correct++;
+      let msg = currentLang==='en' ? `🎉 Correct! ${d1} ÷ ${d2} = ${q}` : `🎉 सही! ${formatNumber(d1)} ÷ ${formatNumber(d2)} = ${formatNumber(q)}`;
+      if(r>0) msg += currentLang==='en' ? ` remainder ${r}` : ` शेष ${formatNumber(r)}`;
+      document.getElementById('testFeedback').innerHTML = msg;
+      speakAfterDelay(currentLang==='en'?`${d1} divided by ${d2} equals ${q}${r>0?' remainder '+r:''}`:`${d1} लाई ${d2} ले भाग गर्दा ${q}${r>0?' शेष '+r:''}`, currentLang);
+    } else {
+      let msg = currentLang==='en' ? `❌ Wrong. The answer is ${correct}.` : `❌ गलत। सही उत्तर ${formatNumber(correct)} हो।`;
+      document.getElementById('testFeedback').innerHTML = msg;
+      speakAfterDelay(currentLang==='en'?`The answer is ${correct}`:`सही उत्तर ${correct} हो`, currentLang);
+    }
+    document.getElementById('testScore').innerHTML=`Score: ${testScore.correct} / ${testScore.total}`;
+    setTimeout(()=>{ generateTestQuestion(); }, 2800);
+  }
+  function newTestQuestion(){ testScore={correct:0,total:0}; document.getElementById('testScore').innerHTML='Score: 0 / 0'; generateTestQuestion(); }
+  document.getElementById('testTypeSelect').onchange=(e)=>{ testType=e.target.value; testScore={correct:0,total:0}; generateTestQuestion(); };
+  document.getElementById('newTestQuestionBtn').onclick=()=>{ testScore={correct:0,total:0}; generateTestQuestion(); };
+  document.getElementById('testSubmitBtn').onclick=submitTestFillblank;
+  generateTestQuestion();
+
+  // ========== MODE SWITCHING & GLOBAL UI ==========
+  function setMode(mode){
+    currentMode=mode;
+    document.getElementById('learnMode').classList.toggle('active',mode==='learn');
+    document.getElementById('practiceMode').classList.toggle('active',mode==='practice');
+    document.getElementById('testMode').classList.toggle('active',mode==='test');
+    if(mode==='test') generateTestQuestion();
+    if(mode==='learn') renderLearn();
+  }
+  document.getElementById('modeSelect').onchange=(e)=>setMode(e.target.value);
+  function updateGlobalUI(){
+    document.getElementById('totalLabelLearn').innerText=currentLang==='en'?'Total:':'जम्मा:';
+    document.getElementById('groupsLabelLearn').innerText=currentLang==='en'?'Groups:':'समूह:';
+    document.getElementById('totalLabelPractice').innerText=currentLang==='en'?'Total:':'जम्मा:';
+    document.getElementById('groupsLabelPractice').innerText=currentLang==='en'?'Groups:':'समूह:';
+    document.getElementById('randomPracticeBtn').innerText=currentLang==='en'?'🎲 Random':'🎲 अनियमित';
+    document.getElementById('checkPracticeBtn').innerText=currentLang==='en'?'✅ Check Division':'✅ भाग जाँच गर्नुहोस्';
+    if(currentMode==='test') generateTestQuestion();
+    renderLearn();
+    resetPractice();
+  }
+  function setLanguage(lang){
+    currentLang=lang;
+    langEn.classList.toggle('active',lang==='en');
+    langNp.classList.toggle('active',lang==='np');
+    updateGlobalUI();
+  }
+  function setTheme(theme){
+    currentTheme=theme;
+    renderLearn();
+    resetPractice();
+    if(currentMode==='test' && currentTestQuestion && currentTestQuestion.type==='pictorial') renderTestBuildArea();
+  }
+  langEn.onclick=()=>setLanguage('en');
+  langNp.onclick=()=>setLanguage('np');
+  themeSelect.onchange=(e)=>setTheme(e.target.value);
+  setMode('learn');
+</script>
+</body>
+</html>

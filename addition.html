@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Addition Lab - Place Value Studio</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: #eef2fa;
+      font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, sans-serif;
+      margin: 0;
+      padding: 24px 20px;
+    }
+
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 2rem;
+      box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+    }
+
+    .top-bar {
+      background: linear-gradient(135deg, #0e3b4f, #1f6a8c);
+      padding: 1rem 1.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      color: white;
+    }
+
+    .home-btn {
+      background: #ffcd7e;
+      color: #1e4b61;
+      text-decoration: none;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      transition: 0.1s;
+    }
+    .home-btn:hover {
+      background: #ffe0b5;
+    }
+
+    .lang-group {
+      display: flex;
+      gap: 12px;
+      background: #ffffff30;
+      padding: 5px 14px;
+      border-radius: 60px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: 1px solid #ffcd7e;
+      padding: 5px 18px;
+      border-radius: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #ffefcf;
+      transition: 0.1s;
+    }
+
+    .lang-btn.active {
+      background: #ffcd7e;
+      color: #1e4b61;
+      border-color: white;
+    }
+
+    .theme-selector {
+      background: white;
+      padding: 8px 18px;
+      border-radius: 40px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      min-width: 190px;
+      line-height: 1.4;
+    }
+    .theme-selector option {
+      font-size: 0.95rem;
+      padding: 6px;
+    }
+
+    .example-area {
+      display: flex;
+      gap: 10px;
+      background: #ffffff30;
+      padding: 4px 16px;
+      border-radius: 60px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .example-btn {
+      background: #ffe0b5;
+      border: none;
+      border-radius: 32px;
+      padding: 6px 16px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .search-row {
+      background: #f9f6ef;
+      margin: 18px 24px 0 24px;
+      border-radius: 80px;
+      padding: 10px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .number-input {
+      font-size: 1.5rem;
+      width: 130px;
+      text-align: center;
+      font-weight: bold;
+      border-radius: 48px;
+      border: 2px solid #ffaa44;
+      padding: 8px 12px;
+      font-family: monospace;
+    }
+
+    .reset-btn, .random-btn, .group-btn {
+      background: #e67e22;
+      border: none;
+      border-radius: 40px;
+      padding: 8px 22px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .reset-btn {
+      background: #2c7aa0;
+    }
+    .group-btn {
+      background: #4caf50;
+      margin-top: 8px;
+      font-size: 0.9rem;
+      padding: 6px 12px;
+    }
+
+    .table-wrapper {
+      padding: 0 24px 16px 24px;
+      overflow-x: auto;
+    }
+
+    .place-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 3px solid black;
+      background: white;
+    }
+
+    .place-table th, .place-table td {
+      border: 2px solid black;
+      padding: 16px 10px;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .place-table th {
+      background: #2b5e7a;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .blocks-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      min-height: 100px;
+      align-items: center;
+    }
+
+    .block {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 1px 1px black;
+      box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: 0.05s linear;
+      flex-shrink: 0;
+    }
+
+    .block:active {
+      transform: translateY(2px);
+    }
+
+    .block.block-disabled {
+      opacity: 0.45;
+      filter: grayscale(0.2);
+      cursor: not-allowed;
+      pointer-events: none;
+      transform: none;
+    }
+
+    .sum-block {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .thousand-block, .hundred-block { width: 88px; height: 88px; font-size: 1rem; }
+    .ten-block { width: 96px; height: 48px; font-size: 0.95rem; }
+    .one-block { width: 52px; height: 52px; font-size: 1rem; }
+
+    .classic-hundred, .classic-thousand {
+      background-color: #1f6392;
+      background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10)), repeating-linear-gradient(to right, transparent, transparent calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10 - 1px), rgba(255,255,200,0.7) calc(100% / 10));
+    }
+    .classic-ten {
+      background-color: #368bc1;
+      background-image: repeating-linear-gradient(90deg, rgba(255,250,210,0.9), rgba(255,250,210,0.9) 1.5px, transparent 1.5px, transparent calc(100% / 10));
+    }
+    .classic-one { background-color: #5ea9d9; }
+    .solid-hundred, .solid-thousand { background: #2c7aa0; }
+    .solid-ten { background: #4797c2; }
+    .solid-one { background: #6db4db; }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <div class="top-bar">
+    <a href="index.html" class="home-btn">🏠 Home</a>
+    <div class="lang-group">
+      <button id="langEn" class="lang-btn active">🇬🇧 English</button>
+      <button id="langNp" class="lang-btn">🇳🇵 नेपाली</button>
+    </div>
+    <select id="themeSelect" class="theme-selector">
+      <option value="classic">📦 Classic (Grids)</option>
+      <option value="rupee">💵 Nepali Rupees</option>
+      <option value="apple">🍎 Apple</option>
+      <option value="mango">🥭 Mango</option>
+      <option value="flower">🌸 Flower</option>
+      <option value="orange">🍊 Orange</option>
+    </select>
+    <div class="example-area" id="exampleArea">
+      <span id="exampleLabel">📘 Examples:</span>
+    </div>
+  </div>
+
+  <div class="search-row">
+    <span>➕ First Number:</span>
+    <input type="number" id="num1Input" class="number-input" value="568" min="0" max="999" step="1">
+    <span>➕ Second Number:</span>
+    <input type="number" id="num2Input" class="number-input" value="487" min="0" max="999" step="1">
+    <button id="resetAddBtn" class="reset-btn">🔄 Reset</button>
+    <button id="randomBtn" class="random-btn">🎲 Random</button>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="place-table" id="addPlaceTable">
+      <thead id="tableHeader">
+        <!-- header will be dynamically updated to include thousands if needed -->
+      </thead>
+      <tbody id="addTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // ---------- NEPALI NUMBER WORDS (extended to 1998) ----------
+  const nepaliWords = {
+    0:'शून्य',1:'एक',2:'दुई',3:'तीन',4:'चार',5:'पाँच',
+    6:'छ',7:'सात',8:'आठ',9:'नौ',10:'दस',11:'एघार',12:'बाह्र',
+    13:'तेह्र',14:'चौध',15:'पन्ध्र',16:'सोह्र',17:'सत्र',18:'अठार',
+    19:'उन्नाइस',20:'बीस',21:'एक्काइस',22:'बाइस',23:'तेइस',24:'चौबीस',
+    25:'पच्चीस',26:'छब्बीस',27:'सत्ताइस',28:'अठ्ठाइस',29:'उनन्तीस',
+    30:'तीस',31:'एकतीस',32:'बत्तीस',33:'तेत्तीस',34:'चौँतीस',35:'पैँतीस',
+    36:'छत्तीस',37:'सैँतीस',38:'अठतीस',39:'उनन्चालीस',40:'चालीस',
+    41:'एकचालीस',42:'बयालीस',43:'त्रिचालीस',44:'चवालीस',45:'पैँतालीस',
+    46:'छयालीस',47:'सच्चालीस',48:'अठचालीस',49:'उनन्चास',50:'पचास',
+    51:'एकाउन्न',52:'बाउन्न',53:'त्रिपन्न',54:'चौवन्न',55:'पचपन्न',
+    56:'छपन्न',57:'सन्ताउन्न',58:'अन्ठाउन्न',59:'उनन्साठी',60:'साठी',
+    61:'एकसट्ठी',62:'बयसट्ठी',63:'त्रिसट्ठी',64:'चौसट्ठी',65:'पैंसट्ठी',
+    66:'छैसट्ठी',67:'सत्सट्ठी',68:'अठसट्ठी',69:'उनन्सत्तरी',70:'सत्तरी',
+    71:'एकहत्तर',72:'बहत्तर',73:'त्रिहत्तर',74:'चौहत्तर',75:'पचहत्तर',
+    76:'छैहत्तर',77:'सतहत्तर',78:'अठहत्तर',79:'उनासी',80:'असी',
+    81:'एकासी',82:'बयासी',83:'त्रियासी',84:'चौरासी',85:'पचासी',
+    86:'छयासी',87:'सतासी',88:'अठासी',89:'उनान्नब्बे',90:'नब्बे',
+    91:'एकान्नब्बे',92:'बयान्नब्बे',93:'त्रियान्नब्बे',94:'चौरान्नब्बे',
+    95:'पन्चान्नब्बे',96:'छयान्नब्बे',97:'सन्तान्नब्बे',98:'अन्ठान्नब्बे',
+    99:'उनान्सय',100:'सय'
+  };
+  function getNepaliNumberWord(num) {
+    if (num < 0) return String(num);
+    if (num <= 100) return nepaliWords[num];
+    if (num < 1000) {
+      const h = Math.floor(num/100), r = num%100;
+      const hw = ['','एक सय','दुई सय','तीन सय','चार सय','पाँच सय','छ सय','सात सय','आठ सय','नौ सय'][h];
+      if (r === 0) return hw;
+      return `${hw} ${nepaliWords[r]}`;
+    } else {
+      const th = Math.floor(num/1000), rem = num%1000;
+      const thw = ['','एक हजार','दुई हजार','तीन हजार','चार हजार','पाँच हजार','छ हजार','सात हजार','आठ हजार','नौ हजार'][th];
+      if (rem === 0) return thw;
+      return `${thw} ${getNepaliNumberWord(rem)}`;
+    }
+  }
+
+  // ---------- GLOBALS ----------
+  let currentLang = 'en';
+  let currentTheme = 'classic';
+  let addNum1 = 568, addNum2 = 487;
+  let firstRemaining = { th:0, h:0, t:0, o:0 };
+  let secondRemaining = { th:0, h:0, t:0, o:0 };
+  let sumTh = 0, sumH = 0, sumT = 0, sumO = 0;
+
+  // DOM elements
+  const langEnBtn = document.getElementById('langEn');
+  const langNpBtn = document.getElementById('langNp');
+  const themeSelect = document.getElementById('themeSelect');
+  const num1Input = document.getElementById('num1Input');
+  const num2Input = document.getElementById('num2Input');
+  const resetAddBtn = document.getElementById('resetAddBtn');
+  const randomBtn = document.getElementById('randomBtn');
+  const addTableBody = document.getElementById('addTableBody');
+  const tableHeader = document.getElementById('tableHeader');
+  const exampleArea = document.getElementById('exampleArea');
+
+  // Helper functions
+  function toNepaliDigits(num) {
+    const digits = ['०','१','२','३','४','५','६','७','८','९'];
+    return num.toString().split('').map(d => digits[parseInt(d)]).join('');
+  }
+  function formatNumberDisplay(num) {
+    return currentLang === 'np' ? toNepaliDigits(num) : num.toString();
+  }
+  function convertNumbersToNepali(text) {
+    if (currentLang !== 'np') return text;
+    return text.replace(/\d+/g, m => toNepaliDigits(parseInt(m)));
+  }
+  function speakNow(text, lang) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang === 'en' ? 'en-US' : 'ne-NP';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  }
+  function numberToWords(num, lang) {
+    if (num === 0) return lang === 'en' ? 'zero' : 'शून्य';
+    if (lang === 'en') {
+      if (num < 1000) {
+        const ones = ['','one','two','three','four','five','six','seven','eight','nine'];
+        const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+        const teens = ['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+        const h = Math.floor(num/100), r = num%100;
+        let str = '';
+        if (h>0) str += ones[h] + ' hundred';
+        if (r>0) {
+          if (str) str += ' ';
+          if (r<10) str += ones[r];
+          else if (r<20) str += teens[r-10];
+          else { const ten = Math.floor(r/10), one = r%10; str += tens[ten]; if (one>0) str += '-' + ones[one]; }
+        }
+        return str;
+      } else {
+        const th = Math.floor(num/1000), rem = num%1000;
+        const thw = ['','one thousand','two thousand','three thousand','four thousand','five thousand','six thousand','seven thousand','eight thousand','nine thousand'][th];
+        if (rem === 0) return thw;
+        return thw + ' ' + numberToWords(rem, 'en');
+      }
+    } else {
+      return getNepaliNumberWord(num);
+    }
+  }
+  function speakCumulativeValue(placeType, clickedCount, unitValue) {
+    let totalValue = clickedCount * unitValue;
+    if (totalValue === 0) return;
+    if (currentLang === 'en') speakNow(totalValue.toString(), 'en');
+    else speakNow(getNepaliNumberWord(totalValue), 'np');
+  }
+  function speakGroupMessage(from) {
+    let msg = '';
+    if (currentLang === 'en') {
+      if (from === 'ones') msg = 'Ten ones make one ten!';
+      else if (from === 'tens') msg = 'Ten tens make one hundred!';
+      else if (from === 'hundreds') msg = 'Ten hundreds make one thousand!';
+    } else {
+      if (from === 'ones') msg = 'दश एकले एक दश बनाउँछ!';
+      else if (from === 'tens') msg = 'दश दशले एक सय बनाउँछ!';
+      else if (from === 'hundreds') msg = 'दश सयले एक हजार बनाउँछ!';
+    }
+    speakNow(msg, currentLang);
+  }
+
+  // Block creation
+  function buildAddBlock(place, value, disabled) {
+    let sizeClass = '';
+    if (place === 'thousand') sizeClass = 'thousand-block';
+    else if (place === 'hundred') sizeClass = 'hundred-block';
+    else if (place === 'ten') sizeClass = 'ten-block';
+    else sizeClass = 'one-block';
+    const themeCls = (currentTheme === 'classic') 
+      ? (place === 'hundred' || place === 'thousand' ? 'classic-hundred' : (place === 'ten' ? 'classic-ten' : 'classic-one'))
+      : (place === 'hundred' || place === 'thousand' ? 'solid-hundred' : (place === 'ten' ? 'solid-ten' : 'solid-one'));
+    let label = '';
+    if (currentTheme === 'classic') label = value.toString();
+    else if (currentTheme === 'rupee') label = value===1000 ? 'रू १०००' : (value===100 ? 'रू १००' : (value===10 ? 'रू १०' : 'रू १'));
+    else if (currentTheme === 'apple') label = value===1000 ? '🍎1000' : (value===100 ? '🍎100' : (value===10 ? '🍎10' : '🍎1'));
+    else if (currentTheme === 'mango') label = value===1000 ? '🥭1000' : (value===100 ? '🥭100' : (value===10 ? '🥭10' : '🥭1'));
+    else if (currentTheme === 'flower') label = value===1000 ? '🌸1000' : (value===100 ? '🌸100' : (value===10 ? '🌸10' : '🌸1'));
+    else if (currentTheme === 'orange') label = value===1000 ? '🍊1000' : (value===100 ? '🍊100' : (value===10 ? '🍊10' : '🍊1'));
+    else label = value.toString();
+    if (currentLang === 'np' && currentTheme === 'classic') label = convertNumbersToNepali(label);
+    else if (currentLang === 'np' && currentTheme !== 'classic') label = label.replace(/\d+/g, m => toNepaliDigits(parseInt(m)));
+    const disabledClass = disabled ? 'block-disabled' : '';
+    return `<div class="block ${sizeClass} ${themeCls} ${disabledClass}" data-place="${place}" data-value="${value}">${label}</div>`;
+  }
+
+  // Regroup function
+  function regroup(placeFrom, placeTo, fromUnit, toUnit) {
+    if (placeFrom === 'ones' && sumO >= 10) {
+      sumO -= 10;
+      sumT += 1;
+      speakGroupMessage('ones');
+    } else if (placeFrom === 'tens' && sumT >= 10) {
+      sumT -= 10;
+      sumH += 1;
+      speakGroupMessage('tens');
+    } else if (placeFrom === 'hundreds' && sumH >= 10) {
+      sumH -= 10;
+      sumTh += 1;
+      speakGroupMessage('hundreds');
+    } else {
+      return;
+    }
+    renderAddition(); // re-render after regrouping
+  }
+
+  // Update table header based on whether thousands column is needed
+  function updateHeader() {
+    const needsTh = (sumTh > 0) || (firstRemaining.th > 0) || (secondRemaining.th > 0);
+    let html = '<tr>';
+    html += '<th></th>';
+    if (needsTh) html += '<th>🏛️ Thousands</th>';
+    html += '<th>🏛️ Hundreds</th><th>📏 Tens</th><th>🟦 Ones</th>';
+    html += '</tr>';
+    tableHeader.innerHTML = html;
+  }
+
+  // Main render function
+  function renderAddition() {
+    const h1 = Math.floor(addNum1/100), t1 = Math.floor((addNum1%100)/10), o1 = addNum1%10;
+    const h2 = Math.floor(addNum2/100), t2 = Math.floor((addNum2%100)/10), o2 = addNum2%10;
+    // First and second numbers never have thousands initially, but after regrouping sum may have thousands
+    // For simplicity, we keep firstRemaining.th = 0 always
+    firstRemaining = { th:0, h: firstRemaining.h, t: firstRemaining.t, o: firstRemaining.o };
+    secondRemaining = { th:0, h: secondRemaining.h, t: secondRemaining.t, o: secondRemaining.o };
+
+    updateHeader(); // show/hide thousands column
+    addTableBody.innerHTML = '';
+
+    // Helper to get column count based on header (dynamic)
+    const colCount = tableHeader.querySelectorAll('th').length - 1; // minus first empty cell
+    const hasTh = (colCount === 4); // thousands + hundreds + tens + ones
+
+    function createRowCells(prefix, withTh) {
+      const cells = [];
+      if (withTh) cells.push(document.createElement('td'));
+      cells.push(document.createElement('td')); // hundreds
+      cells.push(document.createElement('td')); // tens
+      cells.push(document.createElement('td')); // ones
+      return cells;
+    }
+
+    // Row 1: First number
+    const rowFirst = document.createElement('tr');
+    const firstLabel = document.createElement('td');
+    firstLabel.className = 'number-label';
+    firstLabel.innerText = `➕ First: ${formatNumberDisplay(addNum1)}`;
+    rowFirst.appendChild(firstLabel);
+    const firstCells = createRowCells('first', hasTh);
+    firstCells.forEach(cell => rowFirst.appendChild(cell));
+    addTableBody.appendChild(rowFirst);
+
+    // Row 2: Second number
+    const rowSecond = document.createElement('tr');
+    const secondLabel = document.createElement('td');
+    secondLabel.className = 'number-label';
+    secondLabel.innerText = `➕ Second: ${formatNumberDisplay(addNum2)}`;
+    rowSecond.appendChild(secondLabel);
+    const secondCells = createRowCells('second', hasTh);
+    secondCells.forEach(cell => rowSecond.appendChild(cell));
+    addTableBody.appendChild(rowSecond);
+
+    // Row 3: Sum row
+    const rowSum = document.createElement('tr');
+    const sumLabel = document.createElement('td');
+    sumLabel.className = 'number-label';
+    const totalSum = sumTh*1000 + sumH*100 + sumT*10 + sumO;
+    sumLabel.innerText = `✨ Sum: ${formatNumberDisplay(totalSum)}`;
+    rowSum.appendChild(sumLabel);
+    const sumCells = createRowCells('sum', hasTh);
+    sumCells.forEach(cell => rowSum.appendChild(cell));
+    rowSum.style.background = '#e0f0e8';
+    addTableBody.appendChild(rowSum);
+
+    // Row 4: Regrouping buttons (if needed)
+    const rowRegroup = document.createElement('tr');
+    const regroupLabel = document.createElement('td');
+    regroupLabel.innerText = '⚡ Regroup';
+    rowRegroup.appendChild(regroupLabel);
+    const regroupCells = [];
+    if (hasTh) regroupCells.push(document.createElement('td'));
+    regroupCells.push(document.createElement('td'));
+    regroupCells.push(document.createElement('td'));
+    regroupCells.push(document.createElement('td'));
+    regroupCells.forEach(cell => rowRegroup.appendChild(cell));
+    let hasRegroup = false;
+    if (sumO >= 10) {
+      const btn = document.createElement('button');
+      btn.className = 'group-btn';
+      btn.innerText = currentLang === 'en' ? 'Group 10 Ones → 1 Ten' : '१० एक → १ दश';
+      btn.onclick = () => regroup('ones', 'tens', 1, 10);
+      regroupCells[regroupCells.length-1].appendChild(btn); // last cell is ones
+      hasRegroup = true;
+    }
+    if (sumT >= 10) {
+      const btn = document.createElement('button');
+      btn.className = 'group-btn';
+      btn.innerText = currentLang === 'en' ? 'Group 10 Tens → 1 Hundred' : '१० दश → १ सय';
+      btn.onclick = () => regroup('tens', 'hundreds', 10, 100);
+      regroupCells[regroupCells.length-2].appendChild(btn); // tens cell
+      hasRegroup = true;
+    }
+    if (sumH >= 10) {
+      const btn = document.createElement('button');
+      btn.className = 'group-btn';
+      btn.innerText = currentLang === 'en' ? 'Group 10 Hundreds → 1 Thousand' : '१० सय → १ हजार';
+      btn.onclick = () => regroup('hundreds', 'thousands', 100, 1000);
+      if (hasTh) regroupCells[0].appendChild(btn); // thousands cell (but button belongs to hundreds column)
+      else regroupCells[0].appendChild(btn); // first cell after label is hundreds
+      hasRegroup = true;
+    }
+    if (hasRegroup) addTableBody.appendChild(rowRegroup);
+
+    // Row 5: Expanded per column
+    const rowExpanded = document.createElement('tr');
+    const expandedLabel = document.createElement('td');
+    expandedLabel.style.fontWeight = 'bold';
+    expandedLabel.innerText = '📐 Expanded';
+    rowExpanded.appendChild(expandedLabel);
+    const expandedCells = [];
+    if (hasTh) expandedCells.push(document.createElement('td'));
+    expandedCells.push(document.createElement('td'));
+    expandedCells.push(document.createElement('td'));
+    expandedCells.push(document.createElement('td'));
+    expandedCells.forEach(cell => rowExpanded.appendChild(cell));
+    addTableBody.appendChild(rowExpanded);
+
+    // Row 6: Final sum + words
+    const rowFinal = document.createElement('tr');
+    const finalCell = document.createElement('td');
+    finalCell.colSpan = hasTh ? 5 : 4;
+    finalCell.style.background = '#e9f0f5';
+    finalCell.style.fontWeight = 'bold';
+    finalCell.style.padding = '16px';
+    rowFinal.appendChild(finalCell);
+    addTableBody.appendChild(rowFinal);
+    const sumSpan = document.createElement('div');
+    const wordsSpan = document.createElement('div');
+    finalCell.appendChild(sumSpan);
+    finalCell.appendChild(wordsSpan);
+
+    // Helper to fill source cells with click handlers
+    function fillSource(cell, place, total, remaining, source, idx) {
+      const group = document.createElement('div');
+      group.className = 'blocks-group';
+      for (let i=0; i<total; i++) {
+        const disabled = (i >= remaining);
+        const blockHtml = buildAddBlock(place, place === 'thousand' ? 1000 : (place === 'hundred' ? 100 : (place === 'ten' ? 10 : 1)), disabled);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = blockHtml;
+        const blockElem = tempDiv.firstChild;
+        if (!disabled) {
+          blockElem.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (blockElem.classList.contains('block-disabled')) return;
+            let canMove = false;
+            if (source === 'first') {
+              if (place === 'thousand' && firstRemaining.th > 0) { firstRemaining.th--; canMove = true; }
+              else if (place === 'hundred' && firstRemaining.h > 0) { firstRemaining.h--; canMove = true; }
+              else if (place === 'ten' && firstRemaining.t > 0) { firstRemaining.t--; canMove = true; }
+              else if (place === 'one' && firstRemaining.o > 0) { firstRemaining.o--; canMove = true; }
+            } else {
+              if (place === 'thousand' && secondRemaining.th > 0) { secondRemaining.th--; canMove = true; }
+              else if (place === 'hundred' && secondRemaining.h > 0) { secondRemaining.h--; canMove = true; }
+              else if (place === 'ten' && secondRemaining.t > 0) { secondRemaining.t--; canMove = true; }
+              else if (place === 'one' && secondRemaining.o > 0) { secondRemaining.o--; canMove = true; }
+            }
+            if (!canMove) return;
+            blockElem.classList.add('block-disabled');
+            // Update sum totals
+            if (place === 'thousand') { sumTh++; speakCumulativeValue('thousand', sumTh, 1000); }
+            else if (place === 'hundred') { sumH++; speakCumulativeValue('hundred', sumH, 100); }
+            else if (place === 'ten') { sumT++; speakCumulativeValue('ten', sumT, 10); }
+            else { sumO++; speakCumulativeValue('one', sumO, 1); }
+            renderAddition(); // re-render everything
+          });
+        }
+        group.appendChild(blockElem);
+      }
+      cell.innerHTML = '';
+      cell.appendChild(group);
+    }
+
+    // Determine which cells correspond to which place
+    let firstIdx = 0, secondIdx = 0, sumIdx = 0, expandedIdx = 0;
+    if (hasTh) {
+      // fill thousands (always 0 for source)
+      fillSource(firstCells[0], 'thousand', 0, firstRemaining.th, 'first', 0);
+      fillSource(secondCells[0], 'thousand', 0, secondRemaining.th, 'second', 0);
+      // sum thousands
+      const sumThGroup = document.createElement('div'); sumThGroup.className = 'blocks-group';
+      for (let i=0; i<sumTh; i++) sumThGroup.appendChild(createStaticBlock('thousand', 1000));
+      sumCells[0].innerHTML = ''; sumCells[0].appendChild(sumThGroup);
+      expandedCells[0].innerText = convertNumbersToNepali(`${sumTh} × 1000 = ${sumTh*1000}`);
+      firstIdx = 1; secondIdx = 1; sumIdx = 1; expandedIdx = 1;
+    }
+    // Hundreds
+    fillSource(firstCells[firstIdx], 'hundred', Math.floor(addNum1/100), firstRemaining.h, 'first', firstIdx);
+    fillSource(secondCells[secondIdx], 'hundred', Math.floor(addNum2/100), secondRemaining.h, 'second', secondIdx);
+    const sumHGroup = document.createElement('div'); sumHGroup.className = 'blocks-group';
+    for (let i=0; i<sumH; i++) sumHGroup.appendChild(createStaticBlock('hundred', 100));
+    sumCells[sumIdx].innerHTML = ''; sumCells[sumIdx].appendChild(sumHGroup);
+    expandedCells[expandedIdx].innerText = convertNumbersToNepali(`${sumH} × 100 = ${sumH*100}`);
+    // Tens
+    fillSource(firstCells[firstIdx+1], 'ten', Math.floor((addNum1%100)/10), firstRemaining.t, 'first', firstIdx+1);
+    fillSource(secondCells[secondIdx+1], 'ten', Math.floor((addNum2%100)/10), secondRemaining.t, 'second', secondIdx+1);
+    const sumTGroup = document.createElement('div'); sumTGroup.className = 'blocks-group';
+    for (let i=0; i<sumT; i++) sumTGroup.appendChild(createStaticBlock('ten', 10));
+    sumCells[sumIdx+1].innerHTML = ''; sumCells[sumIdx+1].appendChild(sumTGroup);
+    expandedCells[expandedIdx+1].innerText = convertNumbersToNepali(`${sumT} × 10 = ${sumT*10}`);
+    // Ones
+    fillSource(firstCells[firstIdx+2], 'one', addNum1%10, firstRemaining.o, 'first', firstIdx+2);
+    fillSource(secondCells[secondIdx+2], 'one', addNum2%10, secondRemaining.o, 'second', secondIdx+2);
+    const sumOGroup = document.createElement('div'); sumOGroup.className = 'blocks-group';
+    for (let i=0; i<sumO; i++) sumOGroup.appendChild(createStaticBlock('one', 1));
+    sumCells[sumIdx+2].innerHTML = ''; sumCells[sumIdx+2].appendChild(sumOGroup);
+    expandedCells[expandedIdx+2].innerText = convertNumbersToNepali(`${sumO} × 1 = ${sumO}`);
+
+    // Final sum expression and words
+    const total = sumTh*1000 + sumH*100 + sumT*10 + sumO;
+    const parts = [];
+    if (sumTh>0) parts.push(`${sumTh*1000}`); if (sumH>0) parts.push(`${sumH*100}`); if (sumT>0) parts.push(`${sumT*10}`); if (sumO>0) parts.push(`${sumO}`);
+    const expr = parts.length ? parts.join(' + ') + ` = ${total}` : '0 = 0';
+    sumSpan.innerHTML = `✨ ${convertNumbersToNepali(expr)}`;
+    wordsSpan.innerHTML = `📖 ${numberToWords(total, currentLang)}`;
+  }
+
+  function createStaticBlock(place, value) {
+    let sizeClass = '';
+    if (place === 'thousand') sizeClass = 'thousand-block';
+    else if (place === 'hundred') sizeClass = 'hundred-block';
+    else if (place === 'ten') sizeClass = 'ten-block';
+    else sizeClass = 'one-block';
+    const themeCls = (currentTheme === 'classic') 
+      ? (place === 'hundred' || place === 'thousand' ? 'classic-hundred' : (place === 'ten' ? 'classic-ten' : 'classic-one'))
+      : (place === 'hundred' || place === 'thousand' ? 'solid-hundred' : (place === 'ten' ? 'solid-ten' : 'solid-one'));
+    let label = '';
+    if (currentTheme === 'classic') label = value.toString();
+    else if (currentTheme === 'rupee') label = value===1000 ? 'रू १०००' : (value===100 ? 'रू १००' : (value===10 ? 'रू १०' : 'रू १'));
+    else if (currentTheme === 'apple') label = value===1000 ? '🍎1000' : (value===100 ? '🍎100' : (value===10 ? '🍎10' : '🍎1'));
+    else if (currentTheme === 'mango') label = value===1000 ? '🥭1000' : (value===100 ? '🥭100' : (value===10 ? '🥭10' : '🥭1'));
+    else if (currentTheme === 'flower') label = value===1000 ? '🌸1000' : (value===100 ? '🌸100' : (value===10 ? '🌸10' : '🌸1'));
+    else if (currentTheme === 'orange') label = value===1000 ? '🍊1000' : (value===100 ? '🍊100' : (value===10 ? '🍊10' : '🍊1'));
+    else label = value.toString();
+    if (currentLang === 'np' && currentTheme === 'classic') label = convertNumbersToNepali(label);
+    else if (currentLang === 'np' && currentTheme !== 'classic') label = label.replace(/\d+/g, m => toNepaliDigits(parseInt(m)));
+    const div = document.createElement('div');
+    div.className = `block ${sizeClass} ${themeCls} sum-block`;
+    div.textContent = label;
+    return div;
+  }
+
+  function resetAddition() {
+    const h1 = Math.floor(addNum1/100), t1 = Math.floor((addNum1%100)/10), o1 = addNum1%10;
+    const h2 = Math.floor(addNum2/100), t2 = Math.floor((addNum2%100)/10), o2 = addNum2%10;
+    firstRemaining = { th:0, h: h1, t: t1, o: o1 };
+    secondRemaining = { th:0, h: h2, t: t2, o: o2 };
+    sumTh = sumH = sumT = sumO = 0;
+    renderAddition();
+  }
+
+  function updateNumbers() {
+    let n1 = parseInt(num1Input.value); if (isNaN(n1)) n1 = 0; n1 = Math.min(999, Math.max(0, n1));
+    let n2 = parseInt(num2Input.value); if (isNaN(n2)) n2 = 0; n2 = Math.min(999, Math.max(0, n2));
+    addNum1 = n1; addNum2 = n2;
+    resetAddition();
+  }
+
+  function randomNumbers() {
+    num1Input.value = Math.floor(Math.random() * 800) + 100;
+    num2Input.value = Math.floor(Math.random() * 800) + 100;
+    updateNumbers();
+  }
+
+  // UI language & theme
+  function updateUIText() {
+    const exampleBtns = document.querySelectorAll('.example-btn');
+    if (currentLang === 'en') {
+      document.getElementById('exampleLabel').innerText = '📘 Examples:';
+      randomBtn.innerText = '🎲 Random';
+      resetAddBtn.innerText = '🔄 Reset';
+      if (exampleBtns.length) {
+        exampleBtns[0].innerText = '568+487';
+        exampleBtns[1].innerText = '512+347';
+        exampleBtns[2].innerText = '621+178';
+      }
+    } else {
+      document.getElementById('exampleLabel').innerText = '📘 उदाहरण:';
+      randomBtn.innerText = '🎲 अनियमित';
+      resetAddBtn.innerText = '🔄 रिसेट';
+      if (exampleBtns.length) {
+        exampleBtns[0].innerText = toNepaliDigits(568)+'+'+toNepaliDigits(487);
+        exampleBtns[1].innerText = toNepaliDigits(512)+'+'+toNepaliDigits(347);
+        exampleBtns[2].innerText = toNepaliDigits(621)+'+'+toNepaliDigits(178);
+      }
+    }
+    renderAddition(); // re-render to update regrouping button texts
+  }
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    langEnBtn.classList.toggle('active', lang === 'en');
+    langNpBtn.classList.toggle('active', lang === 'np');
+    updateUIText();
+  }
+  function setTheme(theme) { currentTheme = theme; renderAddition(); updateUIText(); }
+
+  // Event listeners
+  langEnBtn.onclick = () => setLanguage('en');
+  langNpBtn.onclick = () => setLanguage('np');
+  themeSelect.onchange = (e) => setTheme(e.target.value);
+  resetAddBtn.onclick = resetAddition;
+  randomBtn.onclick = randomNumbers;
+  num1Input.onchange = updateNumbers;
+  num2Input.onchange = updateNumbers;
+
+  // Predefine example buttons (using numbers that may need regrouping)
+  exampleArea.innerHTML = '<span id="exampleLabel">📘 Examples:</span><button class="example-btn" data-a="568" data-b="487">568+487</button><button class="example-btn" data-a="512" data-b="347">512+347</button><button class="example-btn" data-a="621" data-b="178">621+178</button>';
+  document.querySelectorAll('.example-btn').forEach(btn => {
+    btn.onclick = () => {
+      num1Input.value = btn.getAttribute('data-a');
+      num2Input.value = btn.getAttribute('data-b');
+      updateNumbers();
+    };
+  });
+
+  // Initial render
+  updateNumbers();
+</script>
+</body>
+</html>

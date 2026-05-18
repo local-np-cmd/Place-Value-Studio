@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Multiplication Studio - Learn • Practice • Test</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body {
+      background: #eef2fa;
+      font-family: 'Segoe UI', 'Roboto', 'Noto Sans', sans-serif;
+      margin: 0;
+      padding: 24px 20px;
+    }
+    .main-container {
+      max-width: 1300px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 2rem;
+      box-shadow: 0 25px 40px -12px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    .top-bar {
+      background: linear-gradient(135deg, #0e3b4f, #1f6a8c);
+      padding: 1rem 1.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      color: white;
+    }
+    .home-btn {
+      background: #ffcd7e;
+      color: #1e4b61;
+      text-decoration: none;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-weight: bold;
+    }
+    .lang-group {
+      display: flex;
+      gap: 12px;
+      background: #ffffff30;
+      padding: 5px 14px;
+      border-radius: 60px;
+    }
+    .lang-btn {
+      background: transparent;
+      border: 1px solid #ffcd7e;
+      padding: 5px 18px;
+      border-radius: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #ffefcf;
+    }
+    .lang-btn.active {
+      background: #ffcd7e;
+      color: #1e4b61;
+    }
+    .mode-selector, .theme-selector {
+      background: white;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    /* common components */
+    .control-bar {
+      background: #f9f6ef;
+      margin: 18px 24px 0 24px;
+      border-radius: 80px;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 25px;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      padding: 5px 18px;
+      border-radius: 60px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .stepper button {
+      background: #e67e22;
+      border: none;
+      border-radius: 30px;
+      width: 40px;
+      height: 40px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      transition: 0.05s;
+    }
+    .stepper button:active {
+      transform: scale(0.95);
+    }
+    .value-display {
+      font-size: 1.6rem;
+      font-weight: bold;
+      min-width: 60px;
+      text-align: center;
+      background: #fff;
+      padding: 4px 8px;
+      border-radius: 40px;
+    }
+    .random-btn, .action-btn {
+      background: #2c7aa0;
+      border: none;
+      border-radius: 40px;
+      padding: 8px 22px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      transition: 0.05s;
+    }
+    .action-btn {
+      background: #4caf50;
+    }
+    .random-btn:active, .action-btn:active {
+      transform: scale(0.96);
+    }
+    .build-area {
+      padding: 20px 24px;
+      min-height: 400px;
+    }
+    .groups-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin: 20px 0;
+      background: #fef9e6;
+      border-radius: 2rem;
+      padding: 20px;
+    }
+    .group-card {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 15px;
+      text-align: center;
+      min-width: 120px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: 0.05s;
+    }
+    .group-card:active { transform: scale(0.97); }
+    .group-title { font-weight: bold; margin-bottom: 10px; color: #1e4b61; }
+    .group-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .item-icon { font-size: 1.8rem; pointer-events: none; }
+    .array-grid {
+      display: grid;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px auto;
+      background: #fef9e6;
+      padding: 20px;
+      border-radius: 2rem;
+    }
+    .array-cell {
+      width: 60px;
+      height: 60px;
+      background: #5ea9d9;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: 0.05s;
+    }
+    .array-cell:active { transform: scale(0.95); }
+    .info-row, .expanded-row, .feedback {
+      margin: 15px 24px;
+      padding: 12px;
+      border-radius: 2rem;
+      text-align: center;
+      font-weight: bold;
+    }
+    .info-row { background: #e9f0f5; font-size: 1.2rem; }
+    .expanded-row { background: #f9f3e0; }
+    .feedback { background: #e9f0f5; }
+    .place-value-area {
+      background: #fff3e0;
+      margin: 20px 24px;
+      padding: 20px;
+      border-radius: 2rem;
+    }
+    .pv-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 1rem;
+    }
+    .pv-table td {
+      border: 2px solid #ddd;
+      padding: 15px;
+      text-align: center;
+    }
+    .block-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+    .pv-block {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+    }
+    .options-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 24px;
+    }
+    .option-btn {
+      background: #e0e7ff;
+      border: 2px solid #1e4b61;
+      border-radius: 60px;
+      padding: 10px 25px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.05s;
+    }
+    .option-btn:active { transform: scale(0.96); }
+    .answer-input {
+      font-size: 1.5rem;
+      padding: 10px 20px;
+      width: 150px;
+      text-align: center;
+      border-radius: 60px;
+      border: 2px solid #ffaa44;
+      margin: 15px auto;
+      display: block;
+    }
+    .score {
+      background: #2c7aa0;
+      display: inline-block;
+      padding: 6px 20px;
+      border-radius: 60px;
+      color: white;
+      font-weight: bold;
+    }
+    .mode-container {
+      display: none;
+    }
+    .mode-container.active {
+      display: block;
+    }
+    @media (max-width: 600px) {
+      .array-cell { width: 45px; height: 45px; font-size: 1.2rem; }
+      .pv-block { width: 40px; height: 40px; }
+      .item-icon { font-size: 1.4rem; }
+      .option-btn { font-size: 1rem; padding: 6px 15px; }
+      .stepper button { width: 36px; height: 36px; font-size: 1.1rem; }
+      .value-display { font-size: 1.3rem; min-width: 50px; }
+    }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <div class="top-bar">
+    <a href="index.html" class="home-btn">🏠 Home</a>
+    <div class="lang-group">
+      <button id="langEn" class="lang-btn active">🇬🇧 English</button>
+      <button id="langNp" class="lang-btn">🇳🇵 नेपाली</button>
+    </div>
+    <select id="modeSelect" class="mode-selector">
+      <option value="learn">📖 Learn</option>
+      <option value="practice">✏️ Practice</option>
+      <option value="test">📝 Test</option>
+    </select>
+    <select id="themeSelect" class="theme-selector">
+      <option value="star">⭐ Star</option><option value="apple">🍎 Apple</option><option value="flower">🌸 Flower</option>
+    </select>
+  </div>
+
+  <!-- ================= LEARN MODE ================= -->
+  <div id="learnMode" class="mode-container active">
+    <div class="control-bar">
+      <div class="control-group"><label id="groupsLabelLearn">Groups:</label><div class="stepper"><button id="decGroupsLearn">−</button><span id="groupsValueLearn" class="value-display">3</span><button id="incGroupsLearn">+</button></div></div>
+      <div class="control-group"><label id="perGroupLabelLearn">Per group:</label><div class="stepper"><button id="decPerGroupLearn">−</button><span id="perGroupValueLearn" class="value-display">4</span><button id="incPerGroupLearn">+</button></div></div>
+      <div class="view-toggle" style="background:#2c7aa0; padding:6px 16px; border-radius:40px; display:flex; gap:8px">
+        <button id="viewGroupsLearn" class="view-btn" style="background:white; border:none; border-radius:30px; padding:6px 18px; cursor:pointer">📦 Groups</button>
+        <button id="viewArrayLearn" class="view-btn" style="background:white; border:none; border-radius:30px; padding:6px 18px; cursor:pointer">🔲 Array</button>
+      </div>
+    </div>
+    <div id="learnVisualization" class="table-wrapper"></div>
+    <div class="info-row" id="totalInfoLearn">3 × 4 = 12</div>
+    <div class="expanded-row" id="repeatedAddLearn">4 + 4 + 4 = 12</div>
+    <div class="expanded-row" id="skipCountLearn">Skip count: 4, 8, 12</div>
+    <div class="expanded-row" id="wordsRowLearn">📖 twelve</div>
+  </div>
+
+  <!-- ================= PRACTICE MODE ================= -->
+  <div id="practiceMode" class="mode-container">
+    <div class="control-bar">
+      <div class="control-group"><label id="groupsLabelPractice">Groups:</label><div class="stepper"><button id="decGroupsPractice">−</button><span id="groupsValuePractice" class="value-display">3</span><button id="incGroupsPractice">+</button></div></div>
+      <div class="control-group"><label id="perGroupLabelPractice">Per group:</label><div class="stepper"><button id="decPerGroupPractice">−</button><span id="perGroupValuePractice" class="value-display">4</span><button id="incPerGroupPractice">+</button></div></div>
+      <button id="randomPracticeBtn" class="random-btn">🎲 Random</button>
+      <div class="control-group"><label id="viewLabelPractice">View:</label><button id="modeGroupsPractice" class="action-btn" style="background:#2c7aa0">📦 Groups</button><button id="modeArrayPractice" class="action-btn" style="background:#2c7aa0">🔲 Array</button></div>
+    </div>
+    <div id="practiceBuildArea" class="build-area"></div>
+    <div id="practiceFeedback" class="feedback">✨ Click on groups or array cells to add items. Complete all!</div>
+    <div style="text-align:center"><button id="moveToPVBtn" class="action-btn" style="background:#e67e22">📦 Move to Place Value Table</button></div>
+    <div id="practicePVArea" class="place-value-area" style="display:none">
+      <h3 style="text-align:center">📊 Place Value Table – Regroup if needed</h3>
+      <table class="pv-table"><thead><tr><th>Hundreds</th><th>Tens</th><th>Ones</th></tr></thead>
+        <tbody id="pvTableBodyPractice"><tr><td id="hundredsCellPractice"></td><td id="tensCellPractice"></td><td id="onesCellPractice"></td></tr></tbody>
+      </table>
+      <div style="text-align:center; margin-top:15px">
+        <button id="regroupPracticeBtn" class="action-btn" style="background:#f39c12">🔄 Regroup (10 Ones → 1 Ten)</button>
+        <button id="finalizePracticeBtn" class="action-btn" style="background:#4caf50">✨ Show Multiplication Result</button>
+      </div>
+    </div>
+    <div id="practiceResult" class="feedback" style="display:none"></div>
+  </div>
+
+  <!-- ================= TEST MODE ================= -->
+  <div id="testMode" class="mode-container">
+    <div class="control-bar">
+      <select id="testTypeSelect" class="test-type-selector" style="background:white; padding:6px 14px; border-radius:40px;">
+        <option value="pictorial">🎨 Pictorial (Build & Choose)</option>
+        <option value="fillblank">📝 Fill in the Blanks</option>
+      </select>
+      <button id="newTestQuestionBtn" class="random-btn">🎲 New Question</button>
+      <div class="score" id="testScore">Score: 0 / 0</div>
+    </div>
+    <div id="testQuestionArea" class="question-box" style="background:#fff3e0; margin:20px 24px; padding:25px; border-radius:2rem; text-align:center; font-size:1.8rem; font-weight:bold">3 × 4 = ?</div>
+    <div id="testBuildArea" class="build-area"></div>
+    <div id="testOptionsArea" class="options-container" style="display:none"></div>
+    <div id="testDirectInput" style="display:none; text-align:center">
+      <input type="number" id="testAnswerInput" class="answer-input" placeholder="?" autocomplete="off">
+    </div>
+    <div id="testFeedback" class="feedback"></div>
+    <div style="text-align:center"><button id="testSubmitBtn" class="action-btn" style="display:none">✅ Submit Answer</button></div>
+  </div>
+</div>
+
+<script>
+  // ---------- COMMON BILINGUAL & NUMBER WORDS (FIXED) ----------
+  function englishNumberWord(num) {
+    if (num === 0) return 'zero';
+    const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+    const teens = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+    const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+    if (num < 10) return ones[num];
+    if (num < 20) return teens[num - 10];
+    if (num < 100) {
+      let t = Math.floor(num / 10);
+      let o = num % 10;
+      return tens[t] + (o ? '-' + ones[o] : '');
+    }
+    if (num < 1000) {
+      let h = Math.floor(num / 100);
+      let r = num % 100;
+      return ones[h] + ' hundred' + (r ? ' ' + englishNumberWord(r) : '');
+    }
+    return num.toString();
+  }
+  const nepaliWords = {0:'शून्य',1:'एक',2:'दुई',3:'तीन',4:'चार',5:'पाँच',6:'छ',7:'सात',8:'आठ',9:'नौ',10:'दस',11:'एघार',12:'बाह्र',13:'तेह्र',14:'चौध',15:'पन्ध्र',16:'सोह्र',17:'सत्र',18:'अठार',19:'उन्नाइस',20:'बीस',21:'एक्काइस',22:'बाइस',23:'तेइस',24:'चौबीस',25:'पच्चीस',26:'छब्बीस',27:'सत्ताइस',28:'अठ्ठाइस',29:'उनन्तीस',30:'तीस',31:'एकतीस',32:'बत्तीस',33:'तेत्तीस',34:'चौँतीस',35:'पैँतीस',36:'छत्तीस',37:'सैँतीस',38:'अठतीस',39:'उनन्चालीस',40:'चालीस',41:'एकचालीस',42:'बयालीस',43:'त्रिचालीस',44:'चवालीस',45:'पैँतालीस',46:'छयालीस',47:'सच्चालीस',48:'अठचालीस',49:'उनन्चास',50:'पचास',51:'एकाउन्न',52:'बाउन्न',53:'त्रिपन्न',54:'चौवन्न',55:'पचपन्न',56:'छपन्न',57:'सन्ताउन्न',58:'अन्ठाउन्न',59:'उनन्साठी',60:'साठी',61:'एकसट्ठी',62:'बयसट्ठी',63:'त्रिसट्ठी',64:'चौसट्ठी',65:'पैंसट्ठी',66:'छैसट्ठी',67:'सत्सट्ठी',68:'अठसट्ठी',69:'उनन्सत्तरी',70:'सत्तरी',71:'एकहत्तर',72:'बहत्तर',73:'त्रिहत्तर',74:'चौहत्तर',75:'पचहत्तर',76:'छैहत्तर',77:'सतहत्तर',78:'अठहत्तर',79:'उनासी',80:'असी',81:'एकासी',82:'बयासी',83:'त्रियासी',84:'चौरासी',85:'पचासी',86:'छयासी',87:'सतासी',88:'अठासी',89:'उनान्नब्बे',90:'नब्बे',91:'एकान्नब्बे',92:'बयान्नब्बे',93:'त्रियान्नब्बे',94:'चौरान्नब्बे',95:'पन्चान्नब्बे',96:'छयान्नब्बे',97:'सन्तान्नब्बे',98:'अन्ठान्नब्बे',99:'उनान्सय',100:'सय'};
+  function getNepaliNumberWord(num) { if (num<=100) return nepaliWords[num] || num.toString(); return num.toString(); }
+
+  let currentLang = 'en', currentTheme = 'star', currentMode = 'learn';
+  function toNepaliDigits(num) { const d=['०','१','२','३','४','५','६','७','८','९']; return num.toString().split('').map(c=>d[parseInt(c)]).join(''); }
+  function formatNumber(num) { return currentLang==='np'?toNepaliDigits(num):num.toString(); }
+  function numberToWords(num) { return currentLang==='en'?englishNumberWord(num):getNepaliNumberWord(num); }
+  function speakNow(text, lang) { if(window.speechSynthesis){ window.speechSynthesis.cancel(); let u=new SpeechSynthesisUtterance(text); u.lang=lang==='en'?'en-US':'ne-NP'; u.rate=0.9; window.speechSynthesis.speak(u); } }
+  function getIcon() { return currentTheme==='star'?'⭐':(currentTheme==='apple'?'🍎':'🌸'); }
+
+  // ========== LEARN MODE ==========
+  let learnGroups=3, learnPerGroup=4, learnView='groups';
+  function speakLearnEquation() {
+    const total = learnGroups * learnPerGroup;
+    let msg = currentLang === 'en' ? `${learnGroups} times ${learnPerGroup} equals ${total}` : `${learnGroups} गुना ${learnPerGroup} बराबर ${total}`;
+    speakNow(msg, currentLang);
+  }
+  function renderLearn() {
+    const icon=getIcon();
+    const container=document.getElementById('learnVisualization');
+    if(learnView==='groups'){
+      let html='<div class="groups-container">';
+      for(let i=1;i<=learnGroups;i++){
+        html+=`<div class="group-card"><div class="group-title">${currentLang==='en'?'Group':'समूह'} ${formatNumber(i)}</div><div class="group-items">`;
+        for(let j=0;j<learnPerGroup;j++) html+=`<span class="item-icon">${icon}</span>`;
+        html+=`</div></div>`;
+      }
+      html+='</div>';
+      container.innerHTML=html;
+    } else {
+      let html=`<div class="array-grid" style="grid-template-columns: repeat(${learnPerGroup}, minmax(55px,65px));">`;
+      for(let r=0;r<learnGroups;r++) for(let c=0;c<learnPerGroup;c++) html+=`<div class="array-cell">${icon}</div>`;
+      html+='</div>';
+      container.innerHTML=html;
+    }
+    const total=learnGroups*learnPerGroup;
+    document.getElementById('totalInfoLearn').innerHTML = currentLang==='en' ? `${learnGroups} × ${learnPerGroup} = ${total}` : `${formatNumber(learnGroups)} × ${formatNumber(learnPerGroup)} = ${formatNumber(total)}`;
+    const addParts = Array(learnGroups).fill(learnPerGroup).join(' + ');
+    document.getElementById('repeatedAddLearn').innerHTML = `📐 ${currentLang==='en'?'Repeated addition':'दोहोर्याएर जोड्दा'}: ${addParts} = ${formatNumber(total)}`;
+    let skip=[];
+    for(let i=1;i<=learnGroups;i++) skip.push(i*learnPerGroup);
+    document.getElementById('skipCountLearn').innerHTML = `🔢 ${currentLang==='en'?'Skip count':'छोडेर गणना'}: ${skip.map(n=>formatNumber(n)).join(', ')}`;
+    document.getElementById('wordsRowLearn').innerHTML = `📖 ${numberToWords(total)}`;
+    document.getElementById('groupsValueLearn').innerText = formatNumber(learnGroups);
+    document.getElementById('perGroupValueLearn').innerText = formatNumber(learnPerGroup);
+    speakLearnEquation();
+  }
+  function changeLearnGroups(delta){ let n=learnGroups+delta; if(n>=1&&n<=12){ learnGroups=n; renderLearn(); } }
+  function changeLearnPerGroup(delta){ let n=learnPerGroup+delta; if(n>=1&&n<=12){ learnPerGroup=n; renderLearn(); } }
+  function setLearnView(view){ learnView=view; renderLearn(); }
+  document.getElementById('decGroupsLearn').onclick=()=>changeLearnGroups(-1);
+  document.getElementById('incGroupsLearn').onclick=()=>changeLearnGroups(1);
+  document.getElementById('decPerGroupLearn').onclick=()=>changeLearnPerGroup(-1);
+  document.getElementById('incPerGroupLearn').onclick=()=>changeLearnPerGroup(1);
+  document.getElementById('viewGroupsLearn').onclick=()=>setLearnView('groups');
+  document.getElementById('viewArrayLearn').onclick=()=>setLearnView('array');
+  renderLearn();
+
+  // ========== PRACTICE MODE ==========
+  let practiceGroups=3, practicePerGroup=4, practiceView='groups';
+  let practiceItems=[], practiceBuiltComplete=false;
+  let pvH=0,pvT=0,pvO=0;
+  function resetPractice() {
+    if(practiceView==='groups') practiceItems=Array(practiceGroups).fill(0);
+    else practiceItems=Array(practiceGroups).fill().map(()=>Array(practicePerGroup).fill(false));
+    practiceBuiltComplete=false;
+    renderPracticeBuild();
+    document.getElementById('practicePVArea').style.display='none';
+    document.getElementById('practiceResult').style.display='none';
+    document.getElementById('practiceFeedback').innerHTML=currentLang==='en'?'✨ Click on groups or array cells to add items. Complete all!':'✨ वस्तुहरू थप्न समूह वा पङ्क्तिमा क्लिक गर्नुहोस्। सबै पूरा गर्नुहोस्!';
+  }
+  function renderPracticeBuild() {
+    const icon=getIcon();
+    const container=document.getElementById('practiceBuildArea');
+    if(practiceView==='groups'){
+      let html='<div class="groups-container">';
+      for(let i=0;i<practiceGroups;i++){
+        let filled=practiceItems[i];
+        html+=`<div class="group-card" data-group="${i}"><div class="group-title">${currentLang==='en'?'Group':'समूह'} ${formatNumber(i+1)} (${filled}/${practicePerGroup})</div><div class="group-items">`;
+        for(let j=0;j<filled;j++) html+=`<span class="item-icon">${icon}</span>`;
+        for(let j=filled;j<practicePerGroup;j++) html+=`<span class="item-icon" style="opacity:0.3">◻️</span>`;
+        html+=`</div></div>`;
+      }
+      html+='</div>';
+      container.innerHTML=html;
+      document.querySelectorAll('#practiceBuildArea .group-card').forEach(card=>{
+        card.addEventListener('click',()=>{
+          let idx=parseInt(card.dataset.group);
+          if(practiceItems[idx]<practicePerGroup){ practiceItems[idx]++; renderPracticeBuild(); checkPracticeComplete(); }
+        });
+      });
+    } else {
+      let html=`<div class="array-grid" style="grid-template-columns: repeat(${practicePerGroup}, minmax(55px,65px));">`;
+      for(let r=0;r<practiceGroups;r++){
+        for(let c=0;c<practicePerGroup;c++){
+          let filled=practiceItems[r][c];
+          html+=`<div class="array-cell" data-row="${r}" data-col="${c}" style="${filled?'':'opacity:0.6'}">${filled?icon:'□'}</div>`;
+        }
+      }
+      html+='</div>';
+      container.innerHTML=html;
+      document.querySelectorAll('#practiceBuildArea .array-cell').forEach(cell=>{
+        cell.addEventListener('click',()=>{
+          let r=parseInt(cell.dataset.row), c=parseInt(cell.dataset.col);
+          if(!practiceItems[r][c]){ practiceItems[r][c]=true; renderPracticeBuild(); checkPracticeComplete(); }
+        });
+      });
+    }
+  }
+  function checkPracticeComplete(){
+    let complete=false;
+    if(practiceView==='groups') complete=practiceItems.every(cnt=>cnt===practicePerGroup);
+    else complete=practiceItems.every(row=>row.every(cell=>cell===true));
+    if(complete && !practiceBuiltComplete){
+      practiceBuiltComplete=true;
+      document.getElementById('practiceFeedback').innerHTML=currentLang==='en'?'✅ Great! Now click "Move to Place Value Table".':'✅ उत्तम! अब "स्थानीय मान तालिकामा सार्नुहोस्" क्लिक गर्नुहोस्।';
+      speakNow(currentLang==='en'?'All groups completed! Now move to place value table.':'सबै समूह पूरा भयो! अब स्थानीय मान तालिकामा सार्नुहोस्।',currentLang);
+    }
+  }
+  function moveToPlaceValue(){
+    if(!practiceBuiltComplete){ alert(currentLang==='en'?'Fill all groups/rows first!':'पहिले सबै समूह/पङ्क्ति भर्नुहोस्!'); return; }
+    const total=practiceGroups*practicePerGroup;
+    pvO=total; pvT=Math.floor(pvO/10); pvO%=10; pvH=Math.floor(pvT/10); pvT%=10;
+    updatePracticePV();
+    document.getElementById('practicePVArea').style.display='block';
+    document.getElementById('practiceFeedback').style.display='none';
+    speakNow(currentLang==='en'?`${total} items moved. Use regroup if needed.`:`${total} वस्तुहरू सारियो। आवश्यक भएमा बदल्नुहोस्।`,currentLang);
+  }
+  function updatePracticePV(){
+    function makeBlocks(count,place){
+      let html='<div class="block-group">';
+      for(let i=0;i<count;i++) html+=`<div class="pv-block" data-place="${place}" style="background:${place===100?'#2c7aa0':(place===10?'#4797c2':'#6db4db')}">${formatNumber(place===100?100:(place===10?10:1))}</div>`;
+      html+='</div>';
+      return html;
+    }
+    document.getElementById('hundredsCellPractice').innerHTML=makeBlocks(pvH,100);
+    document.getElementById('tensCellPractice').innerHTML=makeBlocks(pvT,10);
+    document.getElementById('onesCellPractice').innerHTML=makeBlocks(pvO,1);
+    document.querySelectorAll('#pvTableBodyPractice .pv-block').forEach(block=>{
+      block.addEventListener('click',(e)=>{
+        let place=parseInt(block.dataset.place);
+        if(place===100 && pvH>0){ pvH--; updatePracticePV(); }
+        else if(place===10 && pvT>0){ pvT--; updatePracticePV(); }
+        else if(place===1 && pvO>0){ pvO--; updatePracticePV(); }
+      });
+    });
+  }
+  function manualRegroupPractice(){
+    if(pvO>=10){ let times=Math.floor(pvO/10); pvO-=times*10; pvT+=times; speakNow(currentLang==='en'?`Regrouped ${times*10} ones into ${times} tens`:`${times*10} एकलाई ${times} दशमा बदलियो`,currentLang); updatePracticePV(); }
+    else if(pvT>=10){ let times=Math.floor(pvT/10); pvT-=times*10; pvH+=times; speakNow(currentLang==='en'?`Regrouped ${times*10} tens into ${times} hundred`:`${times*10} दशलाई ${times} सयमा बदलियो`,currentLang); updatePracticePV(); }
+    else speakNow(currentLang==='en'?'No need to regroup!':'बदल्न आवश्यक छैन!',currentLang);
+  }
+  function finalizePractice(){
+    const total=pvH*100+pvT*10+pvO;
+    const expected=practiceGroups*practicePerGroup;
+    if(total!==expected){ speakNow(currentLang==='en'?`Total ${total} should be ${expected}. Use regroup or remove blocks.`:`जम्मा ${total} ${expected} हुनुपर्छ। बदल्नुहोस् वा ब्लक हटाउनुहोस्।`,currentLang); return; }
+    const factText=currentLang==='en'?`${practiceGroups} times ${practicePerGroup} equals ${total}`:`${practiceGroups} गुना ${practicePerGroup} बराबर ${total}`;
+    document.getElementById('practiceResult').innerHTML=`🎉 ${factText}<br>📖 ${numberToWords(total)}`;
+    document.getElementById('practiceResult').style.display='block';
+    speakNow(factText,currentLang);
+  }
+  function updatePracticeParams(){
+    document.getElementById('groupsValuePractice').innerText=formatNumber(practiceGroups);
+    document.getElementById('perGroupValuePractice').innerText=formatNumber(practicePerGroup);
+    resetPractice();
+  }
+  function randomPractice(){ practiceGroups=Math.floor(Math.random()*10)+2; practicePerGroup=Math.floor(Math.random()*10)+2; updatePracticeParams(); }
+  document.getElementById('decGroupsPractice').onclick=()=>{ practiceGroups=Math.max(1,practiceGroups-1); updatePracticeParams(); };
+  document.getElementById('incGroupsPractice').onclick=()=>{ practiceGroups=Math.min(12,practiceGroups+1); updatePracticeParams(); };
+  document.getElementById('decPerGroupPractice').onclick=()=>{ practicePerGroup=Math.max(1,practicePerGroup-1); updatePracticeParams(); };
+  document.getElementById('incPerGroupPractice').onclick=()=>{ practicePerGroup=Math.min(12,practicePerGroup+1); updatePracticeParams(); };
+  document.getElementById('randomPracticeBtn').onclick=randomPractice;
+  document.getElementById('modeGroupsPractice').onclick=()=>{ practiceView='groups'; resetPractice(); };
+  document.getElementById('modeArrayPractice').onclick=()=>{ practiceView='array'; resetPractice(); };
+  document.getElementById('moveToPVBtn').onclick=moveToPlaceValue;
+  document.getElementById('regroupPracticeBtn').onclick=manualRegroupPractice;
+  document.getElementById('finalizePracticeBtn').onclick=finalizePractice;
+  resetPractice();
+
+  // ========== TEST MODE ==========
+  let testType='pictorial', testScore={correct:0,total:0};
+  let currentTestQuestion=null, testBuiltGroups=[], testBuiltComplete=false;
+  function generateDistractors(correct, groups, perGroup){
+    let dist=new Set([correct]);
+    let candidates=[correct+groups, correct-groups, correct+perGroup, correct-perGroup, correct+1, correct-1, correct+2, correct-2, (groups+1)*perGroup, groups*(perGroup+1), (groups-1)*perGroup, groups*(perGroup-1)];
+    for(let c of candidates) if(c>0 && c<=144 && c!==correct) dist.add(c);
+    while(dist.size<4) dist.add(Math.floor(Math.random()*100)+1);
+    let opts=Array.from(dist);
+    for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
+    return opts;
+  }
+  function generateTestQuestion(){
+    if(testType==='pictorial'){
+      let g=Math.floor(Math.random()*8)+2, p=Math.floor(Math.random()*8)+2;
+      currentTestQuestion={type:'pictorial', groups:g, perGroup:p, product:g*p};
+      let qText=currentLang==='en'?`${g} × ${p} = ?`:`${formatNumber(g)} × ${formatNumber(p)} = ?`;
+      document.getElementById('testQuestionArea').innerText=qText;
+      testBuiltGroups=Array(g).fill(0);
+      testBuiltComplete=false;
+      renderTestBuildArea();
+      document.getElementById('testBuildArea').style.display='block';
+      document.getElementById('testOptionsArea').style.display='none';
+      document.getElementById('testDirectInput').style.display='none';
+      document.getElementById('testSubmitBtn').style.display='none';
+      document.getElementById('testFeedback').innerHTML='';
+    } else {
+      let a=Math.floor(Math.random()*10)+2, b=Math.floor(Math.random()*10)+2;
+      let variant=Math.floor(Math.random()*3);
+      let qText='', answer=0;
+      if(variant===0){ qText=`${a} × ${b} = ?`; answer=a*b; currentTestQuestion={type:'fillblank', answer, groups:a, perGroup:b, product:a*b}; }
+      else if(variant===1){ qText=`${a} × ? = ${a*b}`; answer=b; currentTestQuestion={type:'fillblank', answer, groups:a, perGroup:b, product:a*b}; }
+      else { qText=`? × ${b} = ${a*b}`; answer=a; currentTestQuestion={type:'fillblank', answer, groups:a, perGroup:b, product:a*b}; }
+      if(currentLang==='np') qText=qText.replace(/\d+/g,m=>toNepaliDigits(parseInt(m)));
+      document.getElementById('testQuestionArea').innerText=qText;
+      document.getElementById('testBuildArea').style.display='none';
+      document.getElementById('testOptionsArea').style.display='none';
+      document.getElementById('testDirectInput').style.display='block';
+      document.getElementById('testSubmitBtn').style.display='block';
+      document.getElementById('testAnswerInput').value='';
+      document.getElementById('testFeedback').innerHTML='';
+    }
+  }
+  function renderTestBuildArea(){
+    if(!currentTestQuestion || currentTestQuestion.type!=='pictorial') return;
+    let g=currentTestQuestion.groups, p=currentTestQuestion.perGroup, icon=getIcon();
+    let html='<div class="groups-container">';
+    for(let i=0;i<g;i++){
+      let filled=testBuiltGroups[i];
+      html+=`<div class="group-card" data-group="${i}"><div class="group-title">${currentLang==='en'?'Group':'समूह'} ${formatNumber(i+1)} (${filled}/${p})</div><div class="group-items">`;
+      for(let j=0;j<filled;j++) html+=`<span class="item-icon">${icon}</span>`;
+      for(let j=filled;j<p;j++) html+=`<span class="item-icon" style="opacity:0.3">◻️</span>`;
+      html+=`</div></div>`;
+    }
+    html+='</div>';
+    document.getElementById('testBuildArea').innerHTML=html;
+    document.querySelectorAll('#testBuildArea .group-card').forEach(card=>{
+      card.addEventListener('click',()=>{
+        let idx=parseInt(card.dataset.group);
+        if(testBuiltGroups[idx] < p){
+          testBuiltGroups[idx]++;
+          renderTestBuildArea();
+          let allFull=testBuiltGroups.every(cnt=>cnt===p);
+          if(allFull && !testBuiltComplete){
+            testBuiltComplete=true;
+            let correct=currentTestQuestion.product;
+            let options=generateDistractors(correct, g, p);
+            let optsHtml='';
+            for(let opt of options) optsHtml+=`<button class="option-btn" data-value="${opt}">${formatNumber(opt)}</button>`;
+            document.getElementById('testOptionsArea').innerHTML=optsHtml;
+            document.getElementById('testOptionsArea').style.display='flex';
+            document.querySelectorAll('.option-btn').forEach(btn=>{
+              btn.addEventListener('click',()=>handleTestPictorialAnswer(parseInt(btn.dataset.value)));
+            });
+            document.getElementById('testFeedback').innerHTML=currentLang==='en'?'✅ Model ready! Choose the correct product.':'✅ मोडेल तयार! सही गुणनफल छान्नुहोस्।';
+          } else {
+            document.getElementById('testOptionsArea').style.display='none';
+            document.getElementById('testFeedback').innerHTML='';
+          }
+        }
+      });
+    });
+  }
+  function handleTestPictorialAnswer(selected){
+    let correct=currentTestQuestion.product, g=currentTestQuestion.groups, p=currentTestQuestion.perGroup;
+    testScore.total++;
+    if(selected===correct){
+      testScore.correct++;
+      document.getElementById('testFeedback').innerHTML=currentLang==='en'?`🎉 Correct! ${g} times ${p} equals ${correct}.`:`🎉 सही! ${formatNumber(g)} गुना ${formatNumber(p)} बराबर ${formatNumber(correct)}।`;
+      speakNow(currentLang==='en'?`${g} times ${p} equals ${correct}`:`${g} गुना ${p} बराबर ${correct}`,currentLang);
+    } else {
+      document.getElementById('testFeedback').innerHTML=currentLang==='en'?`❌ Wrong. ${g} times ${p} equals ${correct}. Let's count again.`:`❌ गलत। ${formatNumber(g)} गुना ${formatNumber(p)} बराबर ${formatNumber(correct)}। फेरि गणना गरौं।`;
+      speakNow(currentLang==='en'?`${g} times ${p} equals ${correct}`:`${g} गुना ${p} बराबर ${correct}`,currentLang);
+    }
+    document.getElementById('testScore').innerHTML=`Score: ${testScore.correct} / ${testScore.total}`;
+    setTimeout(()=>{ generateTestQuestion(); },2500);
+  }
+  function submitTestFillblank(){
+    let userVal=parseInt(document.getElementById('testAnswerInput').value);
+    if(isNaN(userVal)){ document.getElementById('testFeedback').innerHTML=currentLang==='en'?'Please enter a number!':'कृपया संख्या प्रविष्ट गर्नुहोस्!'; return; }
+    let correct=currentTestQuestion.answer, g=currentTestQuestion.groups, p=currentTestQuestion.perGroup;
+    testScore.total++;
+    if(userVal===correct){
+      testScore.correct++;
+      document.getElementById('testFeedback').innerHTML=currentLang==='en'?`🎉 Correct! ${g} times ${p} equals ${correct}.`:`🎉 सही! ${formatNumber(g)} गुना ${formatNumber(p)} बराबर ${formatNumber(correct)}।`;
+      speakNow(currentLang==='en'?`${g} times ${p} equals ${correct}`:`${g} गुना ${p} बराबर ${correct}`,currentLang);
+    } else {
+      document.getElementById('testFeedback').innerHTML=currentLang==='en'?`❌ Wrong. The answer is ${correct}. ${g} × ${p} = ${correct}.`:`❌ गलत। सही उत्तर ${formatNumber(correct)} हो। ${formatNumber(g)} × ${formatNumber(p)} = ${formatNumber(correct)}।`;
+      speakNow(currentLang==='en'?`${g} times ${p} equals ${correct}`:`${g} गुना ${p} बराबर ${correct}`,currentLang);
+    }
+    document.getElementById('testScore').innerHTML=`Score: ${testScore.correct} / ${testScore.total}`;
+    setTimeout(()=>{ generateTestQuestion(); },2500);
+  }
+  function newTestQuestion(){ testScore={correct:0,total:0}; document.getElementById('testScore').innerHTML='Score: 0 / 0'; generateTestQuestion(); }
+  document.getElementById('testTypeSelect').onchange=(e)=>{ testType=e.target.value; testScore={correct:0,total:0}; generateTestQuestion(); };
+  document.getElementById('newTestQuestionBtn').onclick=()=>{ testScore={correct:0,total:0}; generateTestQuestion(); };
+  document.getElementById('testSubmitBtn').onclick=submitTestFillblank;
+  generateTestQuestion();
+
+  // ========== MODE SWITCHING & GLOBAL UI ==========
+  function setMode(mode){
+    currentMode=mode;
+    document.getElementById('learnMode').classList.toggle('active',mode==='learn');
+    document.getElementById('practiceMode').classList.toggle('active',mode==='practice');
+    document.getElementById('testMode').classList.toggle('active',mode==='test');
+    if(mode==='test') generateTestQuestion();
+    if(mode==='learn') renderLearn(); // refresh speech
+  }
+  document.getElementById('modeSelect').onchange=(e)=>setMode(e.target.value);
+  function updateGlobalUI(){
+    document.getElementById('groupsLabelLearn').innerText=currentLang==='en'?'Groups:':'समूह:';
+    document.getElementById('perGroupLabelLearn').innerText=currentLang==='en'?'Per group:':'प्रति समूह:';
+    document.getElementById('groupsLabelPractice').innerText=currentLang==='en'?'Groups:':'समूह:';
+    document.getElementById('perGroupLabelPractice').innerText=currentLang==='en'?'Per group:':'प्रति समूह:';
+    document.getElementById('viewLabelPractice').innerText=currentLang==='en'?'View:':'दृश्य:';
+    document.getElementById('modeGroupsPractice').innerText=currentLang==='en'?'📦 Groups':'📦 समूह';
+    document.getElementById('modeArrayPractice').innerText=currentLang==='en'?'🔲 Array':'🔲 पङ्क्ति';
+    document.getElementById('randomPracticeBtn').innerText=currentLang==='en'?'🎲 Random':'🎲 अनियमित';
+    document.getElementById('moveToPVBtn').innerText=currentLang==='en'?'📦 Move to Place Value Table':'📦 स्थानीय मान तालिकामा सार्नुहोस्';
+    document.getElementById('regroupPracticeBtn').innerText=currentLang==='en'?'🔄 Regroup (10 Ones → 1 Ten)':'🔄 बदल्नुहोस् (१० एक → १ दश)';
+    document.getElementById('finalizePracticeBtn').innerText=currentLang==='en'?'✨ Show Multiplication Result':'✨ गुणन परिणाम देखाउनुहोस्';
+    if(currentMode==='test') generateTestQuestion();
+    renderLearn();
+    updatePracticeParams();
+  }
+  function setLanguage(lang){
+    currentLang=lang;
+    langEn.classList.toggle('active',lang==='en');
+    langNp.classList.toggle('active',lang==='np');
+    updateGlobalUI();
+  }
+  function setTheme(theme){
+    currentTheme=theme;
+    renderLearn();
+    resetPractice();
+    if(currentMode==='test' && currentTestQuestion && currentTestQuestion.type==='pictorial') renderTestBuildArea();
+  }
+  langEn.onclick=()=>setLanguage('en');
+  langNp.onclick=()=>setLanguage('np');
+  themeSelect.onchange=(e)=>setTheme(e.target.value);
+  setMode('learn');
+</script>
+</body>
+</html>

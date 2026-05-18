@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Smart Math Question Builder | Grade 1-3 Quiz</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React 18 & ReactDOM -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <!-- Babel for JSX -->
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+  <style>
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .print-worksheet, .print-worksheet * {
+        visibility: visible;
+      }
+      .print-worksheet {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+  const { useState } = React;
+
+  // ---------- Question Generator Engine (with variety) ----------
+  const categories = {
+    addition: {
+      label: 'Addition',
+      subcategories: [
+        { id: 'add_single_no_carry', label: 'Single digit without carry', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'add_single_carry', label: 'Single digit with carry', difficulty: { easy: false, medium: true, hard: true } },
+        { id: 'add_two_no_carry', label: 'Two digit without carry', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'add_two_carry', label: 'Two digit with carry', difficulty: { easy: false, medium: true, hard: true } },
+        { id: 'add_missing', label: 'Missing numbers', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'add_number_line', label: 'Number line', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'add_word', label: 'Word problems', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'add_three_digit', label: 'Three digit addition', difficulty: { easy: false, medium: true, hard: true } }
+      ]
+    },
+    subtraction: {
+      label: 'Subtraction',
+      subcategories: [
+        { id: 'sub_single', label: 'Single digit', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'sub_two_no_borrow', label: 'Two digit without borrowing', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'sub_two_borrow', label: 'Two digit with borrowing', difficulty: { easy: false, medium: true, hard: true } },
+        { id: 'sub_missing', label: 'Missing numbers', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'sub_number_line', label: 'Number line', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'sub_word', label: 'Word problems', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'sub_three_digit', label: 'Three digit subtraction', difficulty: { easy: false, medium: true, hard: true } }
+      ]
+    },
+    multiplication: {
+      label: 'Multiplication',
+      subcategories: [
+        { id: 'mul_equal_groups', label: 'Equal groups', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'mul_repeated_add', label: 'Repeated addition', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'mul_skip_count', label: 'Skip counting', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'mul_tables', label: 'Multiplication tables', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'mul_arrays', label: 'Arrays', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'mul_missing', label: 'Missing numbers', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'mul_word', label: 'Word problems', difficulty: { easy: true, medium: true, hard: true } }
+      ]
+    },
+    division: {
+      label: 'Division',
+      subcategories: [
+        { id: 'div_equal_sharing', label: 'Equal sharing', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'div_grouping', label: 'Grouping', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'div_repeated_sub', label: 'Repeated subtraction', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'div_facts', label: 'Division facts', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'div_missing', label: 'Missing numbers', difficulty: { easy: true, medium: true, hard: true } },
+        { id: 'div_word', label: 'Word problems', difficulty: { easy: true, medium: true, hard: true } }
+      ]
+    }
+  };
+
+  function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  function generateQuestion(subcatId, difficulty, usedQuestions = new Set()) {
+    let questionText = '';
+    let answer = 0;
+    let options = [];
+    let explanation = '';
+
+    function generateOptions(correct, minOpt, maxOpt) {
+      let opts = new Set([correct]);
+      while(opts.size < 4) {
+        let offset = rand(-5, 5);
+        let cand = correct + offset;
+        if(cand >= minOpt && cand <= maxOpt && cand !== correct) opts.add(cand);
+        else opts.add(rand(minOpt, maxOpt));
+      }
+      return Array.from(opts).sort(() => Math.random() - 0.5);
+    }
+
+    // Word problem helpers
+    const names = ['Tom', 'Emma', 'Lily', 'Sam', 'Maya', 'Leo', 'Zara', 'Aryan'];
+    const objects = ['apples', 'oranges', 'candies', 'books', 'toys', 'stars', 'marbles', 'stickers'];
+
+    // Ranges based on difficulty
+    let range1, range2, range3;
+    if (difficulty === 'easy') {
+      range1 = [1, 20];
+      range2 = [1, 20];
+      range3 = [1, 50];
+    } else if (difficulty === 'medium') {
+      range1 = [10, 50];
+      range2 = [10, 50];
+      range3 = [20, 99];
+    } else {
+      range1 = [20, 99];
+      range2 = [20, 99];
+      range3 = [100, 500];
+    }
+
+    switch(subcatId) {
+      case 'add_single_no_carry':
+        let a1 = rand(1, 9), b1 = rand(1, 9);
+        while(a1 + b1 > 9) { a1 = rand(1,4); b1 = rand(1,4); }
+        questionText = `${a1} + ${b1} = ?`;
+        answer = a1 + b1;
+        options = generateOptions(answer, 0, 18);
+        break;
+      case 'add_single_carry':
+        let a2 = rand(5,9), b2 = rand(5,9);
+        questionText = `${a2} + ${b2} = ?`;
+        answer = a2 + b2;
+        options = generateOptions(answer, 0, 20);
+        break;
+      case 'add_two_no_carry':
+        let a3 = rand(10, 49), b3 = rand(10, 49);
+        while((a3%10)+(b3%10) >= 10) { a3 = rand(10,49); b3 = rand(10,49); }
+        questionText = `${a3} + ${b3} = ?`;
+        answer = a3 + b3;
+        options = generateOptions(answer, 20, 100);
+        break;
+      case 'add_two_carry':
+        let a4 = rand(10, 79), b4 = rand(10, 79);
+        questionText = `${a4} + ${b4} = ?`;
+        answer = a4 + b4;
+        options = generateOptions(answer, 20, 160);
+        break;
+      case 'add_missing':
+        let total = rand(10, 50);
+        let part = rand(1, total-1);
+        questionText = `${part} + ? = ${total}`;
+        answer = total - part;
+        options = generateOptions(answer, 1, total);
+        break;
+      case 'add_number_line':
+        let start = rand(1, 30);
+        let jump = rand(1, 15);
+        questionText = `On a number line, start at ${start} and move ${jump} steps forward. Where do you land?`;
+        answer = start + jump;
+        options = generateOptions(answer, start, start+30);
+        break;
+      case 'add_word':
+        let items = rand(2, 25);
+        let more = rand(2, 25);
+        let name = names[Math.floor(Math.random() * names.length)];
+        let obj = objects[Math.floor(Math.random() * objects.length)];
+        questionText = `${name} has ${items} ${obj}. ${name}'s friend gives ${more} more. How many ${obj} does ${name} have now?`;
+        answer = items + more;
+        options = generateOptions(answer, 1, 50);
+        break;
+      case 'add_three_digit':
+        let a5 = rand(100, 400);
+        let b5 = rand(100, 400);
+        questionText = `${a5} + ${b5} = ?`;
+        answer = a5 + b5;
+        options = generateOptions(answer, 200, 900);
+        break;
+
+      case 'sub_single':
+        let s1 = rand(2, 9), s2 = rand(1, s1);
+        questionText = `${s1} - ${s2} = ?`;
+        answer = s1 - s2;
+        options = generateOptions(answer, 0, 10);
+        break;
+      case 'sub_two_no_borrow':
+        let t1 = rand(20, 99), t2 = rand(10, t1%10);
+        while((t1%10) < (t2%10)) { t1 = rand(20,99); t2 = rand(10, t1%10); }
+        questionText = `${t1} - ${t2} = ?`;
+        answer = t1 - t2;
+        options = generateOptions(answer, 0, 90);
+        break;
+      case 'sub_two_borrow':
+        let u1 = rand(21, 98), u2 = rand(19, u1-1);
+        questionText = `${u1} - ${u2} = ?`;
+        answer = u1 - u2;
+        options = generateOptions(answer, 0, 90);
+        break;
+      case 'sub_missing':
+        let subTotal = rand(20, 80);
+        let subPart = rand(5, subTotal-1);
+        questionText = `${subPart} - ? = ${subPart-5}`;
+        answer = 5;
+        options = generateOptions(answer, 1, 20);
+        break;
+      case 'sub_number_line':
+        let startS = rand(15, 40);
+        let back = rand(1, 15);
+        questionText = `Start at ${startS} on a number line and move ${back} steps backward. Where are you?`;
+        answer = startS - back;
+        options = generateOptions(answer, 1, startS);
+        break;
+      case 'sub_word':
+        let have = rand(20, 60);
+        let give = rand(5, have-1);
+        let name2 = names[Math.floor(Math.random() * names.length)];
+        let obj2 = objects[Math.floor(Math.random() * objects.length)];
+        questionText = `${name2} has ${have} ${obj2}. ${name2} gives ${give} to a friend. How many ${obj2} left?`;
+        answer = have - give;
+        options = generateOptions(answer, 0, have);
+        break;
+      case 'sub_three_digit':
+        let th1 = rand(200, 700);
+        let th2 = rand(100, th1-1);
+        questionText = `${th1} - ${th2} = ?`;
+        answer = th1 - th2;
+        options = generateOptions(answer, 50, 600);
+        break;
+
+      case 'mul_equal_groups':
+        let groups = rand(2, 5);
+        let perGroup = rand(2, 5);
+        let obj3 = objects[Math.floor(Math.random() * objects.length)];
+        questionText = `There are ${groups} groups with ${perGroup} ${obj3} in each group. How many ${obj3} in total?`;
+        answer = groups * perGroup;
+        options = generateOptions(answer, 1, 30);
+        break;
+      case 'mul_repeated_add':
+        let mulA = rand(2, 5);
+        let mulB = rand(2, 5);
+        questionText = `Write ${mulA} × ${mulB} as repeated addition and find the product.`;
+        answer = mulA * mulB;
+        options = generateOptions(answer, 1, 30);
+        break;
+      case 'mul_skip_count':
+        let base = rand(2, 5);
+        let skipPos = rand(1, 3);
+        let numbers = [base, base*2, base*3, base*4];
+        let missingIndex = skipPos - 1;
+        let display = numbers.map((n, idx) => idx === missingIndex ? '__' : n).join(', ');
+        questionText = `Skip count by ${base}: ${display}. What is the missing number?`;
+        answer = base * skipPos;
+        options = generateOptions(answer, base, base*5);
+        break;
+      case 'mul_tables':
+        let factA = rand(2, 9);
+        let factB = rand(2, 9);
+        questionText = `${factA} × ${factB} = ?`;
+        answer = factA * factB;
+        options = generateOptions(answer, 1, 81);
+        break;
+      case 'mul_arrays':
+        let rows = rand(2, 4);
+        let cols = rand(2, 4);
+        questionText = `An array has ${rows} rows and ${cols} columns. How many dots in total?`;
+        answer = rows * cols;
+        options = generateOptions(answer, 1, 20);
+        break;
+      case 'mul_missing':
+        let product = rand(12, 36);
+        let factor = rand(2, 6);
+        questionText = `${factor} × ? = ${product}`;
+        answer = product / factor;
+        options = generateOptions(answer, 1, 12);
+        break;
+      case 'mul_word':
+        let boxes = rand(3, 6);
+        let perBox = rand(2, 8);
+        let item4 = objects[Math.floor(Math.random() * objects.length)];
+        questionText = `Each box contains ${perBox} ${item4}. How many ${item4} in ${boxes} boxes?`;
+        answer = boxes * perBox;
+        options = generateOptions(answer, 5, 50);
+        break;
+
+      case 'div_equal_sharing':
+        let totalShare = rand(12, 36);
+        let shareGroups = rand(2, 6);
+        while(totalShare % shareGroups !== 0) totalShare++;
+        let item5 = objects[Math.floor(Math.random() * objects.length)];
+        questionText = `Share ${totalShare} ${item5} equally among ${shareGroups} friends. How many each?`;
+        answer = totalShare / shareGroups;
+        options = generateOptions(answer, 1, 20);
+        break;
+      case 'div_grouping':
+        let totalGroup = rand(12, 30);
+        let groupSize = rand(2, 5);
+        questionText = `How many groups of ${groupSize} can you make from ${totalGroup} items?`;
+        answer = Math.floor(totalGroup / groupSize);
+        options = generateOptions(answer, 1, 15);
+        break;
+      case 'div_repeated_sub':
+        let dividend = rand(12, 30);
+        let divisorDiv = rand(2, 5);
+        questionText = `${dividend} ÷ ${divisorDiv} = ? (Use repeated subtraction)`;
+        answer = Math.floor(dividend / divisorDiv);
+        options = generateOptions(answer, 1, 15);
+        break;
+      case 'div_facts':
+        let d1 = rand(2, 9);
+        let d2 = rand(2, 9);
+        questionText = `${d1*d2} ÷ ${d1} = ?`;
+        answer = d2;
+        options = generateOptions(answer, 1, 12);
+        break;
+      case 'div_missing':
+        let divResult = rand(3, 9);
+        let divisorMiss = rand(2, 5);
+        questionText = `? ÷ ${divisorMiss} = ${divResult}`;
+        answer = divisorMiss * divResult;
+        options = generateOptions(answer, divisorMiss, divisorMiss*divResult+10);
+        break;
+      case 'div_word':
+        let totalPizza = rand(12, 24);
+        let kids = rand(2, 4);
+        let food = objects[Math.floor(Math.random() * objects.length)];
+        questionText = `${totalPizza} ${food} are shared equally among ${kids} kids. How many does each get?`;
+        answer = totalPizza / kids;
+        options = generateOptions(answer, 1, 12);
+        break;
+      default:
+        questionText = "1 + 1 = ?";
+        answer = 2;
+        options = [1,2,3,4];
+    }
+
+    let qKey = questionText + answer;
+    if(usedQuestions.has(qKey)) {
+      return generateQuestion(subcatId, difficulty, usedQuestions);
+    }
+    usedQuestions.add(qKey);
+    return { text: questionText, answer, options, explanation, subcatId };
+  }
+
+  function getSelectedSubcats(selectedCats) {
+    let subs = [];
+    for(let cat in selectedCats) {
+      for(let sub of categories[cat].subcategories) {
+        if(selectedCats[cat] && selectedCats[cat][sub.id]) {
+          subs.push({ cat, subId: sub.id });
+        }
+      }
+    }
+    return subs;
+  }
+
+  const App = () => {
+    const [step, setStep] = useState('setup');
+    const [selectedCats, setSelectedCats] = useState({
+      addition: { add_single_no_carry: true, add_two_no_carry: true },
+      subtraction: { sub_single: true, sub_two_no_borrow: true },
+      multiplication: { mul_tables: true },
+      division: { div_facts: true }
+    });
+    const [difficulty, setDifficulty] = useState('easy');
+    const [numQuestions, setNumQuestions] = useState(20);
+    const [questions, setQuestions] = useState([]);
+    const [currentQIndex, setCurrentQIndex] = useState(0);
+    const [userAnswers, setUserAnswers] = useState([]);
+    const [quizCompleted, setQuizCompleted] = useState(false);
+    const [showExplanation, setShowExplanation] = useState(false);
+    const [studentName, setStudentName] = useState('');
+    const [date, setDate] = useState(new Date().toISOString().slice(0,10));
+    const [school, setSchool] = useState('');
+
+    // Function to generate a fresh set of questions for printing (or quiz)
+    const generateFreshQuestions = () => {
+      const selectedSubs = getSelectedSubcats(selectedCats);
+      if(selectedSubs.length === 0) return [];
+      const perCat = Math.floor(numQuestions / selectedSubs.length);
+      let remainder = numQuestions % selectedSubs.length;
+      let questionList = [];
+      let usedSet = new Set();
+      for(let i=0; i<selectedSubs.length; i++) {
+        let num = perCat + (i < remainder ? 1 : 0);
+        for(let j=0; j<num; j++) {
+          let q = generateQuestion(selectedSubs[i].subId, difficulty, usedSet);
+          questionList.push(q);
+        }
+      }
+      // Shuffle
+      for(let i=questionList.length-1;i>0;i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [questionList[i], questionList[j]] = [questionList[j], questionList[i]];
+      }
+      return questionList;
+    };
+
+    const generateQuiz = () => {
+      const qs = generateFreshQuestions();
+      if(qs.length === 0) {
+        alert("Please select at least one subcategory.");
+        return;
+      }
+      setQuestions(qs);
+      setUserAnswers(new Array(numQuestions).fill(null));
+      setCurrentQIndex(0);
+      setQuizCompleted(false);
+      setStep('quiz');
+    };
+
+    const printWorksheet = () => {
+      const worksheetQuestions = generateFreshQuestions();
+      if(worksheetQuestions.length === 0) {
+        alert("Please select at least one subcategory before printing.");
+        return;
+      }
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html><head><title>Math Worksheet</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; max-width: 1200px; margin: auto; }
+          .worksheet-header { text-align: center; margin-bottom: 30px; }
+          .question { margin: 20px 0; border-bottom: 1px solid #ccc; padding-bottom: 10px; page-break-inside: avoid; }
+          .options { margin-left: 20px; }
+          .answer-sheet { margin-top: 40px; page-break-before: always; }
+          .answer-item { margin: 8px 0; }
+          @media print {
+            .page-break { page-break-before: always; }
+          }
+        </style>
+        </head><body>
+        <div class="worksheet-header">
+          <h2>Math Practice Worksheet</h2>
+          <p><strong>Name:</strong> ${studentName || '_________________________'} &nbsp;&nbsp; <strong>Date:</strong> ${date} &nbsp;&nbsp; <strong>School:</strong> ${school || '_________________________'}</p>
+        </div>
+        <h3>Questions (1-${numQuestions})</h3>
+      `);
+      const half = Math.ceil(numQuestions / 2);
+      for(let i=0; i<half; i++) {
+        const q = worksheetQuestions[i];
+        printWindow.document.write(`
+          <div class="question">
+            <strong>${i+1}. ${q.text}</strong><br>
+            <div class="options">
+              A) ${q.options[0]} &nbsp;&nbsp; B) ${q.options[1]} &nbsp;&nbsp; C) ${q.options[2]} &nbsp;&nbsp; D) ${q.options[3]}
+            </div>
+            <div>Answer: ___________</div>
+          </div>
+        `);
+      }
+      printWindow.document.write('<div class="page-break"></div>');
+      for(let i=half; i<numQuestions; i++) {
+        const q = worksheetQuestions[i];
+        printWindow.document.write(`
+          <div class="question">
+            <strong>${i+1}. ${q.text}</strong><br>
+            <div class="options">
+              A) ${q.options[0]} &nbsp;&nbsp; B) ${q.options[1]} &nbsp;&nbsp; C) ${q.options[2]} &nbsp;&nbsp; D) ${q.options[3]}
+            </div>
+            <div>Answer: ___________</div>
+          </div>
+        `);
+      }
+      printWindow.document.write(`
+        <div class="answer-sheet">
+          <h3>Answer Sheet</h3>
+          ${worksheetQuestions.map((q, idx) => `<div class="answer-item">${idx+1}. ${q.answer}</div>`).join('')}
+        </div>
+      `);
+      printWindow.document.write(`</body></html>`);
+      printWindow.document.close();
+      printWindow.print();
+    };
+
+    const handleAnswer = (selectedVal) => {
+      let newAnswers = [...userAnswers];
+      newAnswers[currentQIndex] = selectedVal;
+      setUserAnswers(newAnswers);
+    };
+
+    const nextQuestion = () => {
+      if(currentQIndex < numQuestions - 1) {
+        setCurrentQIndex(currentQIndex+1);
+      } else {
+        setQuizCompleted(true);
+        setStep('review');
+      }
+    };
+
+    const prevQuestion = () => {
+      if(currentQIndex > 0) setCurrentQIndex(currentQIndex-1);
+    };
+
+    const score = quizCompleted ? userAnswers.filter((ans, idx) => ans === questions[idx]?.answer).length : 0;
+    const percentage = Math.round((score / numQuestions) * 100);
+
+    const toggleSubcategory = (catId, subId) => {
+      setSelectedCats(prev => ({
+        ...prev,
+        [catId]: { ...prev[catId], [subId]: !prev[catId][subId] }
+      }));
+    };
+
+    const toggleAllSubs = (catId, checked) => {
+      let newSubs = {};
+      categories[catId].subcategories.forEach(sub => { newSubs[sub.id] = checked; });
+      setSelectedCats(prev => ({ ...prev, [catId]: newSubs }));
+    };
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6 font-sans">
+        {step === 'setup' && (
+          <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <h1 className="text-3xl font-bold text-center text-indigo-800 mb-2">📚 Smart Math Question Builder</h1>
+            <p className="text-center text-gray-600 mb-8">Choose topics, subcategories, difficulty & number of questions – generate a custom quiz or print a worksheet</p>
+            
+            <div className="mb-6 flex flex-wrap justify-between items-center gap-4">
+              <div className="flex gap-4 items-center">
+                <span className="font-semibold">Number of questions:</span>
+                {[10, 15, 20].map(n => (
+                  <label key={n} className="flex items-center gap-1">
+                    <input type="radio" name="qty" value={n} checked={numQuestions === n} onChange={() => setNumQuestions(n)} />
+                    {n}
+                  </label>
+                ))}
+              </div>
+              <button onClick={printWorksheet} className="bg-blue-500 text-white px-4 py-2 rounded-full">🖨️ Print Worksheet (Random Questions)</button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Object.keys(categories).map(catId => (
+                <div key={catId} className="border rounded-xl p-4 bg-gray-50">
+                  <div className="flex items-center justify-between mb-2">
+                    <h2 className="text-xl font-semibold">{categories[catId].label}</h2>
+                    <div>
+                      <button onClick={() => toggleAllSubs(catId, true)} className="text-xs bg-green-200 px-2 py-1 rounded mr-1">Select all</button>
+                      <button onClick={() => toggleAllSubs(catId, false)} className="text-xs bg-red-200 px-2 py-1 rounded">Clear</button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-1 max-h-60 overflow-y-auto">
+                    {categories[catId].subcategories.map(sub => (
+                      <label key={sub.id} className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" checked={selectedCats[catId]?.[sub.id] || false} onChange={() => toggleSubcategory(catId, sub.id)} />
+                        {sub.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2"><input type="radio" name="diff" value="easy" checked={difficulty==='easy'} onChange={()=>setDifficulty('easy')}/> Easy</label>
+                <label className="flex items-center gap-2"><input type="radio" name="diff" value="medium" checked={difficulty==='medium'} onChange={()=>setDifficulty('medium')}/> Medium</label>
+                <label className="flex items-center gap-2"><input type="radio" name="diff" value="hard" checked={difficulty==='hard'} onChange={()=>setDifficulty('hard')}/> Hard</label>
+              </div>
+              <button onClick={generateQuiz} className="bg-indigo-600 text-white px-6 py-2 rounded-full hover:bg-indigo-700 transition">✨ Generate {numQuestions}-Question Quiz</button>
+            </div>
+          </div>
+        )}
+
+        {step === 'quiz' && questions.length > 0 && (
+          <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-6">
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-indigo-600 font-bold">Question {currentQIndex+1} of {numQuestions}</div>
+              <div className="w-40 bg-gray-200 rounded-full h-2"><div className="bg-indigo-600 h-2 rounded-full" style={{width: `${((currentQIndex+1)/numQuestions)*100}%`}}></div></div>
+            </div>
+            <div className="bg-indigo-50 p-6 rounded-xl mb-6">
+              <p className="text-xl md:text-2xl font-medium">{questions[currentQIndex].text}</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+              {questions[currentQIndex].options.map((opt, idx) => (
+                <label key={idx} className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition ${userAnswers[currentQIndex] === opt ? 'bg-indigo-100 border-indigo-400' : 'hover:bg-gray-50'}`}>
+                  <input type="radio" name="q" value={opt} checked={userAnswers[currentQIndex] === opt} onChange={() => handleAnswer(opt)} className="w-5 h-5" />
+                  <span className="font-medium">{String.fromCharCode(65+idx)}. {opt}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-between">
+              <button onClick={prevQuestion} disabled={currentQIndex===0} className="px-5 py-2 bg-gray-300 rounded-full disabled:opacity-50">⬅ Previous</button>
+              <button onClick={nextQuestion} disabled={userAnswers[currentQIndex]===null} className="px-5 py-2 bg-indigo-600 text-white rounded-full disabled:opacity-50">➡ {currentQIndex===numQuestions-1 ? 'Finish' : 'Next'}</button>
+            </div>
+          </div>
+        )}
+
+        {step === 'review' && (
+          <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-6">
+            <div className="text-center mb-6">
+              <h2 className="text-3xl font-bold text-indigo-800">Quiz Completed! 🎉</h2>
+              <p className="text-lg">Your score: {score} / {numQuestions} ({percentage}%)</p>
+              <div className="flex justify-center gap-4 mt-4">
+                <button onClick={() => { setStep('setup'); setQuestions([]); setUserAnswers([]); }} className="bg-green-500 text-white px-4 py-2 rounded-full">➕ New Quiz</button>
+                <button onClick={printWorksheet} className="bg-blue-500 text-white px-4 py-2 rounded-full">🖨️ Print Worksheet</button>
+              </div>
+            </div>
+            <div className="mb-4 flex flex-wrap gap-2">
+              <input type="text" placeholder="Student Name" value={studentName} onChange={e=>setStudentName(e.target.value)} className="border rounded p-2 flex-1 text-lg" />
+              <input type="date" value={date} onChange={e=>setDate(e.target.value)} className="border rounded p-2" />
+              <input type="text" placeholder="School" value={school} onChange={e=>setSchool(e.target.value)} className="border rounded p-2 flex-1" />
+            </div>
+            <button onClick={() => setShowExplanation(!showExplanation)} className="text-indigo-600 underline mb-4">🔍 {showExplanation ? 'Hide' : 'Show'} explanations</button>
+            <div className="space-y-4">
+              {questions.map((q, idx) => (
+                <div key={idx} className="border-b pb-3">
+                  <p><strong>{idx+1}. {q.text}</strong> <br/>
+                    Your answer: <span className={userAnswers[idx] === q.answer ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>{userAnswers[idx] ?? 'Not answered'}</span> | Correct: {q.answer}
+                  </p>
+                  {showExplanation && <p className="text-gray-600 text-sm mt-1">💡 {q.explanation}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

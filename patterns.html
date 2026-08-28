@@ -1,1 +1,3376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Pattern Learning Worksheet Generator - Sanskash Digital Solution</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #eef2f7;
+    color: #222;
+}
+
+/* ================= CONTROL PANEL ================= */
+
+.controls {
+    max-width: 1250px;
+    margin: 20px auto;
+    padding: 22px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.12);
+}
+
+.controls h1 {
+    text-align: center;
+    margin: 0 0 5px;
+    color: #263a63;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 22px;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+    gap: 15px;
+}
+
+.control-box {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    background: #fafafa;
+}
+
+.control-box h3 {
+    margin-top: 0;
+    color: #263a63;
+}
+
+.control-box h4 {
+    color: #263a63;
+}
+
+label {
+    display: block;
+    margin: 8px 0;
+    cursor: pointer;
+}
+
+input[type=text],
+input[type=number],
+select {
+    width: 100%;
+    padding: 9px;
+    margin-top: 5px;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+input[type=checkbox],
+input[type=radio] {
+    margin-right: 6px;
+}
+
+.shape-options {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 5px;
+}
+
+.pattern-style-options {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 6px;
+}
+
+.pattern-style-options label {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    margin: 0;
+    font-weight: bold;
+}
+
+.pattern-style-options label:hover {
+    background: #eef3ff;
+}
+
+.pattern-style-note {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.level-description {
+    margin-top: 10px;
+    padding: 8px;
+    background: white;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #666;
+}
+
+.button-row {
+    text-align: center;
+    margin-top: 20px;
+}
+
+button {
+    border: none;
+    padding: 12px 18px;
+    margin: 5px;
+    border-radius: 8px;
+    background: #263a63;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: .9;
+}
+
+.print-btn {
+    background: #16803a;
+}
+
+.quiz-btn {
+    background: #8b4a00;
+}
+
+.reset-btn {
+    background: #9c2f2f;
+}
+
+
+/* ================= SHAPES ================= */
+
+.shape {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.circle {
+    border: 3px solid #111;
+    border-radius: 50%;
+}
+
+.square {
+    border: 3px solid #111;
+}
+
+.rectangle {
+    width: 62px;
+    height: 38px;
+    border: 3px solid #111;
+}
+
+.diamond {
+    width: 38px;
+    height: 38px;
+    border: 3px solid #111;
+    transform: rotate(45deg);
+}
+
+.triangle-svg {
+    width: 52px;
+    height: 50px;
+    display: block;
+}
+
+.star-svg {
+    width: 55px;
+    height: 55px;
+    display: block;
+}
+
+
+/* ================= WORKSHEET ================= */
+
+.worksheet {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 25px auto;
+    padding: 12mm 13mm;
+    background: white;
+    box-shadow: 0 0 12px rgba(0,0,0,.2);
+}
+
+.worksheet-header {
+    text-align: center;
+    border-bottom: 3px solid #222;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.worksheet-header h1 {
+    margin: 0;
+    font-size: 26px;
+}
+
+.worksheet-header h2 {
+    margin: 5px 0 0;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.student-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+.line {
+    display: inline-block;
+    min-width: 110px;
+    height: 18px;
+    border-bottom: 1px solid #222;
+}
+
+.instruction-box {
+    padding: 10px;
+    background: #f2f2f2;
+    border-left: 5px solid #263a63;
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+
+
+/* ================= SHAPE KEY ================= */
+
+.sheet-shape-key {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.sheet-key-title {
+    font-weight: bold;
+    color: #263a63;
+}
+
+.sheet-key-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.sheet-key-item .shape {
+    width: 28px;
+    height: 28px;
+}
+
+.sheet-key-item .rectangle {
+    width: 38px;
+    height: 24px;
+}
+
+.sheet-key-item .diamond {
+    width: 23px;
+    height: 23px;
+}
+
+.sheet-key-item .triangle-svg {
+    width: 30px;
+    height: 30px;
+}
+
+.sheet-key-item .star-svg {
+    width: 31px;
+    height: 31px;
+}
+
+
+/* ================= QUESTIONS ================= */
+
+.question {
+    margin-bottom: 15px;
+    page-break-inside: avoid;
+}
+
+.question-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.pattern-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 72px;
+    padding: 7px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.pattern-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 48px;
+}
+
+.pattern-letter {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.answer-box {
+    width: 58px;
+    height: 58px;
+    border: 2px dashed #555;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    text-align: center;
+    color: #555;
+}
+
+.color-target {
+    width: 62px;
+    height: 62px;
+    border: 2px dashed #555;
+    border-radius: 7px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.missing-box {
+    width: 58px;
+    height: 58px;
+    border: 2px dashed #555;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.missing-choice-area {
+    margin-top: 7px;
+    font-size: 11px;
+    color: #555;
+}
+
+.choice-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 10px;
+}
+
+.footer {
+    margin-top: 15px;
+    padding-top: 8px;
+    border-top: 1px solid #aaa;
+    text-align: center;
+    font-size: 10px;
+    color: #555;
+}
+
+
+/* ================= QUIZ ================= */
+
+.quiz-section {
+    max-width: 950px;
+    margin: 30px auto;
+    padding: 25px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,.12);
+    display: none;
+}
+
+.quiz-section.active {
+    display: block;
+}
+
+.quiz-section h2 {
+    text-align: center;
+    color: #263a63;
+}
+
+.quiz-question {
+    margin: 18px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.quiz-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.quiz-option {
+    width: 82px;
+    height: 82px;
+    margin: 0;
+    padding: 5px;
+    background: white;
+    border: 2px solid #aaa;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.quiz-option.correct {
+    border-color: green;
+    background: #e8f8e8;
+}
+
+.quiz-option.wrong {
+    border-color: red;
+    background: #fdeaea;
+}
+
+.quiz-option:disabled {
+    cursor: default;
+    opacity: 1;
+}
+
+.quiz-score {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+
+/* ================= PRINT ================= */
+
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+
+@media print {
+
+    body {
+        background: white;
+    }
+
+    .controls,
+    .quiz-section {
+        display: none !important;
+    }
+
+    .worksheet {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        padding: 12mm 13mm;
+        box-shadow: none;
+    }
+
+    .triangle-svg,
+    .star-svg {
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+
+
+/* ================= MOBILE ================= */
+
+@media screen and (max-width:850px) {
+
+    .worksheet {
+        width: 100%;
+        min-height: auto;
+        padding: 20px;
+    }
+
+    .student-info {
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+
+<body>
+
+
+<!-- ======================================================
+     CONTROL PANEL
+====================================================== -->
+
+<div class="controls">
+
+    <h1>Pattern Learning Worksheet Generator</h1>
+
+    <div class="subtitle">
+        Create A4 printable worksheets and online pattern quizzes
+    </div>
+
+
+    <div class="control-grid">
+
+
+        <!-- WORKSHEET INFORMATION -->
+
+        <div class="control-box">
+
+            <h3>Worksheet Information</h3>
+
+            <label>
+                Worksheet Title
+                <input
+                    type="text"
+                    id="worksheetTitle"
+                    value="Fun with Patterns!"
+                >
+            </label>
+
+
+            <label>
+                Teacher Name
+                <input
+                    type="text"
+                    id="teacherName"
+                    placeholder="Enter teacher name"
+                >
+            </label>
+
+
+            <label>
+                Number of Questions
+                <input
+                    type="number"
+                    id="questionCount"
+                    value="8"
+                    min="3"
+                    max="20"
+                >
+            </label>
+
+        </div>
+
+
+        <!-- SHAPES -->
+
+        <div class="control-box">
+
+            <h3>Select Shapes</h3>
+
+            <div class="shape-options">
+
+                <label>
+                    <input
+                        type="checkbox"
+                        class="shapeCheck"
+                        value="A"
+                        checked
+                    >
+                    Circle
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        class="shapeCheck"
+                        value="B"
+                        checked
+                    >
+                    Square
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        class="shapeCheck"
+                        value="C"
+                        checked
+                    >
+                    Triangle
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        class="shapeCheck"
+                        value="D"
+                        checked
+                    >
+                    Rectangle
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        class="shapeCheck"
+                        value="E"
+                        checked
+                    >
+                    Star
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        class="shapeCheck"
+                        value="F"
+                        checked
+                    >
+                    Diamond
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <!-- PATTERN STYLES -->
+
+        <div class="control-box">
+
+            <h3>Select Pattern Styles</h3>
+
+            <div class="pattern-style-note">
+                Select the pattern structures you want to use.
+                The generator will create different shape
+                combinations and will not repeat a question.
+            </div>
+
+            <div
+                id="patternStyleOptions"
+                class="pattern-style-options"
+            ></div>
+
+            <div
+                id="levelDescription"
+                class="level-description"
+            ></div>
+
+        </div>
+
+
+        <!-- ACTIVITY -->
+
+        <div class="control-box">
+
+            <h3>Worksheet Activity</h3>
+
+            <label>
+                <input
+                    type="radio"
+                    name="activity"
+                    value="color"
+                    checked
+                >
+                Colour the Next Pattern
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="activity"
+                    value="draw"
+                >
+                Draw the Next Pattern
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="activity"
+                    value="missing"
+                >
+                Draw the Missing Pattern
+            </label>
+
+
+            <div
+                id="drawCountArea"
+                style="display:none;margin-top:12px;"
+            >
+
+                <h4>Number of Shapes to Draw</h4>
+
+                <select id="drawCount"></select>
+
+            </div>
+
+
+            <div
+                id="missingCountArea"
+                style="display:none;margin-top:12px;"
+            >
+
+                <h4>Number of Missing Shapes</h4>
+
+                <select id="missingCount"></select>
+
+            </div>
+
+
+            <div
+                id="missingChoicesArea"
+                style="display:none;margin-top:12px;"
+            >
+
+                <h4>Missing Shape Options</h4>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        id="showMissingChoices"
+                        checked
+                    >
+                    Show possible shape choices
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <!-- DIFFICULTY -->
+
+        <div class="control-box">
+
+            <h3>Difficulty Level</h3>
+
+            <label>
+                <input
+                    type="radio"
+                    name="difficulty"
+                    value="level1"
+                    checked
+                >
+                <strong>Level 1 – Easy</strong>
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="difficulty"
+                    value="level2"
+                >
+                <strong>Level 2 – Medium</strong>
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="difficulty"
+                    value="level3"
+                >
+                <strong>Level 3 – Hard</strong>
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="difficulty"
+                    value="level4"
+                >
+                <strong>Level 4 – Expert</strong>
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <div class="button-row">
+
+        <button onclick="generateWorksheet()">
+            Generate Worksheet
+        </button>
+
+        <button
+            class="print-btn"
+            onclick="printWorksheet()"
+        >
+            Print A4 Worksheet
+        </button>
+
+        <button
+            class="quiz-btn"
+            onclick="startQuiz()"
+        >
+            Start Online Quiz
+        </button>
+
+        <button
+            class="reset-btn"
+            onclick="resetOptions()"
+        >
+            Reset
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ======================================================
+     PRINTABLE WORKSHEET
+====================================================== -->
+
+<div class="worksheet">
+
+    <div class="worksheet-header">
+
+        <h1 id="printTitle">
+            Fun with Patterns!
+        </h1>
+
+        <h2 id="printTeacher">
+            Teacher: ____________________
+        </h2>
+
+    </div>
+
+
+    <div class="student-info">
+
+        <div>
+            Name:
+            <span class="line"></span>
+        </div>
+
+        <div>
+            Class:
+            <span class="line"></span>
+        </div>
+
+        <div>
+            Date:
+            <span class="line"></span>
+        </div>
+
+    </div>
+
+
+    <div
+        class="instruction-box"
+        id="instruction"
+    >
+        Look carefully at each pattern and complete it.
+    </div>
+
+
+    <!-- ONLY ONE DESCRIPTION PER SHEET -->
+
+    <div
+        id="sheetShapeKey"
+        class="sheet-shape-key"
+    ></div>
+
+
+    <div id="questions"></div>
+
+
+    <div class="footer">
+        © 2026 Sanskash Digital Solution.
+        All Rights Reserved.
+    </div>
+
+</div>
+
+
+<!-- ======================================================
+     ONLINE QUIZ
+====================================================== -->
+
+<div
+    class="quiz-section"
+    id="quizSection"
+>
+
+    <h2>Online Pattern Quiz</h2>
+
+    <p style="text-align:center;">
+        Look carefully at each pattern and choose the correct next shape.
+    </p>
+
+    <div id="quizQuestions"></div>
+
+    <div
+        class="quiz-score"
+        id="quizScore"
+    >
+        Score: 0 / 0
+    </div>
+
+    <div style="text-align:center;">
+
+        <button
+            class="quiz-btn"
+            onclick="startQuiz()"
+        >
+            Restart Quiz
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ======================================================
+   BASIC DATA
+====================================================== */
+
+const allLetters = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+];
+
+
+const colors = [
+    "#ef4444",
+    "#3b82f6",
+    "#22c55e",
+    "#facc15",
+    "#a855f7",
+    "#f97316"
+];
+
+
+const shapeNames = {
+
+    A: "Circle",
+    B: "Square",
+    C: "Triangle",
+    D: "Rectangle",
+    E: "Star",
+    F: "Diamond"
+
+};
+
+
+/* ======================================================
+   PATTERN STRUCTURES
+====================================================== */
+
+const patternStyles = {
+
+    level1: [
+
+        {
+            id: "AB",
+            label: "AB",
+            pattern: ["A","B"]
+        },
+
+        {
+            id: "ABC",
+            label: "ABC",
+            pattern: ["A","B","C"]
+        },
+
+        {
+            id: "ABCD",
+            label: "ABCD",
+            pattern: ["A","B","C","D"]
+        },
+
+        {
+            id: "ABCDE",
+            label: "ABCDE",
+            pattern: ["A","B","C","D","E"]
+        },
+
+        {
+            id: "ABCDEF",
+            label: "ABCDEF",
+            pattern: ["A","B","C","D","E","F"]
+        }
+
+    ],
+
+
+    level2: [
+
+        {
+            id: "AAB",
+            label: "AAB",
+            pattern: ["A","A","B"]
+        },
+
+        {
+            id: "ABB",
+            label: "ABB",
+            pattern: ["A","B","B"]
+        },
+
+        {
+            id: "AABB",
+            label: "AABB",
+            pattern: ["A","A","B","B"]
+        },
+
+        {
+            id: "ABA",
+            label: "ABA",
+            pattern: ["A","B","A"]
+        },
+
+        {
+            id: "ABBA",
+            label: "ABBA",
+            pattern: ["A","B","B","A"]
+        },
+
+        {
+            id: "AABAB",
+            label: "AABAB",
+            pattern: ["A","A","B","A","B"]
+        }
+
+    ],
+
+
+    level3: [
+
+        {
+            id: "ABBC",
+            label: "ABBC",
+            pattern: ["A","B","B","C"]
+        },
+
+        {
+            id: "AABC",
+            label: "AABC",
+            pattern: ["A","A","B","C"]
+        },
+
+        {
+            id: "ABCC",
+            label: "ABCC",
+            pattern: ["A","B","C","C"]
+        },
+
+        {
+            id: "AABBC",
+            label: "AABBC",
+            pattern: ["A","A","B","B","C"]
+        },
+
+        {
+            id: "ABBCC",
+            label: "ABBCC",
+            pattern: ["A","B","B","C","C"]
+        },
+
+        {
+            id: "AABCC",
+            label: "AABCC",
+            pattern: ["A","A","B","C","C"]
+        },
+
+        {
+            id: "ABAC",
+            label: "ABAC",
+            pattern: ["A","B","A","C"]
+        }
+
+    ],
+
+
+    level4: [
+
+        {
+            id: "AABBC",
+            label: "AABBC",
+            pattern: ["A","A","B","B","C"]
+        },
+
+        {
+            id: "ABBCCD",
+            label: "ABBCCD",
+            pattern: ["A","B","B","C","C","D"]
+        },
+
+        {
+            id: "AABCBD",
+            label: "AABCBD",
+            pattern: ["A","A","B","C","B","D"]
+        },
+
+        {
+            id: "ABACBD",
+            label: "ABACBD",
+            pattern: ["A","B","A","C","B","D"]
+        },
+
+        {
+            id: "ABBCDD",
+            label: "ABBCDD",
+            pattern: ["A","B","B","C","D","D"]
+        },
+
+        {
+            id: "AABCCD",
+            label: "AABCCD",
+            pattern: ["A","A","B","C","C","D"]
+        },
+
+        {
+            id: "ABCADB",
+            label: "ABCADB",
+            pattern: ["A","B","C","A","D","B"]
+        },
+
+        {
+            id: "ABCCDE",
+            label: "ABCCDE",
+            pattern: ["A","B","C","C","D","E"]
+        },
+
+        {
+            id: "AABBCDE",
+            label: "AABBCDE",
+            pattern: ["A","A","B","B","C","D","E"]
+        },
+
+        {
+            id: "ABCDDEF",
+            label: "ABCDDEF",
+            pattern: ["A","B","C","D","D","E","F"]
+        }
+
+    ]
+
+};
+
+
+/* ======================================================
+   DESCRIPTIONS
+====================================================== */
+
+const levelDescriptions = {
+
+    level1:
+        "Level 1: Simple patterns with one occurrence of each shape in a pattern set. Different combinations such as AB, AC, BC, CA are generated.",
+
+    level2:
+        "Level 2: Repeated-shape patterns such as AAB, ABB, AABB, ABA and ABBA.",
+
+    level3:
+        "Level 3: More complex repeated patterns such as ABBC, AABC, ABCC, AABBC and ABBCC.",
+
+    level4:
+        "Level 4: Expert-level longer mixed patterns with repeated and changing shapes."
+
+};
+
+
+/* ======================================================
+   SHUFFLE
+====================================================== */
+
+function shuffle(array) {
+
+    const copy = [...array];
+
+    for (
+        let i = copy.length - 1;
+        i > 0;
+        i--
+    ) {
+
+        const j =
+            Math.floor(
+                Math.random() * (i + 1)
+            );
+
+        [
+            copy[i],
+            copy[j]
+        ] = [
+            copy[j],
+            copy[i]
+        ];
+
+    }
+
+    return copy;
+
+}
+
+
+/* ======================================================
+   GET SELECTED SHAPES
+====================================================== */
+
+function getSelectedShapes() {
+
+    return Array.from(
+        document.querySelectorAll(
+            ".shapeCheck:checked"
+        )
+    ).map(
+        item => item.value
+    );
+
+}
+
+
+/* ======================================================
+   GET ACTIVITY
+====================================================== */
+
+function getActivity() {
+
+    return document.querySelector(
+        'input[name="activity"]:checked'
+    ).value;
+
+}
+
+
+/* ======================================================
+   GET DIFFICULTY
+====================================================== */
+
+function getDifficulty() {
+
+    return document.querySelector(
+        'input[name="difficulty"]:checked'
+    ).value;
+
+}
+
+
+/* ======================================================
+   SELECTED PATTERN STYLES
+====================================================== */
+
+function getSelectedPatternStyles() {
+
+    const difficulty =
+        getDifficulty();
+
+    const ids =
+        Array.from(
+            document.querySelectorAll(
+                ".patternStyleCheck:checked"
+            )
+        ).map(
+            item => item.value
+        );
+
+    return (
+        patternStyles[difficulty] || []
+    ).filter(
+        style =>
+            ids.includes(style.id)
+    );
+
+}
+
+
+/* ======================================================
+   TRIANGLE
+====================================================== */
+
+function createTriangle(
+    color,
+    outline = false
+) {
+
+    const svg =
+        document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "svg"
+        );
+
+    svg.setAttribute(
+        "class",
+        "triangle-svg"
+    );
+
+    svg.setAttribute(
+        "viewBox",
+        "0 0 50 45"
+    );
+
+    const polygon =
+        document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "polygon"
+        );
+
+    polygon.setAttribute(
+        "points",
+        "25,2 48,43 2,43"
+    );
+
+    polygon.setAttribute(
+        "fill",
+        outline ? "white" : color
+    );
+
+    polygon.setAttribute(
+        "stroke",
+        "#111"
+    );
+
+    polygon.setAttribute(
+        "stroke-width",
+        "3"
+    );
+
+    svg.appendChild(polygon);
+
+    return svg;
+
+}
+
+
+/* ======================================================
+   STAR
+====================================================== */
+
+function createStar(
+    color,
+    outline = false
+) {
+
+    const svg =
+        document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "svg"
+        );
+
+    svg.setAttribute(
+        "class",
+        "star-svg"
+    );
+
+    svg.setAttribute(
+        "viewBox",
+        "0 0 100 100"
+    );
+
+    const polygon =
+        document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "polygon"
+        );
+
+    polygon.setAttribute(
+        "points",
+        "50,5 61,37 95,37 68,57 79,91 50,70 21,91 32,57 5,37 39,37"
+    );
+
+    polygon.setAttribute(
+        "fill",
+        outline ? "white" : color
+    );
+
+    polygon.setAttribute(
+        "stroke",
+        "#111"
+    );
+
+    polygon.setAttribute(
+        "stroke-width",
+        "5"
+    );
+
+    polygon.setAttribute(
+        "stroke-linejoin",
+        "round"
+    );
+
+    svg.appendChild(polygon);
+
+    return svg;
+
+}
+
+
+/* ======================================================
+   CREATE SHAPE
+====================================================== */
+
+function createShape(
+    code,
+    color,
+    outline = false
+) {
+
+    if (code === "C") {
+
+        return createTriangle(
+            color,
+            outline
+        );
+
+    }
+
+
+    if (code === "E") {
+
+        return createStar(
+            color,
+            outline
+        );
+
+    }
+
+
+    const element =
+        document.createElement("div");
+
+    element.classList.add("shape");
+
+
+    if (code === "A") {
+
+        element.classList.add("circle");
+
+    }
+
+    else if (code === "B") {
+
+        element.classList.add("square");
+
+    }
+
+    else if (code === "D") {
+
+        element.classList.add("rectangle");
+
+    }
+
+    else if (code === "F") {
+
+        element.classList.add("diamond");
+
+    }
+
+
+    element.style.backgroundColor =
+        outline
+            ? "white"
+            : color;
+
+    return element;
+
+}
+
+
+/* ======================================================
+   CREATE SHAPE MAP
+====================================================== */
+
+function createSheetMap(
+    selectedShapes
+) {
+
+    const map = {};
+
+    const selected =
+        shuffle(selectedShapes);
+
+    selected.forEach(
+        (shape,index) => {
+
+            const letter =
+                allLetters[index];
+
+            map[letter] = {
+
+                shape: shape,
+
+                color:
+                    colors[
+                        index %
+                        colors.length
+                    ]
+
+            };
+
+        }
+    );
+
+    return map;
+
+}
+
+
+/* ======================================================
+   SHAPE DESCRIPTION KEY
+====================================================== */
+
+function createSheetKey(
+    map,
+    activity
+) {
+
+    const container =
+        document.getElementById(
+            "sheetShapeKey"
+        );
+
+    container.innerHTML = "";
+
+
+    const title =
+        document.createElement("div");
+
+    title.className =
+        "sheet-key-title";
+
+    title.textContent =
+        "Shape Description:";
+
+    container.appendChild(title);
+
+
+    Object.keys(map).forEach(
+        letter => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "sheet-key-item";
+
+
+            const text =
+                document.createElement("span");
+
+            text.textContent =
+                letter +
+                " = " +
+                shapeNames[
+                    map[letter].shape
+                ];
+
+
+            const shape =
+                createShape(
+                    map[letter].shape,
+                    map[letter].color,
+                    activity !== "color"
+                );
+
+
+            item.appendChild(text);
+
+            item.appendChild(shape);
+
+            container.appendChild(item);
+
+        }
+    );
+
+}
+
+
+/* ======================================================
+   PATTERN STYLE CHECKBOXES
+====================================================== */
+
+function updatePatternStyleOptions() {
+
+    const difficulty =
+        getDifficulty();
+
+    const container =
+        document.getElementById(
+            "patternStyleOptions"
+        );
+
+    container.innerHTML = "";
+
+
+    const styles =
+        patternStyles[
+            difficulty
+        ] || [];
+
+
+    styles.forEach(
+        style => {
+
+            const label =
+                document.createElement("label");
+
+
+            const checkbox =
+                document.createElement("input");
+
+
+            checkbox.type =
+                "checkbox";
+
+            checkbox.className =
+                "patternStyleCheck";
+
+            checkbox.value =
+                style.id;
+
+            checkbox.checked =
+                true;
+
+
+            label.appendChild(
+                checkbox
+            );
+
+
+            label.appendChild(
+                document.createTextNode(
+                    " " + style.label
+                )
+            );
+
+
+            container.appendChild(label);
+
+        }
+    );
+
+
+    document.getElementById(
+        "levelDescription"
+    ).textContent =
+        levelDescriptions[
+            difficulty
+        ];
+
+}
+
+
+/* ======================================================
+   ACTIVITY OPTIONS
+====================================================== */
+
+function updateActivityOptions() {
+
+    const activity =
+        getActivity();
+
+    const difficulty =
+        getDifficulty();
+
+
+    document.getElementById(
+        "drawCountArea"
+    ).style.display =
+        activity === "draw"
+            ? "block"
+            : "none";
+
+
+    document.getElementById(
+        "missingCountArea"
+    ).style.display =
+        activity === "missing"
+            ? "block"
+            : "none";
+
+
+    document.getElementById(
+        "missingChoicesArea"
+    ).style.display =
+        activity === "missing"
+            ? "block"
+            : "none";
+
+
+    let maximum;
+
+
+    if (
+        difficulty === "level1"
+    ) {
+
+        maximum = 3;
+
+    }
+
+    else if (
+        difficulty === "level2"
+    ) {
+
+        maximum = 4;
+
+    }
+
+    else if (
+        difficulty === "level3"
+    ) {
+
+        maximum = 5;
+
+    }
+
+    else {
+
+        maximum = 6;
+
+    }
+
+
+    updateSelect(
+        "drawCount",
+        maximum,
+        "Shape"
+    );
+
+
+    updateSelect(
+        "missingCount",
+        Math.min(maximum,4),
+        "Missing Shape"
+    );
+
+}
+
+
+/* ======================================================
+   UPDATE SELECT
+====================================================== */
+
+function updateSelect(
+    id,
+    maximum,
+    label
+) {
+
+    const select =
+        document.getElementById(id);
+
+    const oldValue =
+        parseInt(select.value) || 1;
+
+    select.innerHTML = "";
+
+
+    for (
+        let i = 1;
+        i <= maximum;
+        i++
+    ) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = i;
+
+        option.textContent =
+            i +
+            " " +
+            label +
+            (
+                i > 1
+                    ? "s"
+                    : ""
+            );
+
+
+        if (
+            i ===
+            Math.min(
+                oldValue,
+                maximum
+            )
+        ) {
+
+            option.selected = true;
+
+        }
+
+
+        select.appendChild(option);
+
+    }
+
+}
+
+
+/* ======================================================
+   VISIBLE PATTERN LENGTH
+====================================================== */
+
+function getVisibleLength(
+    difficulty
+) {
+
+    if (
+        difficulty === "level1"
+    ) {
+
+        return 6;
+
+    }
+
+    if (
+        difficulty === "level2"
+    ) {
+
+        return 7;
+
+    }
+
+    if (
+        difficulty === "level3"
+    ) {
+
+        return 8;
+
+    }
+
+    return 9;
+
+}
+
+
+/* ======================================================
+   GENERATE UNIQUE PATTERN QUESTIONS
+
+   THIS IS THE IMPORTANT PART.
+
+   It generates different combinations from the
+   selected shapes instead of repeating AB, AB, AB.
+====================================================== */
+
+function generateUniquePatternStyles(
+    selectedShapes,
+    difficulty,
+    selectedStyles,
+    questionCount
+) {
+
+    const possiblePatterns = [];
+
+
+    selectedStyles.forEach(
+        style => {
+
+            const template =
+                style.pattern;
+
+
+            const uniqueLetters =
+                [
+                    ...new Set(
+                        template
+                    )
+                ];
+
+
+            /*
+               The number of different shapes needed
+               by the pattern cannot exceed the shapes
+               selected by the teacher.
+            */
+
+            if (
+                uniqueLetters.length >
+                selectedShapes.length
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+               Generate every possible mapping.
+
+               For ABB with A,B,C,D:
+
+               ABB
+               ACC
+               ADD
+               BAA
+               BCC
+               BDD
+               CAA
+               CBB
+               CDD
+               DAA
+               DBB
+               DCC
+
+               Thus questions are not simply repeated.
+            */
+
+            function buildMapping(
+                index,
+                usedShapes,
+                mapping
+            ) {
+
+                if (
+                    index ===
+                    uniqueLetters.length
+                ) {
+
+                    const result =
+                        template.map(
+                            letter =>
+                                mapping[
+                                    letter
+                                ]
+                        );
+
+
+                    possiblePatterns.push({
+
+                        id:
+                            result.join(""),
+
+                        pattern:
+                            result,
+
+                        style:
+                            style.id
+
+                    });
+
+
+                    return;
+
+                }
+
+
+                const letter =
+                    uniqueLetters[index];
+
+
+                selectedShapes.forEach(
+                    shape => {
+
+                        if (
+                            !usedShapes.includes(
+                                shape
+                            )
+                        ) {
+
+                            buildMapping(
+
+                                index + 1,
+
+                                [
+                                    ...usedShapes,
+                                    shape
+                                ],
+
+                                {
+                                    ...mapping,
+                                    [letter]:
+                                        shape
+                                }
+
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            buildMapping(
+                0,
+                [],
+                {}
+            );
+
+        }
+    );
+
+
+    /*
+       Remove exact duplicates.
+    */
+
+    const unique =
+        new Map();
+
+
+    possiblePatterns.forEach(
+        item => {
+
+            unique.set(
+                item.id,
+                item
+            );
+
+        }
+    );
+
+
+    /*
+       Shuffle the unique questions.
+    */
+
+    const shuffled =
+        shuffle(
+            Array.from(
+                unique.values()
+            )
+        );
+
+
+    /*
+       Return only the requested number.
+    */
+
+    return shuffled.slice(
+        0,
+        Math.min(
+            questionCount,
+            shuffled.length
+        )
+    );
+
+}
+
+
+/* ======================================================
+   CREATE PATTERN ITEM
+====================================================== */
+
+function createPatternItem(
+    sheetMap,
+    letter,
+    outline
+) {
+
+    const item =
+        document.createElement("div");
+
+    item.className =
+        "pattern-item";
+
+
+    const shape =
+        createShape(
+            sheetMap[letter].shape,
+            sheetMap[letter].color,
+            outline
+        );
+
+
+    const label =
+        document.createElement("div");
+
+    label.className =
+        "pattern-letter";
+
+    label.textContent =
+        letter;
+
+
+    item.appendChild(shape);
+
+    item.appendChild(label);
+
+
+    return item;
+
+}
+
+
+/* ======================================================
+   CREATE QUESTION
+====================================================== */
+
+function createQuestion(
+    number,
+    sheetMap,
+    activity,
+    difficulty,
+    style
+) {
+
+    const template =
+        style.pattern;
+
+
+    const visibleLength =
+        getVisibleLength(
+            difficulty
+        );
+
+
+    const sequence =
+        createSequence(
+            template,
+            visibleLength + 10
+        );
+
+
+    const question =
+        document.createElement("div");
+
+    question.className =
+        "question";
+
+
+    const title =
+        document.createElement("div");
+
+    title.className =
+        "question-title";
+
+
+    let instructionText =
+        "";
+
+
+    if (
+        activity === "color"
+    ) {
+
+        instructionText =
+            "Colour the next pattern.";
+
+    }
+
+    else if (
+        activity === "draw"
+    ) {
+
+        instructionText =
+            "Draw the next pattern.";
+
+    }
+
+    else {
+
+        instructionText =
+            "Draw the missing pattern.";
+
+    }
+
+
+    title.textContent =
+        number +
+        ". Pattern: " +
+        template.join("") +
+        " — " +
+        instructionText;
+
+
+    question.appendChild(title);
+
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "pattern-row";
+
+
+    /* ================= COLOR ================= */
+
+    if (
+        activity === "color"
+    ) {
+
+        for (
+            let i = 0;
+            i < visibleLength;
+            i++
+        ) {
+
+            row.appendChild(
+                createPatternItem(
+                    sheetMap,
+                    sequence[i],
+                    false
+                )
+            );
+
+        }
+
+
+        const next =
+            sequence[
+                visibleLength
+            ];
+
+
+        const target =
+            document.createElement("div");
+
+        target.className =
+            "color-target";
+
+
+        target.appendChild(
+            createShape(
+                sheetMap[next].shape,
+                sheetMap[next].color,
+                true
+            )
+        );
+
+
+        row.appendChild(target);
+
+    }
+
+
+    /* ================= DRAW ================= */
+
+    else if (
+        activity === "draw"
+    ) {
+
+        for (
+            let i = 0;
+            i < visibleLength;
+            i++
+        ) {
+
+            row.appendChild(
+                createPatternItem(
+                    sheetMap,
+                    sequence[i],
+                    true
+                )
+            );
+
+        }
+
+
+        const drawCount =
+            parseInt(
+                document.getElementById(
+                    "drawCount"
+                ).value
+            ) || 1;
+
+
+        for (
+            let i = 0;
+            i < drawCount;
+            i++
+        ) {
+
+            const box =
+                document.createElement("div");
+
+            box.className =
+                "answer-box";
+
+            box.textContent =
+                "Draw";
+
+            row.appendChild(box);
+
+        }
+
+    }
+
+
+    /* ================= MISSING ================= */
+
+    else {
+
+        const missingCount =
+            parseInt(
+                document.getElementById(
+                    "missingCount"
+                ).value
+            ) || 1;
+
+
+        let positions = [];
+
+
+        /*
+           Only choose positions inside the pattern,
+           leaving at least one visible shape at each
+           end where possible.
+        */
+
+        for (
+            let i = 1;
+            i < visibleLength - 1;
+            i++
+        ) {
+
+            positions.push(i);
+
+        }
+
+
+        positions =
+            shuffle(
+                positions
+            ).slice(
+                0,
+                Math.min(
+                    missingCount,
+                    positions.length
+                )
+            );
+
+
+        positions.sort(
+            (a,b) => a-b
+        );
+
+
+        for (
+            let i = 0;
+            i < visibleLength;
+            i++
+        ) {
+
+            if (
+                positions.includes(i)
+            ) {
+
+                const box =
+                    document.createElement("div");
+
+                box.className =
+                    "missing-box";
+
+                box.textContent =
+                    "?";
+
+                row.appendChild(box);
+
+            }
+
+            else {
+
+                row.appendChild(
+                    createPatternItem(
+                        sheetMap,
+                        sequence[i],
+                        true
+                    )
+                );
+
+            }
+
+        }
+
+
+        /* MISSING SHAPE OPTIONS */
+
+        const showChoices =
+            document.getElementById(
+                "showMissingChoices"
+            ).checked;
+
+
+        if (
+            showChoices
+        ) {
+
+            const choiceArea =
+                document.createElement("div");
+
+            choiceArea.className =
+                "missing-choice-area";
+
+
+            choiceArea.innerHTML =
+                "<strong>Shape choices:</strong> ";
+
+
+            const missingLetters =
+                [
+                    ...new Set(
+                        positions.map(
+                            position =>
+                                sequence[position]
+                        )
+                    )
+                ];
+
+
+            let choices =
+                shuffle(
+                    Object.keys(
+                        sheetMap
+                    )
+                );
+
+
+            choices =
+                [
+                    ...missingLetters,
+                    ...choices
+                ];
+
+
+            choices =
+                [
+                    ...new Set(
+                        choices
+                    )
+                ].slice(0,5);
+
+
+            choices =
+                shuffle(
+                    choices
+                );
+
+
+            choices.forEach(
+                letter => {
+
+                    const span =
+                        document.createElement("span");
+
+                    span.className =
+                        "choice-line";
+
+
+                    span.textContent =
+                        letter +
+                        " = " +
+                        shapeNames[
+                            sheetMap[
+                                letter
+                            ].shape
+                        ];
+
+
+                    choiceArea.appendChild(
+                        span
+                    );
+
+                }
+            );
+
+
+            /*
+               Add choices after the pattern row.
+            */
+
+            question.appendChild(row);
+
+            question.appendChild(
+                choiceArea
+            );
+
+
+            return question;
+
+        }
+
+    }
+
+
+    question.appendChild(row);
+
+    return question;
+
+}
+
+
+/* ======================================================
+   CREATE REPEATING SEQUENCE
+====================================================== */
+
+function createSequence(
+    template,
+    length
+) {
+
+    const result = [];
+
+
+    for (
+        let i = 0;
+        i < length;
+        i++
+    ) {
+
+        result.push(
+            template[
+                i %
+                template.length
+            ]
+        );
+
+    }
+
+
+    return result;
+
+}
+
+
+/* ======================================================
+   GENERATE WORKSHEET
+====================================================== */
+
+function generateWorksheet() {
+
+    const selectedShapes =
+        getSelectedShapes();
+
+
+    if (
+        selectedShapes.length < 2
+    ) {
+
+        alert(
+            "Please select at least 2 shapes."
+        );
+
+        return;
+
+    }
+
+
+    const selectedStyles =
+        getSelectedPatternStyles();
+
+
+    if (
+        selectedStyles.length === 0
+    ) {
+
+        alert(
+            "Please select at least one pattern style."
+        );
+
+        return;
+
+    }
+
+
+    const activity =
+        getActivity();
+
+
+    const difficulty =
+        getDifficulty();
+
+
+    let count =
+        parseInt(
+            document.getElementById(
+                "questionCount"
+            ).value
+        ) || 8;
+
+
+    count =
+        Math.max(
+            3,
+            Math.min(
+                20,
+                count
+            )
+        );
+
+
+    /*
+       Generate UNIQUE combinations.
+    */
+
+    const questionStyles =
+        generateUniquePatternStyles(
+            selectedShapes,
+            difficulty,
+            selectedStyles,
+            count
+        );
+
+
+    if (
+        questionStyles.length === 0
+    ) {
+
+        alert(
+            "No valid unique combinations are available. Please select more shapes or different pattern styles."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        questionStyles.length < count
+    ) {
+
+        alert(
+            "Only " +
+            questionStyles.length +
+            " unique pattern combinations are possible with your current selections. The worksheet will use those unique combinations without repeating questions."
+        );
+
+    }
+
+
+    /*
+       Random shape-to-letter mapping.
+    */
+
+    const sheetMap =
+        createSheetMap(
+            selectedShapes
+        );
+
+
+    /* TITLE */
+
+    const title =
+        document.getElementById(
+            "worksheetTitle"
+        ).value.trim();
+
+
+    document.getElementById(
+        "printTitle"
+    ).textContent =
+        title ||
+        "Fun with Patterns!";
+
+
+    /* TEACHER */
+
+    const teacher =
+        document.getElementById(
+            "teacherName"
+        ).value.trim();
+
+
+    document.getElementById(
+        "printTeacher"
+    ).textContent =
+        teacher
+            ? "Teacher: " + teacher
+            : "Teacher: ____________________";
+
+
+    /* INSTRUCTION */
+
+    let instruction;
+
+
+    if (
+        activity === "color"
+    ) {
+
+        instruction =
+            "Look at the pattern letters and shapes. Continue the pattern by colouring the next outline shape.";
+
+    }
+
+    else if (
+        activity === "draw"
+    ) {
+
+        instruction =
+            "Look carefully at each pattern and draw the next shape or shapes in the empty boxes.";
+
+    }
+
+    else {
+
+        instruction =
+            "Look carefully at each pattern and draw the correct shapes in the missing boxes.";
+
+    }
+
+
+    document.getElementById(
+        "instruction"
+    ).textContent =
+        instruction;
+
+
+    /*
+       ONE shape description section
+       for the entire sheet.
+    */
+
+    createSheetKey(
+        sheetMap,
+        activity
+    );
+
+
+    /*
+       QUESTIONS
+    */
+
+    const questions =
+        document.getElementById(
+            "questions"
+        );
+
+
+    questions.innerHTML =
+        "";
+
+
+    questionStyles.forEach(
+        (style,index) => {
+
+            const question =
+                createQuestion(
+                    index + 1,
+                    sheetMap,
+                    activity,
+                    difficulty,
+                    style
+                );
+
+
+            questions.appendChild(
+                question
+            );
+
+        }
+    );
+
+
+    /*
+       Hide quiz when generating worksheet.
+    */
+
+    document.getElementById(
+        "quizSection"
+    ).classList.remove(
+        "active"
+    );
+
+}
+
+
+/* ======================================================
+   PRINT
+====================================================== */
+
+function printWorksheet() {
+
+    generateWorksheet();
+
+
+    setTimeout(
+        () => {
+
+            window.print();
+
+        },
+        250
+    );
+
+}
+
+
+/* ======================================================
+   ONLINE QUIZ
+====================================================== */
+
+let quizScore = 0;
+
+let quizAnswered = 0;
+
+const totalQuizQuestions = 5;
+
+
+/* ======================================================
+   START QUIZ
+====================================================== */
+
+function startQuiz() {
+
+    const selectedShapes =
+        getSelectedShapes();
+
+
+    if (
+        selectedShapes.length < 2
+    ) {
+
+        alert(
+            "Please select at least 2 shapes."
+        );
+
+        return;
+
+    }
+
+
+    const selectedStyles =
+        getSelectedPatternStyles();
+
+
+    if (
+        selectedStyles.length === 0
+    ) {
+
+        alert(
+            "Please select at least one pattern style."
+        );
+
+        return;
+
+    }
+
+
+    const difficulty =
+        getDifficulty();
+
+
+    const validPatterns =
+        generateUniquePatternStyles(
+            selectedShapes,
+            difficulty,
+            selectedStyles,
+            totalQuizQuestions
+        );
+
+
+    if (
+        validPatterns.length === 0
+    ) {
+
+        alert(
+            "No valid unique quiz combinations are available."
+        );
+
+        return;
+
+    }
+
+
+    quizScore = 0;
+
+    quizAnswered = 0;
+
+
+    const section =
+        document.getElementById(
+            "quizSection"
+        );
+
+
+    const container =
+        document.getElementById(
+            "quizQuestions"
+        );
+
+
+    section.classList.add(
+        "active"
+    );
+
+
+    container.innerHTML =
+        "";
+
+
+    document.getElementById(
+        "quizScore"
+    ).textContent =
+        "Score: 0 / 0";
+
+
+    const sheetMap =
+        createSheetMap(
+            selectedShapes
+        );
+
+
+    validPatterns.forEach(
+        (style,index) => {
+
+            createQuizQuestion(
+                container,
+                index + 1,
+                sheetMap,
+                difficulty,
+                style
+            );
+
+        }
+    );
+
+
+    section.scrollIntoView({
+        behavior: "smooth"
+    });
+
+}
+
+
+/* ======================================================
+   CREATE QUIZ QUESTION
+====================================================== */
+
+function createQuizQuestion(
+    container,
+    number,
+    sheetMap,
+    difficulty,
+    style
+) {
+
+    const template =
+        style.pattern;
+
+
+    const visibleLength =
+        Math.min(
+            7,
+            getVisibleLength(
+                difficulty
+            )
+        );
+
+
+    const sequence =
+        createSequence(
+            template,
+            visibleLength + 1
+        );
+
+
+    const correctLetter =
+        sequence[
+            visibleLength
+        ];
+
+
+    const box =
+        document.createElement("div");
+
+    box.className =
+        "quiz-question";
+
+
+    const heading =
+        document.createElement("strong");
+
+    heading.textContent =
+        "Question " +
+        number +
+        " — Pattern: " +
+        template.join("") +
+        ". What comes next?";
+
+
+    box.appendChild(heading);
+
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "pattern-row";
+
+
+    for (
+        let i = 0;
+        i < visibleLength;
+        i++
+    ) {
+
+        row.appendChild(
+            createPatternItem(
+                sheetMap,
+                sequence[i],
+                true
+            )
+        );
+
+    }
+
+
+    const questionMark =
+        document.createElement("div");
+
+    questionMark.className =
+        "missing-box";
+
+    questionMark.textContent =
+        "?";
+
+
+    row.appendChild(
+        questionMark
+    );
+
+
+    box.appendChild(row);
+
+
+    const options =
+        document.createElement("div");
+
+    options.className =
+        "quiz-options";
+
+
+    let optionLetters =
+        shuffle(
+            Object.keys(
+                sheetMap
+            )
+        );
+
+
+    optionLetters =
+        optionLetters.slice(
+            0,
+            Math.min(
+                4,
+                optionLetters.length
+            )
+        );
+
+
+    if (
+        !optionLetters.includes(
+            correctLetter
+        )
+    ) {
+
+        optionLetters[0] =
+            correctLetter;
+
+    }
+
+
+    optionLetters =
+        shuffle(
+            optionLetters
+        );
+
+
+    optionLetters.forEach(
+        letter => {
+
+            const button =
+                document.createElement("button");
+
+            button.className =
+                "quiz-option";
+
+            button.dataset.letter =
+                letter;
+
+
+            button.appendChild(
+                createShape(
+                    sheetMap[
+                        letter
+                    ].shape,
+
+                    sheetMap[
+                        letter
+                    ].color,
+
+                    true
+                )
+            );
+
+
+            const letterText =
+                document.createElement("small");
+
+            letterText.textContent =
+                letter;
+
+
+            button.appendChild(
+                letterText
+            );
+
+
+            button.onclick =
+                function() {
+
+                    if (
+                        box.dataset.answered ===
+                        "yes"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    box.dataset.answered =
+                        "yes";
+
+
+                    const buttons =
+                        options.querySelectorAll(
+                            ".quiz-option"
+                        );
+
+
+                    buttons.forEach(
+                        b =>
+                            b.disabled = true
+                    );
+
+
+                    if (
+                        letter ===
+                        correctLetter
+                    ) {
+
+                        button.classList.add(
+                            "correct"
+                        );
+
+                        quizScore++;
+
+                    }
+
+                    else {
+
+                        button.classList.add(
+                            "wrong"
+                        );
+
+
+                        buttons.forEach(
+                            b => {
+
+                                if (
+                                    b.dataset.letter ===
+                                    correctLetter
+                                ) {
+
+                                    b.classList.add(
+                                        "correct"
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    }
+
+
+                    quizAnswered++;
+
+                    updateQuizScore();
+
+                };
+
+
+            options.appendChild(button);
+
+        }
+    );
+
+
+    box.appendChild(options);
+
+    container.appendChild(box);
+
+}
+
+
+/* ======================================================
+   QUIZ SCORE
+====================================================== */
+
+function updateQuizScore() {
+
+    const score =
+        document.getElementById(
+            "quizScore"
+        );
+
+
+    score.textContent =
+        quizAnswered <
+        totalQuizQuestions
+
+            ? "Score: " +
+              quizScore +
+              " / " +
+              quizAnswered
+
+            : "Quiz Complete! Final Score: " +
+              quizScore +
+              " / " +
+              totalQuizQuestions;
+
+}
+
+
+/* ======================================================
+   EVENT LISTENERS
+====================================================== */
+
+document.querySelectorAll(
+    'input[name="activity"]'
+).forEach(
+    input => {
+
+        input.addEventListener(
+            "change",
+            updateActivityOptions
+        );
+
+    }
+);
+
+
+document.querySelectorAll(
+    'input[name="difficulty"]'
+).forEach(
+    input => {
+
+        input.addEventListener(
+            "change",
+            function() {
+
+                updateActivityOptions();
+
+                updatePatternStyleOptions();
+
+            }
+        );
+
+    }
+);
+
+
+/* ======================================================
+   RESET
+====================================================== */
+
+function resetOptions() {
+
+    document.getElementById(
+        "worksheetTitle"
+    ).value =
+        "Fun with Patterns!";
+
+
+    document.getElementById(
+        "teacherName"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "questionCount"
+    ).value =
+        8;
+
+
+    document.querySelectorAll(
+        ".shapeCheck"
+    ).forEach(
+        checkbox =>
+            checkbox.checked = true
+    );
+
+
+    document.querySelector(
+        'input[name="activity"][value="color"]'
+    ).checked =
+        true;
+
+
+    document.querySelector(
+        'input[name="difficulty"][value="level1"]'
+    ).checked =
+        true;
+
+
+    document.getElementById(
+        "showMissingChoices"
+    ).checked =
+        true;
+
+
+    updateActivityOptions();
+
+    updatePatternStyleOptions();
+
+    generateWorksheet();
+
+}
+
+
+/* ======================================================
+   INITIALIZE
+====================================================== */
+
+window.addEventListener(
+    "load",
+    function() {
+
+        updateActivityOptions();
+
+        updatePatternStyleOptions();
+
+        generateWorksheet();
+
+    }
+);
+
+</script>
+
+</body>
+</html>

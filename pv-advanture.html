@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Place Value Adventure – Learn & Play</title>
+  <style>
+    :root {
+      --hundreds: #1e88e5;
+      --tens: #43a047;
+      --ones: #fb8c00;
+      --text: #1a237e;
+      --star: #ffc107;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: linear-gradient(165deg, #e3f2fd 0%, #fff8e1 50%, #e8f5e9 100%);
+      min-height: 100vh;
+      color: var(--text);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      margin-bottom: 2px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 0.88rem;
+      opacity: 0.85;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    /* Range selector */
+    .range-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .range-selector span {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .range-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 2px solid #c5cae9;
+      background: #fff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .range-btn.active {
+      background: #3949ab;
+      color: white;
+      border-color: #3949ab;
+    }
+
+    .modes {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      justify-content: center;
+    }
+
+    .mode-btn {
+      padding: 7px 14px;
+      border-radius: 18px;
+      border: 2px solid #c5cae9;
+      background: #fff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .mode-btn.active {
+      background: #6a1b9a;
+      color: white;
+      border-color: #6a1b9a;
+    }
+
+    .main-card {
+      background: #fff;
+      border-radius: 22px;
+      box-shadow: 0 10px 36px rgba(26, 35, 126, 0.12);
+      padding: 16px;
+      max-width: 780px;
+      width: 100%;
+    }
+
+    /* Number display */
+    .number-display {
+      text-align: center;
+      margin-bottom: 14px;
+      padding: 12px;
+      background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .big-number {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #1565c0;
+      line-height: 1.1;
+    }
+
+    .number-name {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #6a1b9a;
+      margin-top: 2px;
+      min-height: 1.4em;
+    }
+
+    .expanded {
+      font-size: 0.95rem;
+      margin-top: 2px;
+      opacity: 0.9;
+    }
+
+    .feedback {
+      min-height: 22px;
+      margin-top: 4px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #2e7d32;
+    }
+
+    .speak-btn, .sound-toggle {
+      position: absolute;
+      top: 8px;
+      width: 34px;
+      height: 34px;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+    }
+
+    .sound-toggle { left: 10px; background: #546e7a; }
+    .speak-btn { right: 10px; background: #7e57c2; }
+
+    .score-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .stars { color: var(--star); letter-spacing: 1px; }
+
+    /* ===== PLACE VALUE TABLE (matches reference image) ===== */
+    .places {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      margin-bottom: 14px;
+      width: 100%;
+    }
+
+    .place {
+      flex: 1 1 0;
+      min-width: 0;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid #e0e0e0;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .place-header {
+      text-align: center;
+      padding: 10px 6px 8px;
+      color: white;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+    }
+
+    .place-header .mult {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      opacity: 0.9;
+      margin-top: 2px;
+    }
+
+    .place.hundreds .place-header { background: var(--hundreds); }
+    .place.tens .place-header { background: var(--tens); }
+    .place.ones .place-header { background: var(--ones); }
+
+    /* Slot grid – dashed circles */
+    .slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 12px 10px;
+      min-height: 140px;
+      background: #fafafa;
+      justify-items: center;
+      align-content: start;
+    }
+
+    .place.hundreds .slots { background: #e3f2fd; }
+    .place.tens .slots { background: #e8f5e9; }
+    .place.ones .slots { background: #fff3e0; }
+
+    .slot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px dashed #bbb;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: white;
+      cursor: default;
+      transition: transform 0.15s, background 0.15s;
+      user-select: none;
+    }
+
+    .slot.filled {
+      border-style: solid;
+      cursor: pointer;
+    }
+
+    .place.hundreds .slot.filled {
+      background: var(--hundreds);
+      border-color: #1565c0;
+      box-shadow: 0 2px 0 #0d47a1;
+    }
+
+    .place.tens .slot.filled {
+      background: var(--tens);
+      border-color: #2e7d32;
+      box-shadow: 0 2px 0 #1b5e20;
+    }
+
+    .place.ones .slot.filled {
+      background: var(--ones);
+      border-color: #ef6c00;
+      box-shadow: 0 2px 0 #e65100;
+    }
+
+    .slot.filled:active {
+      transform: scale(0.9);
+    }
+
+    /* Count under slots */
+    .place-count {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 800;
+      padding: 6px 0 4px;
+      margin: 0 10px;
+      border-radius: 12px;
+    }
+
+    .place.hundreds .place-count { background: #bbdefb; color: #0d47a1; }
+    .place.tens .place-count { background: #c8e6c9; color: #1b5e20; }
+    .place.ones .place-count { background: #ffe0b2; color: #e65100; }
+
+    /* − / + under each column */
+    .place-controls {
+      display: flex;
+      gap: 8px;
+      padding: 8px 10px 12px;
+      justify-content: center;
+    }
+
+    .place-controls button {
+      flex: 1;
+      max-width: 70px;
+      height: 40px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+      transition: transform 0.1s;
+    }
+
+    .place-controls button:active { transform: scale(0.95); }
+
+    .btn-minus {
+      background: #f5f5f5;
+      color: #757575;
+      border: 2px solid #e0e0e0 !important;
+      box-shadow: none !important;
+    }
+
+    .place.hundreds .btn-plus { background: var(--hundreds); color: white; }
+    .place.tens .btn-plus { background: var(--tens); color: white; }
+    .place.ones .btn-plus { background: var(--ones); color: white; }
+
+    /* Challenge */
+    .challenge-panel {
+      display: none;
+      background: #f3e5f5;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+      text-align: center;
+      border: 2px solid #ce93d8;
+    }
+
+    .challenge-panel.show { display: block; }
+
+    .challenge-target {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #6a1b9a;
+    }
+
+    .btn-check {
+      margin-top: 8px;
+      padding: 10px 20px;
+      background: #81c784;
+      color: #1b5e20;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #66bb6a;
+    }
+
+    /* Global actions */
+    .global-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .global-controls button {
+      padding: 9px 14px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+    }
+
+    .btn-clear { background: #ef9a9a; color: #b71c1c; }
+    .btn-hint { background: #fff59d; color: #f57f17; }
+    .btn-plus10 { background: #90caf9; color: #0d47a1; }
+
+    .tip {
+      background: #fff8e1;
+      border-left: 5px solid #ffb300;
+      padding: 10px 12px;
+      border-radius: 0 12px 12px 0;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .tip strong { color: #e65100; }
+
+    .toast {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a237e;
+      color: white;
+      padding: 11px 20px;
+      border-radius: 50px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 100;
+      pointer-events: none;
+      font-size: 0.92rem;
+      text-align: center;
+      max-width: 90%;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Hide columns based on range */
+    .place.hidden { display: none; }
+
+    @media (max-width: 520px) {
+      .slot { width: 26px; height: 26px; font-size: 0.75rem; }
+      .place-count { font-size: 1.5rem; }
+      .place-header { font-size: 0.8rem; padding: 8px 4px; }
+      .big-number { font-size: 2.3rem; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Place Value Adventure</h1>
+  <p class="subtitle">Play • Hear the number • Master the places</p>
+
+  <!-- Choose how far to learn -->
+  <div class="range-selector">
+    <span>Learn up to:</span>
+    <button class="range-btn" data-range="10" onclick="setRange(10)">10</button>
+    <button class="range-btn active" data-range="100" onclick="setRange(100)">100</button>
+    <button class="range-btn" data-range="1000" onclick="setRange(1000)">1000</button>
+  </div>
+
+  <div class="modes">
+    <button class="mode-btn active" data-mode="explore" onclick="setMode('explore')">Explore</button>
+    <button class="mode-btn" data-mode="challenge" onclick="setMode('challenge')">Challenge</button>
+  </div>
+
+  <div class="main-card">
+    <div class="score-bar">
+      <span>Stars: <span class="stars" id="starDisplay">☆ ☆ ☆</span></span>
+      <span id="scoreText">Free Play</span>
+    </div>
+
+    <div class="number-display">
+      <button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Sound on/off">🔊</button>
+      <button class="speak-btn" onclick="speakCurrentNumber()" title="Hear the number">🔊</button>
+      <div class="big-number" id="totalNumber">0</div>
+      <div class="number-name" id="numberName">zero</div>
+      <div class="expanded" id="expandedForm">0 ones</div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="challenge-panel" id="challengePanel">
+      <div style="font-size:0.9rem; margin-bottom:2px;">Make this number:</div>
+      <div class="challenge-target" id="challengeTarget">27</div>
+      <button class="btn-check" onclick="checkChallenge()">Check My Answer</button>
+    </div>
+
+    <!-- PLACE VALUE TABLE -->
+    <div class="places" id="placesRow">
+      <!-- HUNDREDS -->
+      <div class="place hundreds" id="hundredsPlace">
+        <div class="place-header">
+          HUNDREDS
+          <span class="mult">×100</span>
+        </div>
+        <div class="slots" id="hundredsSlots"></div>
+        <div class="place-count" id="hundredsCount">0</div>
+        <div class="place-controls">
+          <button class="btn-minus" onclick="changePlace('hundreds', -1)">−</button>
+          <button class="btn-plus" onclick="changePlace('hundreds', 1)">+</button>
+        </div>
+      </div>
+
+      <!-- TENS -->
+      <div class="place tens" id="tensPlace">
+        <div class="place-header">
+          TENS
+          <span class="mult">×10</span>
+        </div>
+        <div class="slots" id="tensSlots"></div>
+        <div class="place-count" id="tensCount">0</div>
+        <div class="place-controls">
+          <button class="btn-minus" onclick="changePlace('tens', -1)">−</button>
+          <button class="btn-plus" onclick="changePlace('tens', 1)">+</button>
+        </div>
+      </div>
+
+      <!-- ONES -->
+      <div class="place ones" id="onesPlace">
+        <div class="place-header">
+          ONES
+          <span class="mult">×1</span>
+        </div>
+        <div class="slots" id="onesSlots"></div>
+        <div class="place-count" id="onesCount">0</div>
+        <div class="place-controls">
+          <button class="btn-minus" onclick="changePlace('ones', -1)">−</button>
+          <button class="btn-plus" onclick="changePlace('ones', 1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="global-controls">
+      <button class="btn-plus10" onclick="addTenOnes()">+10 Ones</button>
+      <button class="btn-clear" onclick="clearAll()">Clear All</button>
+      <button class="btn-hint" onclick="showHint()">Hint</button>
+    </div>
+
+    <div class="tip" id="tipBox">
+      <strong>How to play:</strong><br>
+      • Use <strong>+</strong> and <strong>−</strong> under each column to add or remove.<br>
+      • Click a filled circle to remove that block.<br>
+      • When a place reaches 10 it regroups to the next place (left).<br>
+      • Choose “Learn up to 10 / 100 / 1000” at the top.
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ======================
+    // STATE
+    // ======================
+    let ones = 0;
+    let tens = 0;
+    let hundreds = 0;
+    let maxRange = 100;          // 10 | 100 | 1000
+    let soundOn = true;
+    let mode = "explore";
+    let challengeNumber = 0;
+    let starsEarned = 0;
+    let challengesWon = 0;
+
+    const MAX_PER_PLACE = 9;     // show up to 9 slots (classic place-value)
+
+    // ======================
+    // NUMBER NAMES
+    // ======================
+    const onesNames = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+                      "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+                      "sixteen", "seventeen", "eighteen", "nineteen"];
+    const tensNames = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+
+    function numberToWords(n) {
+      if (n === 0) return "zero";
+      if (n < 0 || n > 999) return String(n);
+      let words = [];
+      const h = Math.floor(n / 100);
+      const rem = n % 100;
+      if (h > 0) words.push(onesNames[h] + " hundred");
+      if (rem > 0) {
+        if (rem < 20) words.push(onesNames[rem]);
+        else {
+          const t = Math.floor(rem / 10);
+          const o = rem % 10;
+          words.push(tensNames[t] + (o ? "-" + onesNames[o] : ""));
+        }
+      }
+      return words.join(" ");
+    }
+
+    // ======================
+    // SOUND
+    // ======================
+    function playTone(freq, dur = 0.12, type = "sine") {
+      if (!soundOn) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + dur);
+      } catch (e) {}
+    }
+
+    function playSuccess() {
+      playTone(523, 0.1);
+      setTimeout(() => playTone(659, 0.1), 90);
+      setTimeout(() => playTone(784, 0.16), 180);
+    }
+
+    function playRegroup() {
+      playTone(392, 0.09);
+      setTimeout(() => playTone(523, 0.14), 80);
+    }
+
+    function speak(text) {
+      if (!soundOn || !window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.92;
+      u.pitch = 1.05;
+      const voices = window.speechSynthesis.getVoices();
+      const pref = voices.find(v => v.lang.startsWith("en") && (v.name.includes("Female") || v.name.includes("Google") || v.name.includes("Samantha")));
+      if (pref) u.voice = pref;
+      window.speechSynthesis.speak(u);
+    }
+
+    function speakCurrentNumber() {
+      speak(numberToWords(hundreds * 100 + tens * 10 + ones));
+    }
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      document.getElementById("soundToggle").textContent = soundOn ? "🔊" : "🔇";
+      if (soundOn) playTone(600, 0.08);
+    }
+
+    // ======================
+    // RANGE (10 / 100 / 1000)
+    // ======================
+    function setRange(r) {
+      maxRange = r;
+      document.querySelectorAll(".range-btn").forEach(b => {
+        b.classList.toggle("active", Number(b.dataset.range) === r);
+      });
+
+      // Show / hide columns
+      document.getElementById("hundredsPlace").classList.toggle("hidden", r < 1000);
+      document.getElementById("tensPlace").classList.toggle("hidden", r < 100);
+
+      // Reset if current value exceeds new range
+      if (r === 10) { hundreds = 0; tens = 0; if (ones > 9) ones = 9; }
+      if (r === 100) { hundreds = 0; }
+
+      updateDisplay();
+      showFeedback(r === 10 ? "Learning ones (up to 10)" : r === 100 ? "Learning tens & ones (up to 100)" : "Learning hundreds, tens & ones (up to 1000)");
+    }
+
+    // ======================
+    // CORE CHANGE + REGROUP
+    // ======================
+    function changePlace(place, delta) {
+      if (place === "ones") ones += delta;
+      else if (place === "tens") tens += delta;
+      else if (place === "hundreds") hundreds += delta;
+
+      // Prevent negative
+      if (ones < 0) ones = 0;
+      if (tens < 0) tens = 0;
+      if (hundreds < 0) hundreds = 0;
+
+      // Auto-regroup when ≥ 10
+      let regrouped = false;
+      while (ones >= 10 && maxRange >= 100) {
+        ones -= 10;
+        tens += 1;
+        regrouped = true;
+      }
+      while (tens >= 10 && maxRange >= 1000) {
+        tens -= 10;
+        hundreds += 1;
+        regrouped = true;
+      }
+
+      if (delta > 0) playTone(place === "ones" ? 520 : place === "tens" ? 440 : 349, 0.08);
+      else playTone(300, 0.08);
+
+      if (regrouped) {
+        playRegroup();
+        showFeedback("Regrouped! 10 in a place became 1 of the next place.");
+        showToast("10 → next place!");
+      }
+
+      updateDisplay();
+    }
+
+    function removeOneFromPlace(place) {
+      changePlace(place, -1);
+    }
+
+    function addTenOnes() {
+      ones += 10;
+      // trigger regroup
+      let regrouped = false;
+      while (ones >= 10 && maxRange >= 100) {
+        ones -= 10;
+        tens += 1;
+        regrouped = true;
+      }
+      while (tens >= 10 && maxRange >= 1000) {
+        tens -= 10;
+        hundreds += 1;
+        regrouped = true;
+      }
+      playTone(520, 0.08);
+      if (regrouped) {
+        playRegroup();
+        showToast("10 ones → 1 ten");
+      }
+      showFeedback("Added 10 ones");
+      updateDisplay();
+    }
+
+    function clearAll() {
+      ones = tens = hundreds = 0;
+      showFeedback("Cleared! Ready to explore.");
+      updateDisplay();
+    }
+
+    // ======================
+    // RENDER SLOTS
+    // ======================
+    function renderSlots(place, count) {
+      const container = document.getElementById(place + "Slots");
+      container.innerHTML = "";
+      const showCount = Math.min(count, MAX_PER_PLACE);
+
+      for (let i = 0; i < MAX_PER_PLACE; i++) {
+        const slot = document.createElement("div");
+        slot.className = "slot" + (i < showCount ? " filled" : "");
+        if (i < showCount) {
+          // Numbers on blocks (especially clear for ones)
+          if (place === "ones") slot.textContent = "1";
+          else if (place === "tens") slot.textContent = "10";
+          else slot.textContent = "100";
+
+          slot.title = "Click to remove";
+          slot.onclick = () => removeOneFromPlace(place);
+        }
+        container.appendChild(slot);
+      }
+    }
+
+    function updateDisplay() {
+      const total = hundreds * 100 + tens * 10 + ones;
+      document.getElementById("totalNumber").textContent = total;
+      document.getElementById("numberName").textContent = numberToWords(total);
+      document.getElementById("hundredsCount").textContent = hundreds;
+      document.getElementById("tensCount").textContent = tens;
+      document.getElementById("onesCount").textContent = ones;
+
+      let parts = [];
+      if (hundreds > 0) parts.push(`${hundreds} hundred${hundreds > 1 ? "s" : ""}`);
+      if (tens > 0) parts.push(`${tens} ten${tens > 1 ? "s" : ""}`);
+      if (ones > 0) parts.push(`${ones} one${ones > 1 ? "s" : ""}`);
+      if (parts.length === 0) parts.push("0 ones");
+      document.getElementById("expandedForm").textContent = parts.join(" + ") + ` = ${total}`;
+
+      renderSlots("hundreds", hundreds);
+      renderSlots("tens", tens);
+      renderSlots("ones", ones);
+
+      updateStars();
+    }
+
+    // ======================
+    // MODES & CHALLENGE
+    // ======================
+    function setMode(m) {
+      mode = m;
+      document.querySelectorAll(".mode-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.mode === m);
+      });
+      const panel = document.getElementById("challengePanel");
+      if (m === "challenge") {
+        panel.classList.add("show");
+        document.getElementById("scoreText").textContent = "Challenge Mode";
+        newChallenge();
+      } else {
+        panel.classList.remove("show");
+        document.getElementById("scoreText").textContent = "Free Play";
+      }
+    }
+
+    function newChallenge() {
+      if (maxRange === 10) {
+        challengeNumber = Math.floor(Math.random() * 9) + 1;
+      } else if (maxRange === 100) {
+        challengeNumber = Math.floor(Math.random() * 89) + 10;
+      } else {
+        challengeNumber = Math.floor(Math.random() * 800) + 100;
+      }
+      document.getElementById("challengeTarget").textContent = challengeNumber;
+      ones = tens = hundreds = 0;
+      updateDisplay();
+      showFeedback("Build the number " + challengeNumber);
+      speak("Make the number " + numberToWords(challengeNumber));
+    }
+
+    function checkChallenge() {
+      const total = hundreds * 100 + tens * 10 + ones;
+      if (total === challengeNumber) {
+        challengesWon++;
+        starsEarned = Math.min(3, Math.floor(challengesWon / 2) + 1);
+        playSuccess();
+        showFeedback("Correct! " + numberToWords(total) + " 🎉");
+        showToast("Well done!");
+        speak("Yes! " + numberToWords(total) + ". Great job!");
+        updateStars();
+        setTimeout(newChallenge, 1600);
+      } else {
+        playTone(200, 0.18, "square");
+        showFeedback(`Not yet. You made ${total}. Keep trying!`);
+        speak("Not yet. You made " + numberToWords(total));
+      }
+    }
+
+    function updateStars() {
+      document.getElementById("starDisplay").textContent =
+        ("★ ".repeat(starsEarned) + "☆ ".repeat(3 - starsEarned)).trim();
+    }
+
+    function showHint() {
+      if (mode === "challenge") {
+        const total = hundreds * 100 + tens * 10 + ones;
+        if (total < challengeNumber) showFeedback("You need more. Try adding in the ones or tens.");
+        else if (total > challengeNumber) showFeedback("Too many! Use the − buttons or click circles to remove.");
+        else showFeedback("You have the right number – press Check!");
+        return;
+      }
+      if (ones >= 9) showFeedback("One more one will regroup into a ten!");
+      else if (tens >= 9 && maxRange >= 1000) showFeedback("One more ten will regroup into a hundred!");
+      else showFeedback("Press + under a column to add. Click a circle to remove.");
+    }
+
+    function showFeedback(msg) {
+      const el = document.getElementById("feedback");
+      el.textContent = msg;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2000);
+    }
+
+    // ======================
+    // INIT
+    // ======================
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = () => {};
+    }
+
+    setRange(100); // default: up to 100 (tens + ones)
+    updateDisplay();
+    showFeedback("Choose how far to learn, then use + and − under each column.");
+  </script>
+</body>
+</html>

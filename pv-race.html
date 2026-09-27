@@ -4,11 +4,15 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Place Value Race</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%237c3aed'/%3E%3Cpolygon points='13,20 45,20 52,13 20,13' fill='%23ddd6fe' stroke='%23ddd6fe' stroke-width='2.4' stroke-linejoin='round'/%3E%3Cpolygon points='45,20 52,13 52,45 45,52' fill='%23a78bfa' stroke='%23a78bfa' stroke-width='2.4' stroke-linejoin='round'/%3E%3Cpolygon points='13,20 45,20 45,52 13,52' fill='%23ffffff' stroke='%23ffffff' stroke-width='2.4' stroke-linejoin='round'/%3E%3Ccircle cx='21' cy='44' r='5' fill='%2322c55e'/%3E%3Ccircle cx='29' cy='36' r='5' fill='%23f59e0b'/%3E%3Ccircle cx='37' cy='28' r='5' fill='%233b82f6'/%3E%3C/svg%3E">
 <style>
 :root{
   --bg:#eef5ff;--card:#fff;--ink:#1e293b;--muted:#64748b;--line:#dbe5f0;
   --hundreds:#3b82f6;--tens:#f59e0b;--ones:#22c55e;--accent:#7c3aed;
-  --shadow:0 8px 22px rgba(30,41,59,.10)
+  --shadow:0 8px 22px rgba(30,41,59,.10);
+  /* responsive place-value circle sizing */
+  --dot-size: clamp(26px, 7.6vw, 38px);
+  --dot-gap: clamp(5px, 1.4vw, 8px);
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -16,7 +20,10 @@ background:linear-gradient(180deg,#edf4ff,#f8fbff 50%,#f1f5f9);color:var(--ink)}
 .wrap{max-width:1180px;margin:auto;padding:16px}
 header{background:linear-gradient(135deg,#4338ca,#7c3aed);color:#fff;border-radius:22px;
 padding:20px 22px;box-shadow:var(--shadow);margin-bottom:14px}
-header .title{font-size:clamp(25px,4vw,40px);font-weight:950;letter-spacing:-1px}
+header .title{font-size:clamp(25px,4vw,40px);font-weight:950;letter-spacing:-1px;
+display:flex;align-items:center;gap:.35em}
+header .title .title-icon{flex:0 0 auto;display:block;width:1em;height:1em;
+filter:drop-shadow(0 2px 4px rgba(15,23,42,.35))}
 header p{margin:6px 0 0;opacity:.94;line-height:1.45;font-size:14px;max-width:760px}
 
 /* ---------- pages ---------- */
@@ -35,6 +42,13 @@ button:hover{transform:translateY(-1px)} button:disabled{opacity:.45;cursor:not-
 .primary{background:#7c3aed;color:#fff;box-shadow:0 6px 14px rgba(124,58,237,.20)}
 .secondary{background:#ede9fe;color:#5b21b6}.ghost{background:#f1f5f9;color:#334155}
 .big{width:100%;padding:14px;font-size:16px;margin-top:12px;border-radius:14px}
+
+/* small die icon used inside buttons and headings */
+.btn-die{display:inline-block;vertical-align:-.22em;margin-right:.4em;
+filter:drop-shadow(0 1px 1.5px rgba(15,23,42,.25))}
+.inline-die{display:inline-block;vertical-align:-.14em;margin-right:.35em;
+width:1em;height:1em;
+filter:drop-shadow(0 1px 2px rgba(15,23,42,.28))}
 
 /* ---------- mode picker ---------- */
 .mode-grid{display:grid;gap:10px}
@@ -93,50 +107,64 @@ color:#4c1d95;text-shadow:0 2px 0 #ede9fe}
 .progress>div{height:100%;width:0;background:linear-gradient(90deg,#a78bfa,#6366f1);transition:width .35s}
 
 .board{display:grid;gap:10px}
-.place{position:relative;border:1px solid var(--line);border-radius:17px;padding:11px 10px 10px;background:#fbfdff;overflow:hidden}
+.place{position:relative;border:1px solid var(--line);border-radius:17px;
+padding: clamp(8px, 2vw, 11px) clamp(6px, 1.6vw, 10px) clamp(8px, 2vw, 10px);
+background:#fbfdff;overflow:hidden}
 .place::before{content:"";position:absolute;top:0;left:0;right:0;height:5px}
 .place.h::before{background:var(--hundreds)} .place.t::before{background:var(--tens)} .place.o::before{background:var(--ones)}
-.place-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.place-name{font-size:14px;font-weight:950}.place-value{font-size:10px;color:var(--muted);font-weight:800}
-.digit{font-size:50px;line-height:1;font-weight:1000;text-align:center;margin:6px 0}
-.digit.wide{font-size:38px}
+.place-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.place-name{font-size: clamp(11px, 2.6vw, 14px);font-weight:950}
+.place-value{font-size:10px;color:var(--muted);font-weight:800}
+.digit{font-size: clamp(34px, 8vw, 50px);line-height:1;font-weight:1000;text-align:center;margin:6px 0}
+.digit.wide{font-size: clamp(26px, 6vw, 38px)}
 
-/* ---------- circles with numbers inside ---------- */
+/* ---------- circles with numbers inside (responsive) ---------- */
 .dots{
   display:grid;
-  grid-template-columns:repeat(3,38px);
-  grid-template-rows:repeat(3,38px);
+  grid-template-columns:repeat(3, var(--dot-size));
+  grid-template-rows:repeat(3, var(--dot-size));
   justify-content:center;
-  gap:8px;
+  gap: var(--dot-gap);
   align-content:center;
 }
 .dot{
-  width:38px;height:38px;border-radius:50%;
-  border:2px solid #d4dce8;background:#fff;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius:50%;
+  border:2px solid #d4dce8;
+  background:#fff;
   display:grid;place-items:center;
   font-weight:950;color:#94a3b8;line-height:1;
   user-select:none;
   transition:background .18s,border-color .18s,color .18s,transform .18s;
 }
-.dot.h{font-size:10px}
-.dot.t{font-size:12px}
-.dot.o{font-size:14px}
+/* fonts scale with the circle size so numbers stay legible */
+.dot.h{font-size: calc(var(--dot-size) * .26)}
+.dot.t{font-size: calc(var(--dot-size) * .32)}
+.dot.o{font-size: calc(var(--dot-size) * .37)}
 .dot.on{transform:scale(1.05)}
 .dot.on.h{background:#93c5fd;border-color:#3b82f6;color:#1e3a8a}
 .dot.on.t{background:#fcd34d;border-color:#f59e0b;color:#78350f}
 .dot.on.o{background:#86efac;border-color:#22c55e;color:#14532d}
 .place-note{font-size:10px;color:var(--muted);text-align:center;margin-top:6px;font-weight:750}
 
-/* ---------- dice ---------- */
+/* ---------- dice (3D PV Dice shell) ---------- */
 .dice-area{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
-.dice-title{font-size:14px;font-weight:950;margin-bottom:7px;text-align:center}
+.dice-title{font-size:14px;font-weight:950;margin-bottom:7px;text-align:center;
+display:flex;align-items:center;justify-content:center;gap:.35em}
 .dice-row{display:grid;gap:10px}
 .die-card{border:1px solid var(--line);border-radius:16px;padding:9px;text-align:center;background:#fff}
-.die{width:68px;height:68px;border-radius:15px;margin:4px auto 7px;display:grid;place-items:center;background:#fff;border:4px solid currentColor;box-shadow:0 7px 13px rgba(15,23,42,.10)}
-.die.h{color:var(--hundreds)} .die.t{color:var(--tens)} .die.o{color:var(--ones)}
-.face{display:grid;grid-template-columns:repeat(3,9px);gap:5px;justify-content:center}
-.pip{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:0}
-.pip.show{opacity:1}
+.die{
+  width:78px;height:78px;
+  margin:4px auto 7px;
+  display:grid;place-items:center;
+  background:transparent;border:0;box-shadow:none;
+}
+.face{display:block;width:100%;height:100%}
+.die svg{
+  display:block;width:100%;height:100%;
+  filter:drop-shadow(0 3px 6px rgba(15,23,42,.22));
+}
 .die-label{font-size:12px;font-weight:950}.die-help{font-size:10px;color:var(--muted);margin:1px 0 7px}
 .roll-btn{width:100%;font-size:11px;padding:8px}
 .dice-actions{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px}.dice-actions button{width:100%}
@@ -194,7 +222,11 @@ padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
 /* ---------- MOVE OUTCOME POPUP ---------- */
 .move-box{width:min(720px,100%);text-align:center}
-.move-player-name{font-size:clamp(20px,3.5vw,26px);font-weight:950;color:#4c1d95}
+.move-player-name{
+  font-size:clamp(20px,3.5vw,26px);font-weight:950;color:#4c1d95;
+  display:flex;align-items:center;justify-content:center;gap:.35em;flex-wrap:wrap;
+}
+.move-player-name .inline-die{width:1.05em;height:1.05em;margin-right:0}
 .move-roll-label{font-size:14px;color:#475569;font-weight:750;margin-top:3px}
 
 .move-equation{
@@ -238,7 +270,11 @@ padding:12px;margin:10px 0;font-size:14px;font-weight:800;color:#4c1d95;text-ali
 .reject-icon{font-size:64px;line-height:1;margin-bottom:6px}
 .reject-title{font-size:clamp(22px,4vw,30px);font-weight:1000;color:#dc2626;margin:0 0 6px}
 .reject-sub{font-size:14px;color:#475569;font-weight:750;margin-bottom:8px}
-.reject-player{font-size:18px;font-weight:950;color:#4c1d95;margin-bottom:8px}
+.reject-player{
+  font-size:18px;font-weight:950;color:#4c1d95;margin-bottom:8px;
+  display:flex;align-items:center;justify-content:center;gap:.35em;flex-wrap:wrap;
+}
+.reject-player .inline-die{width:1.05em;height:1.05em;margin-right:0}
 .reject-message{background:#fef2f2;border:2px solid #fecaca;border-radius:14px;
 padding:12px;font-size:14px;font-weight:800;color:#991b1b;line-height:1.55;text-align:left;margin:10px 0}
 .reject-message b{color:#7f1d1d}
@@ -270,11 +306,9 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
   .dice-row{grid-template-columns:1fr !important}
   .dice-actions,.bottom-tools,.win-btns{grid-template-columns:1fr}
   .game-bar{grid-template-columns:1fr}
-  .dots{grid-template-columns:repeat(3,34px);grid-template-rows:repeat(3,34px);gap:6px}
-  .dot{width:34px;height:34px}
-  .dot.h{font-size:9px}
   .move-places{grid-template-columns:1fr !important}
   .target-grid{grid-template-columns:1fr}
+  .die{width:70px;height:70px}
 }
 </style>
 </head>
@@ -284,7 +318,18 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
 
 <div class="wrap">
   <header>
-    <div class="title">🎲 Place Value Race</div>
+    <div class="title">
+      <svg class="title-icon" viewBox="8 13 79 79" width="1em" height="1em" role="img" aria-label="Place Value Dice">
+        <title>Place Value Dice</title>
+        <polygon points="10,30 70,30 85,15 25,15" fill="#ddd6fe" stroke="#ddd6fe" stroke-width="2.4" stroke-linejoin="round"/>
+        <polygon points="70,30 85,15 85,75 70,90" fill="#a78bfa" stroke="#a78bfa" stroke-width="2.4" stroke-linejoin="round"/>
+        <polygon points="10,30 70,30 70,90 10,90" fill="#ffffff" stroke="#ffffff" stroke-width="2.4" stroke-linejoin="round"/>
+        <circle cx="22" cy="42" r="5" fill="#22c55e"/>
+        <circle cx="40" cy="60" r="5" fill="#f59e0b"/>
+        <circle cx="58" cy="78" r="5" fill="#3b82f6"/>
+      </svg>
+      <span>Place Value Race</span>
+    </div>
     <p>Roll, add, carry, and learn: <b>10 ones become 1 ten</b> and <b>10 tens become 1 hundred</b>.</p>
   </header>
 
@@ -368,7 +413,7 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
         <div class="turn-help" id="turnHelp">Choose a die below.</div>
       </div>
       <div class="bar-actions">
-        <button class="secondary" id="rollAllBtn">🎲 Roll All</button>
+        <button class="secondary" id="rollAllBtn">Roll All</button>
         <button class="ghost" id="newRoundBtn">🔁 New Round</button>
         <button class="ghost" id="backToSetupBtn">⚙️ Setup</button>
       </div>
@@ -381,26 +426,26 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
         <div id="boardsArea" class="boards"></div>
 
         <section class="dice-area">
-          <div class="dice-title" id="diceTitle">🎲 Dice Actions</div>
+          <div class="dice-title" id="diceTitle">Dice Actions</div>
           <div class="dice-row" id="diceRow">
             <div class="die-card" data-place="h">
-              <div class="die h" id="dieH"><div class="face"></div></div>
+              <div class="die" id="dieH"><div class="face"></div></div>
               <div class="die-label">Hundreds Die</div><div class="die-help">1–6 × 100</div>
               <button class="primary roll-btn" data-place="h">Roll Hundreds</button>
             </div>
             <div class="die-card" data-place="t">
-              <div class="die t" id="dieT"><div class="face"></div></div>
+              <div class="die" id="dieT"><div class="face"></div></div>
               <div class="die-label">Tens Die</div><div class="die-help">1–6 × 10</div>
               <button class="primary roll-btn" data-place="t">Roll Tens</button>
             </div>
             <div class="die-card" data-place="o">
-              <div class="die o" id="dieO"><div class="face"></div></div>
+              <div class="die" id="dieO"><div class="face"></div></div>
               <div class="die-label">Ones Die</div><div class="die-help">1–6 × 1</div>
               <button class="primary roll-btn" data-place="o">Roll Ones</button>
             </div>
           </div>
           <div class="dice-actions">
-            <button class="secondary" id="rollAllBtn2">🎲 Roll All</button>
+            <button class="secondary" id="rollAllBtn2">Roll All</button>
             <button class="ghost" id="readyBtn">↩️ Ready for Next Turn</button>
           </div>
         </section>
@@ -542,6 +587,33 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
     t:"10 tens → 1 hundred",
     o:"10 ones → 1 ten"
   };
+
+  const PIP_COLOR = { h:"#3b82f6", t:"#f59e0b", o:"#22c55e" };
+  const PIP_XS = [22, 40, 58];
+  const PIP_YS = [42, 60, 78];
+  const PIP_R  = 5.2;
+
+  // compact inline die used inside buttons and headings
+  const DIE_ICON_BTN =
+    `<svg class="btn-die" viewBox="8 13 79 79" width="1.15em" height="1.15em" aria-hidden="true">` +
+      `<polygon points="10,30 70,30 85,15 25,15" fill="#ddd6fe"/>` +
+      `<polygon points="70,30 85,15 85,75 70,90" fill="#a78bfa"/>` +
+      `<polygon points="10,30 70,30 70,90 10,90" fill="#ffffff"/>` +
+      `<circle cx="22" cy="42" r="4.5" fill="#22c55e"/>` +
+      `<circle cx="40" cy="60" r="4.5" fill="#f59e0b"/>` +
+      `<circle cx="58" cy="78" r="4.5" fill="#3b82f6"/>` +
+    `</svg>`;
+
+  // same die but for headings / titles (self-styled via .inline-die)
+  const DIE_ICON_INLINE =
+    `<svg class="inline-die" viewBox="8 13 79 79" width="1em" height="1em" aria-hidden="true">` +
+      `<polygon points="10,30 70,30 85,15 25,15" fill="#ddd6fe"/>` +
+      `<polygon points="70,30 85,15 85,75 70,90" fill="#a78bfa"/>` +
+      `<polygon points="10,30 70,30 70,90 10,90" fill="#ffffff"/>` +
+      `<circle cx="22" cy="42" r="4.5" fill="#22c55e"/>` +
+      `<circle cx="40" cy="60" r="4.5" fill="#f59e0b"/>` +
+      `<circle cx="58" cy="78" r="4.5" fill="#3b82f6"/>` +
+    `</svg>`;
 
   const START_OPTIONS = {
     10:   [0, 2, 5, 8],
@@ -701,7 +773,6 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
     return d;
   }
 
-  // no leading zeros (0 stays "0")
   function displayNumber(n){
     const safe = Math.max(0, Math.min(state.target, Math.round(n)));
     return String(safe);
@@ -837,19 +908,31 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
   }
 
   /* ============================================================
-     DICE
+     DICE — 3D PV Dice shell
   ============================================================ */
+  function dieSVG(place, value){
+    const color = PIP_COLOR[place] || "#7c3aed";
+    const patt  = PIP_PATTERNS[value] || [];
+    let pips = "";
+    patt.forEach(i => {
+      const cx = PIP_XS[i % 3];
+      const cy = PIP_YS[Math.floor(i / 3)];
+      pips += `<circle cx="${cx}" cy="${cy}" r="${PIP_R}" fill="${color}"/>`;
+    });
+    return `
+      <svg viewBox="8 13 79 79" width="100%" height="100%" role="img" aria-label="Die showing ${value}">
+        <polygon points="10,30 70,30 85,15 25,15" fill="#ddd6fe"/>
+        <polygon points="70,30 85,15 85,75 70,90" fill="#a78bfa"/>
+        <polygon points="10,30 70,30 70,90 10,90" fill="#ffffff"/>
+        ${pips}
+      </svg>`;
+  }
+
   function makeDieFace(place, value){
     const die = $("die" + place.toUpperCase());
     if (!die) return;
     const face = die.querySelector(".face");
-    face.innerHTML = "";
-    const pattern = PIP_PATTERNS[value] || [];
-    for (let i = 0; i < 9; i++){
-      const p = document.createElement("div");
-      p.className = "pip" + (pattern.includes(i) ? " show" : "");
-      face.appendChild(p);
-    }
+    face.innerHTML = dieSVG(place, value);
   }
 
   function animateDie(place){
@@ -875,9 +958,12 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
     $("diceRow").style.gridTemplateColumns = `repeat(${state.places.length}, 1fr)`;
 
     const count = state.places.length;
-    const label = count === 1 ? "🎲 Roll" : count === 2 ? "🎲 Roll Both" : "🎲 Roll All Three";
-    $("rollAllBtn").textContent  = count === 1 ? "🎲 Roll Die" : label;
-    $("rollAllBtn2").textContent = label;
+    const label = count === 1 ? "Roll Die" : count === 2 ? "Roll Both" : "Roll All Three";
+    $("rollAllBtn").innerHTML  = DIE_ICON_BTN + " " + label;
+    $("rollAllBtn2").innerHTML = DIE_ICON_BTN + " " + label;
+
+    // 🆕 die icon in the "Dice Actions" title
+    $("diceTitle").innerHTML = DIE_ICON_INLINE + " Dice Actions";
 
     state.places.forEach(p => makeDieFace(p, 1));
   }
@@ -964,7 +1050,8 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
   }
 
   function buildMovePopup({ player, before, after, added, rollTitle }){
-    $("movePlayerName").textContent = "🎲 " + player.name;
+    // 🆕 use the PV Dice icon instead of the emoji
+    $("movePlayerName").innerHTML = DIE_ICON_INLINE + " " + escapeHtml(player.name);
     $("moveRollLabel").textContent = rollTitle;
 
     $("moveEquation").innerHTML =
@@ -998,10 +1085,11 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
   }
 
   /* ============================================================
-     REJECT POPUP (roll exceeds target — turn still passes)
+     REJECT POPUP
   ============================================================ */
   function showRejectPopup({ player, before, added, wouldBe, rollTitle }, callback){
-    $("rejectPlayer").textContent = "🎲 " + player.name;
+    // 🆕 PV Dice icon instead of the emoji
+    $("rejectPlayer").innerHTML = DIE_ICON_INLINE + " " + escapeHtml(player.name);
     $("rejectSub").textContent = rollTitle;
 
     $("rejectEquation").innerHTML =
@@ -1085,7 +1173,6 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
   }
 
   function applyRejectedMove(player, before, added, wouldBe, rollTitle){
-    // The roll already counted. Move is NOT applied. Turn passes.
     setLatest(
       `<b>${escapeHtml(player.name)}</b> — ${rollTitle}. ` +
       `+${added} would make <b>${wouldBe}</b>, past ${state.target}. Move rejected — turn passes.`
@@ -1100,7 +1187,6 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
 
     renderHistory();
 
-    const target = state.target;
     const myName = player.name;
 
     showRejectPopup(
@@ -1140,7 +1226,6 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
 
       const value = (fixedValue == null) ? await animateDie(place) : fixedValue;
 
-      // count the roll — even if it's rejected
       player.rolls++;
       renderPlayers();
 
@@ -1175,11 +1260,8 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
       const before = currentTotal();
       const after = before + added;
 
-      // count the roll — even if it's rejected
       player.rolls++;
       renderPlayers();
-
-      const diceStr = state.places.map(p => rolls[p]).join("-");
 
       const label = state.places.length === 1
         ? `rolled the die — ${rolls.o} → +${added}`
@@ -1225,7 +1307,7 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
   }
 
   /* ============================================================
-     PLAYER BOARD PEEK POPUP (individual mode only)
+     PLAYER BOARD PEEK POPUP
   ============================================================ */
   function openPlayerBoard(i){
     if (state.mode !== "individual") return;
@@ -1298,7 +1380,6 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
         row.title = "Click to view this player's board";
       }
 
-      // Total shown in bold + purple, rolls and moves after
       const totalShown = state.mode === "shared" ? state.total : p.total;
 
       row.innerHTML =
@@ -1557,6 +1638,7 @@ border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:v
      INIT
   ============================================================ */
   ["h","t","o"].forEach(p => makeDieFace(p, 1));
+  $("diceTitle").innerHTML = DIE_ICON_INLINE + " Dice Actions";
   renderHistory();
 })();
 </script>

@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Place Value Race</title>
+<style>
+:root{
+  --bg:#eef5ff;--card:#fff;--ink:#1e293b;--muted:#64748b;--line:#dbe5f0;
+  --hundreds:#3b82f6;--tens:#f59e0b;--ones:#22c55e;--accent:#7c3aed;
+  --shadow:0 8px 22px rgba(30,41,59,.10)
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+background:linear-gradient(180deg,#edf4ff,#f8fbff 50%,#f1f5f9);color:var(--ink)}
+.wrap{max-width:1180px;margin:auto;padding:16px}
+header{background:linear-gradient(135deg,#4338ca,#7c3aed);color:#fff;border-radius:22px;
+padding:20px 22px;box-shadow:var(--shadow);margin-bottom:14px}
+header .title{font-size:clamp(25px,4vw,40px);font-weight:950;letter-spacing:-1px}
+header p{margin:6px 0 0;opacity:.94;line-height:1.45;font-size:14px;max-width:760px}
+
+/* ---------- pages ---------- */
+.page[hidden]{display:none}
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:900px){.setup-grid{grid-template-columns:1fr}}
+
+.setup{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.setup-title{font-size:15px;font-weight:950;margin-bottom:9px}
+.controls{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+label{font-size:11px;font-weight:850;color:var(--muted);display:block;margin-bottom:4px}
+input,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:14px;background:#fff}
+input:disabled{opacity:.45;background:#f1f5f9}
+button{border:0;border-radius:11px;padding:10px 13px;font-weight:900;cursor:pointer;transition:.14s;font-family:inherit}
+button:hover{transform:translateY(-1px)} button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.primary{background:#7c3aed;color:#fff;box-shadow:0 6px 14px rgba(124,58,237,.20)}
+.secondary{background:#ede9fe;color:#5b21b6}.ghost{background:#f1f5f9;color:#334155}
+.big{width:100%;padding:14px;font-size:16px;margin-top:12px;border-radius:14px}
+
+/* ---------- mode picker ---------- */
+.mode-grid{display:grid;gap:10px}
+.mode-card{text-align:left;background:#f8fafc;border:2px solid var(--line);border-radius:16px;
+padding:13px 14px;cursor:pointer;display:block;width:100%;transition:.15s}
+.mode-card:hover{transform:translateY(-1px);border-color:#c4b5fd}
+.mode-card.selected{border-color:#7c3aed;background:#f5f3ff;box-shadow:0 6px 16px rgba(124,58,237,.15)}
+.mode-icon{font-size:24px;line-height:1}
+.mode-name{font-weight:950;font-size:15px;margin-top:4px}
+.mode-desc{font-size:12px;color:#475569;line-height:1.45;margin-top:3px;font-weight:500}
+
+/* target picker */
+.target-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.target-card{background:#f8fafc;border:2px solid var(--line);border-radius:16px;padding:12px 8px;
+text-align:center;cursor:pointer;transition:.15s;display:block;width:100%}
+.target-card:hover{transform:translateY(-1px);border-color:#c4b5fd}
+.target-card.selected{border-color:#7c3aed;background:#f5f3ff;box-shadow:0 6px 16px rgba(124,58,237,.15)}
+.target-num{font-size:26px;font-weight:1000;letter-spacing:-1px;line-height:1}
+.target-places{font-size:10px;font-weight:850;color:var(--muted);margin-top:5px;letter-spacing:.3px}
+.target-card.selected .target-places{color:#5b21b6}
+
+/* ---------- game ---------- */
+.game-bar{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 14px;
+box-shadow:var(--shadow);margin-bottom:10px}
+.turn-label{font-size:10px;color:var(--muted);font-weight:950;letter-spacing:.5px}
+.turn-name{font-size:20px;font-weight:950;color:#4c1d95}
+.turn-help{font-size:11px;color:var(--muted);margin-top:1px}
+.bar-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.scoreboard{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.scoreboard .sb-title{font-size:11px;font-weight:950;color:var(--muted);letter-spacing:.5px}
+.win-chip{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);
+border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;box-shadow:var(--shadow)}
+.win-chip.active{outline:2px solid #c4b5fd;background:#f5f3ff}
+.win-chip .cnt{background:#7c3aed;color:#fff;border-radius:999px;padding:1px 9px;font-weight:950;font-size:11px}
+
+.play-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:12px}
+.main-card,.side-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+.main-card{padding:14px}.side-card{padding:14px;height:max-content;position:sticky;top:10px}
+
+/* ---------- boards ---------- */
+.boards{display:block}
+.player-board{border:2px solid var(--line);border-radius:18px;padding:10px;background:#fbfdff;transition:.2s}
+.player-board.active{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.player-board.done{border-color:#22c55e;background:#f0fdf4}
+.pb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px}
+.pb-name{font-size:16px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-wins{font-size:11px;font-weight:950;color:#b45309;background:#fef3c7;padding:2px 9px;border-radius:999px;white-space:nowrap}
+
+.number-panel{text-align:center;padding:3px 0 9px}
+.score{font-size:clamp(46px,7vw,74px);font-weight:1000;line-height:.95;letter-spacing:-3px;
+color:#4c1d95;text-shadow:0 2px 0 #ede9fe}
+.target{font-size:12px;color:var(--muted);font-weight:800;margin-top:3px}
+.progress{height:11px;background:#e5e7eb;border-radius:999px;overflow:hidden;max-width:650px;margin:9px auto 0}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,#a78bfa,#6366f1);transition:width .35s}
+
+.board{display:grid;gap:10px}
+.place{position:relative;border:1px solid var(--line);border-radius:17px;padding:11px 10px 10px;background:#fbfdff;overflow:hidden}
+.place::before{content:"";position:absolute;top:0;left:0;right:0;height:5px}
+.place.h::before{background:var(--hundreds)} .place.t::before{background:var(--tens)} .place.o::before{background:var(--ones)}
+.place-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.place-name{font-size:14px;font-weight:950}.place-value{font-size:10px;color:var(--muted);font-weight:800}
+.digit{font-size:50px;line-height:1;font-weight:1000;text-align:center;margin:6px 0}
+.digit.wide{font-size:38px}
+
+/* ---------- circles with numbers inside ---------- */
+.dots{
+  display:grid;
+  grid-template-columns:repeat(3,38px);
+  grid-template-rows:repeat(3,38px);
+  justify-content:center;
+  gap:8px;
+  align-content:center;
+}
+.dot{
+  width:38px;height:38px;border-radius:50%;
+  border:2px solid #d4dce8;background:#fff;
+  display:grid;place-items:center;
+  font-weight:950;color:#94a3b8;line-height:1;
+  user-select:none;
+  transition:background .18s,border-color .18s,color .18s,transform .18s;
+}
+.dot.h{font-size:10px}
+.dot.t{font-size:12px}
+.dot.o{font-size:14px}
+.dot.on{transform:scale(1.05)}
+.dot.on.h{background:#93c5fd;border-color:#3b82f6;color:#1e3a8a}
+.dot.on.t{background:#fcd34d;border-color:#f59e0b;color:#78350f}
+.dot.on.o{background:#86efac;border-color:#22c55e;color:#14532d}
+.place-note{font-size:10px;color:var(--muted);text-align:center;margin-top:6px;font-weight:750}
+
+/* ---------- dice ---------- */
+.dice-area{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.dice-title{font-size:14px;font-weight:950;margin-bottom:7px;text-align:center}
+.dice-row{display:grid;gap:10px}
+.die-card{border:1px solid var(--line);border-radius:16px;padding:9px;text-align:center;background:#fff}
+.die{width:68px;height:68px;border-radius:15px;margin:4px auto 7px;display:grid;place-items:center;background:#fff;border:4px solid currentColor;box-shadow:0 7px 13px rgba(15,23,42,.10)}
+.die.h{color:var(--hundreds)} .die.t{color:var(--tens)} .die.o{color:var(--ones)}
+.face{display:grid;grid-template-columns:repeat(3,9px);gap:5px;justify-content:center}
+.pip{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:0}
+.pip.show{opacity:1}
+.die-label{font-size:12px;font-weight:950}.die-help{font-size:10px;color:var(--muted);margin:1px 0 7px}
+.roll-btn{width:100%;font-size:11px;padding:8px}
+.dice-actions{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px}.dice-actions button{width:100%}
+
+#readyBtn.needed{
+  background:#7c3aed;color:#fff;
+  animation:pulseReady 1.4s infinite;
+}
+@keyframes pulseReady{
+  0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,.55)}
+  50%{box-shadow:0 0 0 10px rgba(124,58,237,0)}
+}
+
+/* ---------- sidebar ---------- */
+.side-title{font-size:15px;font-weight:950;margin:0 0 8px}
+.latest{padding:11px;border-radius:12px;background:#f5f3ff;color:#4c1d95;font-size:12px;line-height:1.45;margin-bottom:10px}
+.player-list{display:flex;flex-direction:column;gap:7px}
+.player-row{display:grid;grid-template-columns:10px 1fr auto;gap:8px;align-items:center;padding:8px 10px;
+background:#f8fafc;border-radius:11px;font-size:12px;border:1px solid transparent;transition:.15s}
+.player-row.clickable{cursor:pointer}
+.player-row.clickable:hover{background:#eef2ff;border-color:#c7d2fe;transform:translateY(-1px)}
+.player-row.active{outline:2px solid #c4b5fd;background:#f5f3ff}
+.swatch{width:10px;height:10px;border-radius:50%}
+.player-name-line{font-size:12px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-stats{font-size:10px;color:var(--muted);font-weight:750;margin-top:3px;line-height:1.5}
+.player-stats .stat-total{
+  color:#7c3aed;font-weight:1000;font-size:14px;
+  background:#ede9fe;padding:1px 8px;border-radius:6px;margin-right:2px;
+}
+.player-stats .stat-sep{color:#cbd5e1;margin:0 4px}
+.player-wins-box{font-size:11px;font-weight:950;color:#b45309;background:#fef3c7;
+padding:3px 9px;border-radius:999px;white-space:nowrap}
+.peek-hint{font-size:10px;color:var(--muted);font-weight:750;margin:-4px 0 8px}
+.history{margin-top:10px;max-height:190px;overflow:auto;display:flex;flex-direction:column;gap:5px}
+.event{display:grid;grid-template-columns:64px 1fr auto;gap:6px;padding:7px 8px;background:#f8fafc;border-radius:9px;font-size:10px}
+.event.rejected{background:#fef2f2;color:#991b1b}
+.event .who{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.event .delta{font-weight:950;color:#4c1d95}
+.mini{font-size:11px;color:var(--muted)}
+
+.bottom-tools{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);
+padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bottom-tools button{background:#f8fafc;border:1px solid var(--line);color:#334155}
+
+/* ---------- modals ---------- */
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.62);z-index:20;align-items:center;justify-content:center;padding:16px}
+.modal.show{display:flex}
+.modal-box{width:min(620px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:22px;padding:20px;box-shadow:0 30px 70px rgba(0,0,0,.28)}
+.modal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.modal-head h2{margin:0;font-size:22px}.close-btn{background:#f1f5f9;color:#334155;padding:7px 10px}
+.info-grid{display:grid;gap:8px}.info-box{padding:11px 12px;border-radius:12px;background:#f8fafc;line-height:1.5;font-size:13px}
+.info-box strong{color:#4c1d95}
+.pascal{background:#0f172a;color:#e2e8f0;border-radius:13px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.5;overflow:auto}
+.pascal .kw{color:#c4b5fd}.pascal .num{color:#7dd3fc}.pascal .cm{color:#94a3b8}
+
+/* ---------- MOVE OUTCOME POPUP ---------- */
+.move-box{width:min(720px,100%);text-align:center}
+.move-player-name{font-size:clamp(20px,3.5vw,26px);font-weight:950;color:#4c1d95}
+.move-roll-label{font-size:14px;color:#475569;font-weight:750;margin-top:3px}
+
+.move-equation{
+  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;
+  gap:10px;font-size:clamp(32px,7vw,56px);font-weight:1000;letter-spacing:-2px;
+  margin:18px 0;line-height:1;
+}
+.move-equation .op{color:#7c3aed}
+.move-equation .added{color:#7c3aed}
+.move-equation .result{color:#059669}
+.move-equation .result.bad{color:#dc2626}
+
+.move-places{display:grid;gap:10px;margin:16px 0}
+.mp-card{border-radius:16px;padding:12px 8px;border:3px solid;text-align:center}
+.mp-card.h{background:#eff6ff;border-color:#93c5fd}
+.mp-card.t{background:#fffbeb;border-color:#fcd34d}
+.mp-card.o{background:#f0fdf4;border-color:#86efac}
+.mp-label{font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.mp-card.h .mp-label{color:#1e40af}
+.mp-card.t .mp-label{color:#92400e}
+.mp-card.o .mp-label{color:#14532d}
+.mp-calc{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:5px;
+font-size:clamp(20px,3.5vw,30px);font-weight:1000;line-height:1.1}
+.mp-op{color:#94a3b8;font-weight:900}
+.mp-num{color:#1e293b}
+.mp-card.h .mp-num{color:#1e3a8a}
+.mp-card.t .mp-num{color:#78350f}
+.mp-card.o .mp-num{color:#14532d}
+.mp-carry-in{color:#7c3aed;font-size:.78em;vertical-align:super;font-weight:1000}
+.mp-carry-badge{margin-top:8px;display:inline-block;padding:4px 10px;border-radius:999px;
+font-size:11px;font-weight:950;background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.mp-carry-in-note{margin-top:8px;font-size:10px;font-weight:850;color:#7c3aed}
+
+.move-carry-note{background:#f5f3ff;border:2px dashed #a78bfa;border-radius:14px;
+padding:12px;margin:10px 0;font-size:14px;font-weight:800;color:#4c1d95;text-align:left;line-height:1.5}
+.move-carry-note:empty{display:none}
+.move-ok{width:100%;padding:15px;font-size:17px;margin-top:12px;border-radius:14px}
+
+/* ---------- REJECT POPUP ---------- */
+.reject-box{width:min(640px,100%);text-align:center}
+.reject-icon{font-size:64px;line-height:1;margin-bottom:6px}
+.reject-title{font-size:clamp(22px,4vw,30px);font-weight:1000;color:#dc2626;margin:0 0 6px}
+.reject-sub{font-size:14px;color:#475569;font-weight:750;margin-bottom:8px}
+.reject-player{font-size:18px;font-weight:950;color:#4c1d95;margin-bottom:8px}
+.reject-message{background:#fef2f2;border:2px solid #fecaca;border-radius:14px;
+padding:12px;font-size:14px;font-weight:800;color:#991b1b;line-height:1.55;text-align:left;margin:10px 0}
+.reject-message b{color:#7f1d1d}
+.reject-ok{width:100%;padding:15px;font-size:17px;margin-top:12px;border-radius:14px;background:#dc2626;color:#fff}
+.reject-ok:hover{background:#b91c1c}
+
+/* ---------- win ---------- */
+.win{display:none;position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:30;align-items:center;justify-content:center;padding:16px}
+.win.show{display:flex}
+.winbox{width:min(560px,100%);background:#fff;border-radius:25px;padding:28px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.trophy{font-size:66px;line-height:1}
+.winbox h2{font-size:29px;margin:6px 0}
+.winbox p{font-size:16px;color:#475569;margin:4px 0}
+.callout{padding:12px;border-radius:13px;background:#ecfdf5;color:#065f46;line-height:1.5;font-size:13px}
+.win-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+
+.toast{position:fixed;right:16px;bottom:16px;z-index:40;max-width:320px;padding:11px 13px;border-radius:12px;background:#0f172a;color:#fff;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);pointer-events:none;transition:.22s;font-size:12px}
+.toast.show{opacity:1;transform:translateY(0)}
+
+footer{text-align:center;color:#64748b;font-size:11px;padding:14px 0 2px}
+
+.sound-toggle{position:fixed;right:16px;top:16px;z-index:50;background:#fff;border:1px solid var(--line);
+border-radius:999px;width:44px;height:44px;padding:0;font-size:20px;box-shadow:var(--shadow);display:grid;place-items:center}
+.sound-toggle.muted{opacity:.55}
+
+@media(max-width:900px){.play-layout{grid-template-columns:1fr}.side-card{position:static}}
+@media(max-width:620px){
+  .controls{grid-template-columns:1fr}
+  .dice-row{grid-template-columns:1fr !important}
+  .dice-actions,.bottom-tools,.win-btns{grid-template-columns:1fr}
+  .game-bar{grid-template-columns:1fr}
+  .dots{grid-template-columns:repeat(3,34px);grid-template-rows:repeat(3,34px);gap:6px}
+  .dot{width:34px;height:34px}
+  .dot.h{font-size:9px}
+  .move-places{grid-template-columns:1fr !important}
+  .target-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<button class="sound-toggle" id="soundToggle" title="Sound on / off">🔊</button>
+
+<div class="wrap">
+  <header>
+    <div class="title">🎲 Place Value Race</div>
+    <p>Roll, add, carry, and learn: <b>10 ones become 1 ten</b> and <b>10 tens become 1 hundred</b>.</p>
+  </header>
+
+  <!-- ============================ SETUP PAGE ============================ -->
+  <section id="setupPage" class="page">
+    <div class="setup-grid">
+
+      <div class="setup">
+        <div class="setup-title">🎮 Choose a Game Mode</div>
+        <div class="mode-grid">
+          <button type="button" class="mode-card selected" data-mode="shared">
+            <div class="mode-icon">🎯</div>
+            <div class="mode-name">Shared Board</div>
+            <div class="mode-desc">All players add to <b>one single board</b>. Turn passes automatically.</div>
+          </button>
+          <button type="button" class="mode-card" data-mode="individual">
+            <div class="mode-icon">🧍</div>
+            <div class="mode-name">Individual Boards</div>
+            <div class="mode-desc">Each player has <b>their own board</b>. Press <b>“Pass to …”</b> to hand over the turn.</div>
+          </button>
+        </div>
+
+        <div class="setup-title" style="margin-top:14px">🎯 Choose a Target</div>
+        <div class="target-grid" id="targetGrid">
+          <button type="button" class="target-card" data-target="10">
+            <div class="target-num">10</div>
+            <div class="target-places">Ones only</div>
+          </button>
+          <button type="button" class="target-card" data-target="100">
+            <div class="target-num">100</div>
+            <div class="target-places">Tens + Ones</div>
+          </button>
+          <button type="button" class="target-card selected" data-target="1000">
+            <div class="target-num">1000</div>
+            <div class="target-places">H+T+O</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="setup">
+        <div class="setup-title">👥 Players &amp; Options</div>
+        <div class="controls">
+          <div>
+            <label>Number of Players</label>
+            <select id="playerCount">
+              <option value="1">1 Player</option>
+              <option value="2" selected>2 Players</option>
+              <option value="3">3 Players</option>
+              <option value="4">4 Players</option>
+            </select>
+          </div>
+          <div>
+            <label>Starting Number</label>
+            <select id="startValue"></select>
+          </div>
+          <div><label>Player 1</label><input id="p1" value="Player 1" maxlength="16"></div>
+          <div><label>Player 2</label><input id="p2" value="Player 2" maxlength="16"></div>
+          <div><label>Player 3</label><input id="p3" value="Player 3" maxlength="16" disabled></div>
+          <div><label>Player 4</label><input id="p4" value="Player 4" maxlength="16" disabled></div>
+        </div>
+        <button class="primary big" id="startGameBtn">▶ Start Game</button>
+      </div>
+
+    </div>
+
+    <section class="bottom-tools" style="grid-template-columns:1fr 1fr">
+      <button id="rulesBtn2">📘 Game Rules</button>
+      <button id="carryBtn2">🔄 How the Carry Function Works</button>
+    </section>
+  </section>
+
+  <!-- ============================ GAME PAGE ============================ -->
+  <section id="gamePage" class="page" hidden>
+
+    <div class="game-bar">
+      <div>
+        <div class="turn-label">
+          ROUND <span id="roundNum">1</span> • <span id="modeLabel">Shared Board</span> • TARGET <span id="targetLabel">1000</span>
+        </div>
+        <div class="turn-name" id="turnName">—</div>
+        <div class="turn-help" id="turnHelp">Choose a die below.</div>
+      </div>
+      <div class="bar-actions">
+        <button class="secondary" id="rollAllBtn">🎲 Roll All</button>
+        <button class="ghost" id="newRoundBtn">🔁 New Round</button>
+        <button class="ghost" id="backToSetupBtn">⚙️ Setup</button>
+      </div>
+    </div>
+
+    <div class="scoreboard" id="scoreboard"></div>
+
+    <div class="play-layout">
+      <main class="main-card">
+        <div id="boardsArea" class="boards"></div>
+
+        <section class="dice-area">
+          <div class="dice-title" id="diceTitle">🎲 Dice Actions</div>
+          <div class="dice-row" id="diceRow">
+            <div class="die-card" data-place="h">
+              <div class="die h" id="dieH"><div class="face"></div></div>
+              <div class="die-label">Hundreds Die</div><div class="die-help">1–6 × 100</div>
+              <button class="primary roll-btn" data-place="h">Roll Hundreds</button>
+            </div>
+            <div class="die-card" data-place="t">
+              <div class="die t" id="dieT"><div class="face"></div></div>
+              <div class="die-label">Tens Die</div><div class="die-help">1–6 × 10</div>
+              <button class="primary roll-btn" data-place="t">Roll Tens</button>
+            </div>
+            <div class="die-card" data-place="o">
+              <div class="die o" id="dieO"><div class="face"></div></div>
+              <div class="die-label">Ones Die</div><div class="die-help">1–6 × 1</div>
+              <button class="primary roll-btn" data-place="o">Roll Ones</button>
+            </div>
+          </div>
+          <div class="dice-actions">
+            <button class="secondary" id="rollAllBtn2">🎲 Roll All</button>
+            <button class="ghost" id="readyBtn">↩️ Ready for Next Turn</button>
+          </div>
+        </section>
+      </main>
+
+      <aside class="side-card">
+        <div class="side-title">📣 Last Move</div>
+        <div class="latest" id="latestMove">Roll a die to begin.</div>
+        <div class="side-title">Players</div>
+        <div class="peek-hint" id="peekHint">👆 Click a player to view their board</div>
+        <div class="player-list" id="players"></div>
+        <div class="side-title" style="margin-top:12px">Move History</div>
+        <div class="history" id="history"></div>
+      </aside>
+    </div>
+
+    <section class="bottom-tools">
+      <button id="rulesBtn">📘 Game Rules</button>
+      <button id="carryBtn">🔄 How the Carry Function Works</button>
+    </section>
+
+    <footer>Place Value Race • Roll • Add • Carry • Reach the target</footer>
+  </section>
+</div>
+
+<!-- ------------------------- RULES MODAL ------------------------- -->
+<div class="modal" id="rulesModal">
+  <div class="modal-box">
+    <div class="modal-head"><h2>📘 Game Rules</h2><button class="close-btn" data-close="rulesModal">✕</button></div>
+    <div class="info-grid">
+      <div class="info-box">🎯 <strong>Goal:</strong> be the first player to make <b>exactly the target</b> (10, 100, or 1000).</div>
+      <div class="info-box">🎲 <strong>Dice:</strong> only the dice that match your target are shown.</div>
+      <div class="info-box">⚠️ <strong>Exact finish:</strong> if a roll would push you past the target, the move is rejected — but the turn still passes to the next player. So think before you roll!</div>
+      <div class="info-box">📊 <strong>Stats:</strong> you can see each player's <b>total</b>, <b>rolls</b>, <b>moves</b>, and <b>wins</b> in the player list.</div>
+      <div class="info-box">👀 <strong>Board:</strong> each place shows its digit and exactly <b>9 circles</b>. Ones circles say <b>1</b>, tens say <b>10</b>, hundreds say <b>100</b>.</div>
+      <div class="info-box">🔄 <strong>Carry:</strong> when a place reaches 10, it resets to 0 and 1 moves to the next place.</div>
+      <div class="info-box">🎮 <strong>Modes:</strong> <b>Shared Board</b> = everyone adds to one board. <b>Individual Boards</b> = only the active player's board is shown; press <b>“Pass to …”</b> to hand over.</div>
+      <div class="info-box">🏆 <strong>Wins:</strong> the winner of each round gets a trophy. Press <b>New Round</b> to keep playing — the wins stay on the scoreboard.</div>
+      <div class="info-box">🔊 <strong>Sound:</strong> tap the speaker button (top-right) to mute or unmute sounds and voice.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ------------------------- CARRY MODAL ------------------------- -->
+<div class="modal" id="carryModal">
+  <div class="modal-box">
+    <div class="modal-head"><h2>🔄 How the Carry Function Works</h2><button class="close-btn" data-close="carryModal">✕</button></div>
+    <div class="info-grid">
+      <div class="info-box"><strong>1.</strong> A place can show <b>0 to 9</b> circles.</div>
+      <div class="info-box"><strong>2.</strong> Add one more. <b>9 + 1 = 10</b>.</div>
+      <div class="info-box"><strong>3.</strong> Write <b>0</b> in the current place and carry <b>1</b> to the next place.</div>
+      <div class="info-box"><strong>Example:</strong> 129 + 1 = <b>130</b>. Ones 9 → 0, while one new ten is carried.</div>
+      <div class="pascal">
+<span class="cm">{ Pascal-style place-value logic }</span>
+<span class="kw">Ones</span> := N <span class="kw">mod</span> <span class="num">10</span>;
+<span class="kw">Tens</span> := (N <span class="kw">div</span> <span class="num">10</span>) <span class="kw">mod</span> <span class="num">10</span>;
+<span class="kw">Hundreds</span> := (N <span class="kw">div</span> <span class="num">100</span>) <span class="kw">mod</span> <span class="num">10</span>;
+      </div>
+      <div class="info-box"><strong>mod</strong> gives the remainder. <strong>div</strong> gives the whole-number part. Together they split a number into its place-value digits.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ------------------- PLAYER BOARD PEEK MODAL ------------------- -->
+<div class="modal" id="playerBoardModal">
+  <div class="modal-box" style="width:min(720px,100%)">
+    <div class="modal-head">
+      <h2 id="pbModalTitle">Player Board</h2>
+      <button class="close-btn" data-close="playerBoardModal">✕</button>
+    </div>
+    <div id="pbModalBody"></div>
+  </div>
+</div>
+
+<!-- ------------------------- MOVE OUTCOME POPUP ------------------------- -->
+<div class="modal" id="moveModal">
+  <div class="modal-box move-box">
+    <div class="move-player-name" id="movePlayerName">Player 1</div>
+    <div class="move-roll-label" id="moveRollLabel">rolled the Ones die</div>
+
+    <div class="move-equation" id="moveEquation"></div>
+
+    <div class="move-places" id="movePlaces"></div>
+
+    <div class="move-carry-note" id="moveCarryNote"></div>
+
+    <button class="primary move-ok" id="moveOkBtn">Got it! ✓</button>
+  </div>
+</div>
+
+<!-- ------------------------- REJECT POPUP (exceeds target) ------------------------- -->
+<div class="modal" id="rejectModal">
+  <div class="modal-box reject-box">
+    <div class="reject-icon">🚫</div>
+    <h2 class="reject-title">Too Bad — Over the Target!</h2>
+    <div class="reject-player" id="rejectPlayer">Player 1</div>
+    <div class="reject-sub" id="rejectSub">The roll was too big.</div>
+
+    <div class="move-equation" id="rejectEquation"></div>
+
+    <div class="reject-message" id="rejectMessage"></div>
+
+    <button class="reject-ok" id="rejectOkBtn">OK — Pass to the next player ▶</button>
+  </div>
+</div>
+
+<!-- ------------------------- WIN MODAL ------------------------- -->
+<div class="win" id="winModal">
+  <div class="winbox">
+    <div class="trophy">🏆</div>
+    <h2 id="winTitle">Congratulations!</h2>
+    <p id="winText">You reached the target!</p>
+    <div class="callout" id="winCallout"><b>Target complete!</b> You used place value and carrying to reach the target.</div>
+    <div class="scoreboard" id="winScoreboard" style="justify-content:center;margin-top:14px"></div>
+    <div class="win-btns">
+      <button class="primary" id="nextRoundBtn">▶ Next Round</button>
+      <button class="ghost" id="backToSetupBtn2">⚙️ Back to Setup</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+  const PLACE_VALUE = { h:100, t:10, o:1 };
+  const LABELS     = { h:"Hundreds", t:"Tens", o:"Ones" };
+  const EMOJI      = { h:"🔵", t:"🟡", o:"🟢" };
+  const CIRCLE_LABEL = { h:"100", t:"10", o:"1" };
+  const SWATCHES = ["#7c3aed","#0284c7","#ea580c","#059669"];
+  const PIP_PATTERNS = {
+    1:[4], 2:[0,8], 3:[0,4,8], 4:[0,2,6,8], 5:[0,2,4,6,8], 6:[0,2,3,5,6,8]
+  };
+  const CARRY_TEXT = {
+    h:"10 hundreds → 1000",
+    t:"10 tens → 1 hundred",
+    o:"10 ones → 1 ten"
+  };
+
+  const START_OPTIONS = {
+    10:   [0, 2, 5, 8],
+    100:  [0, 10, 20, 25, 50, 75, 90],
+    1000: [0, 100, 200, 250, 500, 750, 900]
+  };
+
+  function placesForTarget(t){
+    if (t === 10)  return ["o"];
+    if (t === 100) return ["t","o"];
+    return ["h","t","o"];
+  }
+
+  const state = {
+    mode:"shared",
+    target:1000,
+    places:["h","t","o"],
+    started:false,
+    finished:false,
+    awaitingReady:false,
+    turn:0,
+    startValue:0,
+    total:0,
+    players:[],
+    history:[],
+    round:1,
+    soundOn:true
+  };
+
+  let boardEls = [];
+  let rolling = false;
+  let moveCallback = null;
+
+  /* ============================================================
+     SOUND ENGINE
+  ============================================================ */
+  let audioCtx = null;
+
+  function getCtx(){
+    if (!state.soundOn) return null;
+    try {
+      if (!audioCtx){
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        audioCtx = new AC();
+      }
+      if (audioCtx.state === "suspended"){
+        audioCtx.resume().catch(()=>{});
+      }
+      return audioCtx;
+    } catch(e){ return null; }
+  }
+
+  function playTone(freq, duration, type, volume, delay){
+    type    = type    || "sine";
+    volume  = volume  == null ? 0.15 : volume;
+    delay   = delay   || 0;
+    const ctx = getCtx();
+    if (!ctx) return;
+    try {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const start = ctx.currentTime + delay;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(volume, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      osc.start(start);
+      osc.stop(start + duration + 0.02);
+    } catch(e){}
+  }
+
+  function soundRoll(){
+    for (let i = 0; i < 6; i++){
+      const f = 320 + Math.random()*420;
+      playTone(f, 0.05, "square", 0.06, i*0.075);
+    }
+    playTone(180, 0.14, "triangle", 0.18, 0.5);
+  }
+
+  function soundPass(){
+    playTone(660, 0.12, "sine", 0.16, 0);
+    playTone(880, 0.18, "sine", 0.16, 0.11);
+  }
+
+  function soundMove(){
+    playTone(523.25, 0.10, "sine", 0.13, 0);
+    playTone(659.25, 0.14, "sine", 0.13, 0.09);
+  }
+
+  function soundReject(){
+    playTone(240, 0.18, "sawtooth", 0.10, 0);
+    playTone(180, 0.24, "sawtooth", 0.10, 0.14);
+  }
+
+  function soundWin(){
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((f, i) => playTone(f, 0.45, "triangle", 0.18, i*0.16));
+    playTone(1046.5, 0.9, "triangle", 0.16, 0.7);
+    playTone(783.99,  0.9, "triangle", 0.10, 0.7);
+  }
+
+  function soundClick(){
+    playTone(700, 0.05, "sine", 0.08, 0);
+  }
+
+  /* ============================================================
+     SPEECH
+  ============================================================ */
+  function speak(text){
+    if (!state.soundOn) return;
+    if (!("speechSynthesis" in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate  = 0.95;
+      u.pitch = 1.1;
+      u.volume = 1;
+      const voices = window.speechSynthesis.getVoices();
+      const enVoice = voices.find(v => /en[-_]/i.test(v.lang));
+      if (enVoice) u.voice = enVoice;
+      window.speechSynthesis.speak(u);
+    } catch(e){}
+  }
+
+  function stopSpeaking(){
+    if ("speechSynthesis" in window){
+      try { window.speechSynthesis.cancel(); } catch(e){}
+    }
+  }
+
+  /* ============================================================
+     HELPERS
+  ============================================================ */
+  function getDigits(n){
+    const target = state.target;
+    const safe = Math.max(0, Math.min(target, Math.round(n)));
+    const d = { h:0, t:0, o:0 };
+
+    if (target === 10){
+      d.o = safe;
+      return d;
+    }
+    if (target === 100){
+      if (safe >= 100){ d.t = 10; d.o = 0; return d; }
+      d.t = Math.floor(safe/10) % 10;
+      d.o = safe % 10;
+      return d;
+    }
+    if (safe >= 1000){ d.h = 10; d.t = 0; d.o = 0; return d; }
+    d.h = Math.floor(safe/100) % 10;
+    d.t = Math.floor(safe/10) % 10;
+    d.o = safe % 10;
+    return d;
+  }
+
+  // no leading zeros (0 stays "0")
+  function displayNumber(n){
+    const safe = Math.max(0, Math.min(state.target, Math.round(n)));
+    return String(safe);
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => (
+      {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]
+    ));
+  }
+
+  function toast(msg){
+    const el = $("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(window.__toast);
+    window.__toast = setTimeout(() => el.classList.remove("show"), 2400);
+  }
+
+  function setLatest(html){ $("latestMove").innerHTML = html; }
+  const activePlayer = () => state.players[state.turn];
+  const currentTotal = () => state.mode === "shared" ? state.total : activePlayer().total;
+
+  /* ============================================================
+     BOARD BUILDING
+  ============================================================ */
+  function placeMarkup(p, name, value){
+    return `
+      <div class="place ${p}">
+        <div class="place-head">
+          <div class="place-name">${EMOJI[p]} ${name}</div>
+          <div class="place-value">${value}</div>
+        </div>
+        <div class="digit" data-digit="${p}">0</div>
+        <div class="dots" data-dots="${p}"></div>
+        <div class="place-note">9 circles • carry at 10</div>
+      </div>`;
+  }
+
+  function makeBoardEl(){
+    const wrap = document.createElement("div");
+    wrap.className = "board-wrap";
+
+    let placesHtml = "";
+    state.places.forEach(p => {
+      const name  = LABELS[p];
+      const value = p === "h" ? "100 each" : p === "t" ? "10 each" : "1 each";
+      placesHtml += placeMarkup(p, name, value);
+    });
+
+    wrap.innerHTML = `
+      <div class="number-panel">
+        <div class="score" data-role="score">0</div>
+        <div class="target">Target: ${state.target}</div>
+        <div class="progress"><div data-role="progress"></div></div>
+      </div>
+      <div class="board" style="grid-template-columns:repeat(${state.places.length},1fr)">
+        ${placesHtml}
+      </div>`;
+
+    state.places.forEach(p => {
+      const holder = wrap.querySelector(`[data-dots="${p}"]`);
+      for (let i = 0; i < 9; i++){
+        const d = document.createElement("div");
+        d.className = "dot " + p;
+        d.textContent = CIRCLE_LABEL[p];
+        holder.appendChild(d);
+      }
+    });
+    return wrap;
+  }
+
+  function updateBoardEl(root, total){
+    const safe = Math.max(0, Math.min(state.target, total));
+    root.querySelector('[data-role="score"]').textContent = displayNumber(safe);
+    root.querySelector('[data-role="progress"]').style.width =
+      Math.min(100, (safe / state.target) * 100) + "%";
+
+    const d = getDigits(safe);
+    state.places.forEach(p => {
+      const digitEl = root.querySelector(`[data-digit="${p}"]`);
+      digitEl.textContent = d[p];
+      digitEl.classList.toggle("wide", d[p] >= 10);
+
+      const dots = root.querySelectorAll(`[data-dots="${p}"] .dot`);
+      dots.forEach((dot, i) => {
+        if (i < d[p]) dot.classList.add("on");
+        else          dot.classList.remove("on");
+      });
+    });
+  }
+
+  function buildBoards(){
+    const area = $("boardsArea");
+    area.innerHTML = "";
+    boardEls = [];
+
+    if (state.mode === "shared"){
+      const b = makeBoardEl();
+      area.appendChild(b);
+      boardEls.push({ boardEl:b, cardEl:b });
+    } else {
+      const card = document.createElement("div");
+      card.className = "player-board active";
+      card.innerHTML = `<div class="pb-head">
+          <span class="pb-name"></span>
+          <span class="pb-wins"></span>
+        </div>`;
+      const b = makeBoardEl();
+      card.appendChild(b);
+      area.appendChild(card);
+      boardEls.push({ boardEl:b, cardEl:card });
+    }
+  }
+
+  function updateBoards(){
+    if (!boardEls.length) return;
+    const entry = boardEls[0];
+
+    if (state.mode === "shared"){
+      updateBoardEl(entry.boardEl, state.total);
+      entry.cardEl.classList.toggle("active", !state.finished);
+      return;
+    }
+
+    const p = activePlayer();
+    if (!p) return;
+    updateBoardEl(entry.boardEl, p.total);
+    entry.cardEl.querySelector(".pb-name").textContent = "🎯 " + p.name;
+    entry.cardEl.querySelector(".pb-wins").textContent = "🏆 " + p.wins;
+    entry.cardEl.classList.toggle("active", !state.finished);
+    entry.cardEl.classList.toggle("done", p.total >= state.target);
+  }
+
+  /* ============================================================
+     DICE
+  ============================================================ */
+  function makeDieFace(place, value){
+    const die = $("die" + place.toUpperCase());
+    if (!die) return;
+    const face = die.querySelector(".face");
+    face.innerHTML = "";
+    const pattern = PIP_PATTERNS[value] || [];
+    for (let i = 0; i < 9; i++){
+      const p = document.createElement("div");
+      p.className = "pip" + (pattern.includes(i) ? " show" : "");
+      face.appendChild(p);
+    }
+  }
+
+  function animateDie(place){
+    return new Promise(resolve => {
+      soundRoll();
+      const timer = setInterval(() => {
+        makeDieFace(place, Math.floor(Math.random()*6) + 1);
+      }, 70);
+      setTimeout(() => {
+        clearInterval(timer);
+        const final = Math.floor(Math.random()*6) + 1;
+        makeDieFace(place, final);
+        resolve(final);
+      }, 520);
+    });
+  }
+
+  function applyTargetToDiceUI(){
+    document.querySelectorAll(".die-card").forEach(card => {
+      const p = card.dataset.place;
+      card.style.display = state.places.includes(p) ? "" : "none";
+    });
+    $("diceRow").style.gridTemplateColumns = `repeat(${state.places.length}, 1fr)`;
+
+    const count = state.places.length;
+    const label = count === 1 ? "🎲 Roll" : count === 2 ? "🎲 Roll Both" : "🎲 Roll All Three";
+    $("rollAllBtn").textContent  = count === 1 ? "🎲 Roll Die" : label;
+    $("rollAllBtn2").textContent = label;
+
+    state.places.forEach(p => makeDieFace(p, 1));
+  }
+
+  /* ============================================================
+     PLACE VALUE STEP-BY-STEP CALCULATION
+  ============================================================ */
+  function computePlaceSteps(before, added){
+    const b = getDigits(before);
+    const a = {
+      h: Math.floor(added/100) % 10,
+      t: Math.floor(added/10) % 10,
+      o: added % 10
+    };
+    const result = {};
+    let carry = 0;
+
+    const order = ["o","t","h"];
+    const leftmost = state.places[0];
+
+    for (const p of order){
+      if (!state.places.includes(p)) continue;
+      const isLast = (p === leftmost);
+      const sum = (b[p] || 0) + a[p] + carry;
+
+      let resultVal, carryOut;
+      if (isLast){
+        resultVal = sum;
+        carryOut  = 0;
+      } else {
+        carryOut  = sum >= 10 ? 1 : 0;
+        resultVal = sum - carryOut*10;
+      }
+
+      result[p] = {
+        b: b[p] || 0,
+        a: a[p],
+        carryIn: carry,
+        sum,
+        result: resultVal,
+        carryOut
+      };
+      carry = carryOut;
+    }
+    return result;
+  }
+
+  function placeCard(p, step){
+    let calc = `<span class="mp-num">${step.b}</span>`;
+    calc += `<span class="mp-op">+</span>`;
+    calc += `<span class="mp-num">${step.a}</span>`;
+    if (step.carryIn){
+      calc += `<span class="mp-op">+</span>`;
+      calc += `<span class="mp-carry-in">${step.carryIn}</span>`;
+    }
+    calc += `<span class="mp-op">=</span>`;
+    calc += `<span class="mp-num">${step.sum}</span>`;
+
+    let badge = "";
+    if (step.carryOut){
+      badge = `<div class="mp-carry-badge">🔄 ${CARRY_TEXT[p]}</div>`;
+    } else if (step.carryIn){
+      badge = `<div class="mp-carry-in-note">↑ carried ${step.carryIn} came from the place on the right</div>`;
+    }
+
+    return `<div class="mp-card ${p}">
+      <div class="mp-label">${EMOJI[p]} ${LABELS[p]}</div>
+      <div class="mp-calc">${calc}</div>
+      ${badge}
+    </div>`;
+  }
+
+  function buildCarryNote(steps){
+    const parts = [];
+    ["o","t","h"].forEach(p => {
+      const s = steps[p];
+      if (!s || !s.carryOut) return;
+      if (p === "o") parts.push("The <b>ones</b> place reached 10 → 0 stays in ones and <b>1 ten</b> is carried to the tens place.");
+      if (p === "t") parts.push("The <b>tens</b> place reached 10 → 0 stays in tens and <b>1 hundred</b> is carried to the hundreds place.");
+      if (p === "h") parts.push("The <b>hundreds</b> place reached 10 → <b>1000</b>! 10 hundreds make one thousand.");
+    });
+    if (!parts.length) return "";
+    return "🔄 " + parts.join("<br>🔄 ");
+  }
+
+  function buildMovePopup({ player, before, after, added, rollTitle }){
+    $("movePlayerName").textContent = "🎲 " + player.name;
+    $("moveRollLabel").textContent = rollTitle;
+
+    $("moveEquation").innerHTML =
+      `<span class="num">${before}</span>` +
+      `<span class="op">+</span>` +
+      `<span class="num added">${added}</span>` +
+      `<span class="op">=</span>` +
+      `<span class="num result">${after}</span>`;
+
+    const steps = computePlaceSteps(before, added);
+    let html = "";
+    state.places.forEach(p => { html += placeCard(p, steps[p]); });
+    $("movePlaces").innerHTML = html;
+    $("movePlaces").style.gridTemplateColumns = `repeat(${state.places.length}, 1fr)`;
+
+    $("moveCarryNote").innerHTML = buildCarryNote(steps);
+  }
+
+  function showMovePopup(data, callback){
+    buildMovePopup(data);
+    soundMove();
+    moveCallback = callback || null;
+    $("moveModal").classList.add("show");
+  }
+
+  function closeMovePopup(){
+    $("moveModal").classList.remove("show");
+    const cb = moveCallback;
+    moveCallback = null;
+    if (cb) cb();
+  }
+
+  /* ============================================================
+     REJECT POPUP (roll exceeds target — turn still passes)
+  ============================================================ */
+  function showRejectPopup({ player, before, added, wouldBe, rollTitle }, callback){
+    $("rejectPlayer").textContent = "🎲 " + player.name;
+    $("rejectSub").textContent = rollTitle;
+
+    $("rejectEquation").innerHTML =
+      `<span class="num">${before}</span>` +
+      `<span class="op">+</span>` +
+      `<span class="num added">${added}</span>` +
+      `<span class="op">=</span>` +
+      `<span class="num result bad">${wouldBe}</span>`;
+
+    $("rejectMessage").innerHTML =
+      `Adding <b>${added}</b> would make <b>${wouldBe}</b>, which is <b>past the target of ${state.target}</b>. ` +
+      `So this move was <b>not</b> played.<br><br>` +
+      `Your roll still counts — the turn passes to the next player. ` +
+      `💡 <b>Tip:</b> next time try a smaller die so you land exactly on ${state.target}!`;
+
+    soundReject();
+    moveCallback = callback || null;
+    $("rejectModal").classList.add("show");
+  }
+
+  function closeRejectPopup(){
+    $("rejectModal").classList.remove("show");
+    const cb = moveCallback;
+    moveCallback = null;
+    if (cb) cb();
+  }
+
+  /* ============================================================
+     GAME LOGIC
+  ============================================================ */
+  function endTurnOrWaitForPass(player, message){
+    if (state.mode === "individual"){
+      state.awaitingReady = true;
+      updateDiceButtons();
+      setLatest(message);
+    } else {
+      nextTurn();
+    }
+  }
+
+  function applyMove(player, before, after, added, rollTitle){
+    if (state.mode === "shared") state.total = after;
+    else player.total = after;
+
+    player.moves++;
+
+    const steps = computePlaceSteps(before, added);
+    const notes = [];
+    ["o","t","h"].forEach(p => {
+      const s = steps[p];
+      if (!s || !s.carryOut) return;
+      notes.push(CARRY_TEXT[p]);
+    });
+
+    setLatest(
+      `<b>${escapeHtml(player.name)}</b> — ${rollTitle}. ` +
+      `${before} + ${added} = <b>${after}</b>` +
+      (notes.length ? ` • Carry: ${notes.join(" • ")}` : "")
+    );
+
+    state.history.unshift({ player: player.name, text: rollTitle, total: after });
+
+    renderHistory();
+    updateBoards();
+    renderPlayers();
+    renderScoreboard($("scoreboard"));
+    updateDiceButtons();
+
+    const won = after === state.target;
+
+    showMovePopup(
+      { player, before, after, added, rollTitle },
+      () => {
+        if (won){ finishRound(player); return; }
+        endTurnOrWaitForPass(
+          player,
+          `<b>${escapeHtml(player.name)}</b>, press <b>“Pass to …”</b> when you are ready to hand over the turn.`
+        );
+      }
+    );
+  }
+
+  function applyRejectedMove(player, before, added, wouldBe, rollTitle){
+    // The roll already counted. Move is NOT applied. Turn passes.
+    setLatest(
+      `<b>${escapeHtml(player.name)}</b> — ${rollTitle}. ` +
+      `+${added} would make <b>${wouldBe}</b>, past ${state.target}. Move rejected — turn passes.`
+    );
+
+    state.history.unshift({
+      player: player.name,
+      text: `${rollTitle} (rejected — past ${state.target})`,
+      total: before,
+      rejected: true
+    });
+
+    renderHistory();
+
+    const target = state.target;
+    const myName = player.name;
+
+    showRejectPopup(
+      { player, before, added, wouldBe, rollTitle },
+      () => {
+        endTurnOrWaitForPass(
+          player,
+          `<b>${escapeHtml(myName)}</b> rolled too big — turn passes. ` +
+          (state.mode === "individual"
+            ? `Press <b>“Pass to …”</b> to hand over.`
+            : ``)
+        );
+      }
+    );
+  }
+
+  function nextTurn(){
+    state.turn = (state.turn + 1) % state.players.length;
+    state.awaitingReady = false;
+    $("turnName").textContent = activePlayer().name;
+    updateBoards();
+    renderPlayers();
+    renderScoreboard($("scoreboard"));
+    updateDiceButtons();
+  }
+
+  async function rollPlace(place, fixedValue){
+    if (!state.started || state.finished || rolling || state.awaitingReady) return;
+    if (!state.places.includes(place)) return;
+
+    rolling = true;
+    try {
+      const mult = PLACE_VALUE[place];
+      const name = LABELS[place];
+      const player = activePlayer();
+      const before = currentTotal();
+
+      const value = (fixedValue == null) ? await animateDie(place) : fixedValue;
+
+      // count the roll — even if it's rejected
+      player.rolls++;
+      renderPlayers();
+
+      const added = value * mult;
+      const after = before + added;
+
+      if (after > state.target){
+        applyRejectedMove(player, before, added, after,
+          `rolled the ${name} die — ${value} × ${mult} = +${added}`);
+        return;
+      }
+
+      applyMove(player, before, after, added,
+        `rolled the ${name} die — ${value} × ${mult} = +${added}`);
+    } finally {
+      rolling = false;
+    }
+  }
+
+  async function rollAll(){
+    if (!state.started || state.finished || rolling || state.awaitingReady) return;
+
+    rolling = true;
+    try {
+      const rolls = {};
+      await Promise.all(state.places.map(async p => { rolls[p] = await animateDie(p); }));
+
+      let added = 0;
+      state.places.forEach(p => { added += rolls[p] * PLACE_VALUE[p]; });
+
+      const player = activePlayer();
+      const before = currentTotal();
+      const after = before + added;
+
+      // count the roll — even if it's rejected
+      player.rolls++;
+      renderPlayers();
+
+      const diceStr = state.places.map(p => rolls[p]).join("-");
+
+      const label = state.places.length === 1
+        ? `rolled the die — ${rolls.o} → +${added}`
+        : `rolled ${state.places.map(p => `${rolls[p]} ${LABELS[p].toLowerCase()}`).join(", ")} → +${added}`;
+
+      if (after > state.target){
+        applyRejectedMove(player, before, added, after, label);
+        return;
+      }
+
+      applyMove(player, before, after, added, label);
+    } finally {
+      rolling = false;
+    }
+  }
+
+  function finishRound(winner){
+    state.finished = true;
+    state.awaitingReady = false;
+    winner.wins++;
+
+    updateBoards();
+    renderPlayers();
+    renderScoreboard($("scoreboard"));
+    renderScoreboard($("winScoreboard"));
+    updateDiceButtons();
+
+    $("winTitle").textContent = `🏆 ${winner.name} wins the round!`;
+    $("winText").textContent =
+      `${winner.name} reached exactly ${state.target} in ${winner.moves} move${winner.moves === 1 ? "" : "s"} ` +
+      `(${winner.rolls} roll${winner.rolls === 1 ? "" : "s"}).`;
+    $("winCallout").innerHTML =
+      `<b>${state.target} complete!</b> You used place value and carrying to reach the target.`;
+    $("winModal").classList.add("show");
+
+    soundWin();
+
+    const spoken =
+      `Congratulations ${winner.name}, you have reached the target first. ` +
+      `You won this round. Press next round to continue the game.`;
+
+    setTimeout(() => speak(spoken), 1000);
+  }
+
+  /* ============================================================
+     PLAYER BOARD PEEK POPUP (individual mode only)
+  ============================================================ */
+  function openPlayerBoard(i){
+    if (state.mode !== "individual") return;
+    const p = state.players[i];
+    if (!p) return;
+
+    soundClick();
+
+    $("pbModalTitle").textContent = `🎯 ${p.name}`;
+    const body = $("pbModalBody");
+    body.innerHTML = "";
+
+    const meta = document.createElement("div");
+    meta.className = "info-box";
+    meta.style.marginBottom = "12px";
+    meta.innerHTML =
+      `<b>Total:</b> <span style="color:#7c3aed;font-weight:1000;font-size:16px">${p.total}</span> / ${state.target} ` +
+      `&nbsp;•&nbsp; <b>Rolls:</b> ${p.rolls} ` +
+      `&nbsp;•&nbsp; <b>Moves:</b> ${p.moves} ` +
+      `&nbsp;•&nbsp; <b>🏆 Wins:</b> ${p.wins}`;
+    body.appendChild(meta);
+
+    const b = makeBoardEl();
+    body.appendChild(b);
+    updateBoardEl(b, p.total);
+
+    $("playerBoardModal").classList.add("show");
+  }
+
+  /* ============================================================
+     DICE BUTTON STATE
+  ============================================================ */
+  function updateDiceButtons(){
+    const blocked = !state.started || state.finished || state.awaitingReady;
+    document.querySelectorAll(".roll-btn").forEach(b => b.disabled = blocked);
+    $("rollAllBtn").disabled  = blocked;
+    $("rollAllBtn2").disabled = blocked;
+
+    const readyBtn = $("readyBtn");
+    if (state.mode === "individual" && state.awaitingReady){
+      const nextIdx  = (state.turn + 1) % state.players.length;
+      const nextName = state.players[nextIdx].name;
+      readyBtn.textContent = `▶ Pass to ${nextName}`;
+      readyBtn.classList.add("needed");
+      readyBtn.disabled = false;
+    } else if (state.mode === "individual"){
+      readyBtn.textContent = "↩️ Ready for Next Turn";
+      readyBtn.classList.remove("needed");
+      readyBtn.disabled = true;
+    } else {
+      readyBtn.textContent = "↩️ Ready for Next Turn";
+      readyBtn.classList.remove("needed");
+      readyBtn.disabled = false;
+    }
+  }
+
+  /* ============================================================
+     RENDERING
+  ============================================================ */
+  function renderPlayers(){
+    const el = $("players");
+    el.innerHTML = "";
+    const clickable = state.mode === "individual";
+
+    state.players.forEach((p, i) => {
+      const row = document.createElement("div");
+      row.className = "player-row" + (i === state.turn && !state.finished ? " active" : "");
+      if (clickable){
+        row.classList.add("clickable");
+        row.title = "Click to view this player's board";
+      }
+
+      // Total shown in bold + purple, rolls and moves after
+      const totalShown = state.mode === "shared" ? state.total : p.total;
+
+      row.innerHTML =
+        `<span class="swatch" style="background:${SWATCHES[i % SWATCHES.length]}"></span>
+         <div>
+           <div class="player-name-line">${escapeHtml(p.name)}</div>
+           <div class="player-stats">
+             <span class="stat-total">${totalShown}</span>
+             <span class="stat-sep">•</span> Rolls <b>${p.rolls}</b>
+             <span class="stat-sep">•</span> Moves <b>${p.moves}</b>
+           </div>
+         </div>
+         <span class="player-wins-box">🏆 ${p.wins}</span>`;
+
+      if (clickable) row.addEventListener("click", () => openPlayerBoard(i));
+      el.appendChild(row);
+    });
+  }
+
+  function renderScoreboard(target){
+    if (!target) return;
+    target.innerHTML = `<span class="sb-title">🏆 WINS</span>`;
+    state.players.forEach((p, i) => {
+      const chip = document.createElement("div");
+      chip.className = "win-chip" + (i === state.turn && !state.finished ? " active" : "");
+      chip.innerHTML = `<span>${escapeHtml(p.name)}</span><span class="cnt">${p.wins}</span>`;
+      target.appendChild(chip);
+    });
+  }
+
+  function renderHistory(){
+    const el = $("history");
+    if (!state.history.length){
+      el.innerHTML = `<div class="mini">No moves yet.</div>`;
+      return;
+    }
+    el.innerHTML = state.history.slice(0, 40).map(e =>
+      `<div class="event${e.rejected ? " rejected" : ""}">
+         <span class="who">${escapeHtml(e.player)}</span>
+         <span>${escapeHtml(e.text)}</span>
+         <span class="delta">${e.total}</span>
+       </div>`
+    ).join("");
+  }
+
+  /* ============================================================
+     ROUND / GAME FLOW
+  ============================================================ */
+  function startRound(){
+    state.finished = false;
+    state.awaitingReady = false;
+    state.turn = 0;
+    state.total = state.startValue;
+    state.history = [];
+
+    state.players.forEach(p => {
+      p.total  = state.startValue;
+      p.moves  = 0;
+      p.rolls  = 0;
+    });
+
+    stopSpeaking();
+
+    $("winModal").classList.remove("show");
+    $("moveModal").classList.remove("show");
+    $("rejectModal").classList.remove("show");
+    $("playerBoardModal").classList.remove("show");
+
+    $("roundNum").textContent    = state.round;
+    $("targetLabel").textContent = state.target;
+    $("modeLabel").textContent   = state.mode === "shared" ? "Shared Board" : "Individual Boards";
+    $("turnName").textContent    = state.players[0].name;
+    $("turnHelp").textContent    = state.mode === "shared"
+      ? "All players add to the same board. Reach exactly the target together."
+      : "Only the active player's board is shown. After a move, press “Pass to …” to hand over.";
+
+    $("peekHint").style.display = state.mode === "individual" ? "block" : "none";
+
+    setLatest(
+      `Round ${state.round} (target <b>${state.target}</b>) started at <b>${state.startValue}</b>. ` +
+      `<b>${escapeHtml(state.players[0].name)}</b>, choose a die or roll all.`
+    );
+
+    buildBoards();
+    applyTargetToDiceUI();
+    updateBoards();
+    renderPlayers();
+    renderScoreboard($("scoreboard"));
+    renderHistory();
+    renderScoreboard($("winScoreboard"));
+
+    state.started = true;
+    updateDiceButtons();
+  }
+
+  function startGameFromSetup(){
+    getCtx();
+
+    const count  = Number($("playerCount").value);
+    const start  = Number($("startValue").value);
+
+    state.mode   = document.querySelector(".mode-card.selected").dataset.mode;
+    state.target = Number(document.querySelector(".target-card.selected").dataset.target);
+    state.places = placesForTarget(state.target);
+    state.startValue = start;
+    state.round = 1;
+    state.players = [];
+
+    for (let i = 1; i <= count; i++){
+      const name = ($("p" + i).value || "").trim() || `Player ${i}`;
+      state.players.push({ name, total:start, moves:0, rolls:0, wins:0 });
+    }
+
+    $("setupPage").hidden = true;
+    $("gamePage").hidden  = false;
+
+    soundClick();
+    startRound();
+    toast(state.mode === "shared" ? "Shared board game started!" : "Individual boards game started!");
+  }
+
+  function nextRound(){
+    state.round++;
+    startRound();
+    soundClick();
+    toast(`Round ${state.round} — wins are kept!`);
+  }
+
+  function backToSetup(){
+    state.started = false;
+    state.finished = false;
+    state.awaitingReady = false;
+    stopSpeaking();
+    $("winModal").classList.remove("show");
+    $("moveModal").classList.remove("show");
+    $("rejectModal").classList.remove("show");
+    $("playerBoardModal").classList.remove("show");
+    $("gamePage").hidden = true;
+    $("setupPage").hidden = false;
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  /* ============================================================
+     UI WIRING
+  ============================================================ */
+  const openModal  = id => $(id).classList.add("show");
+  const closeModal = id => $(id).classList.remove("show");
+
+  $("soundToggle").addEventListener("click", () => {
+    state.soundOn = !state.soundOn;
+    $("soundToggle").textContent = state.soundOn ? "🔊" : "🔇";
+    $("soundToggle").classList.toggle("muted", !state.soundOn);
+    if (!state.soundOn) stopSpeaking();
+    else soundClick();
+  });
+
+  document.querySelectorAll(".mode-card").forEach(card => {
+    card.addEventListener("click", () => {
+      document.querySelectorAll(".mode-card").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      soundClick();
+    });
+  });
+
+  document.querySelectorAll(".target-card").forEach(card => {
+    card.addEventListener("click", () => {
+      document.querySelectorAll(".target-card").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      rebuildStartOptions();
+      soundClick();
+    });
+  });
+
+  function rebuildStartOptions(){
+    const target = Number(document.querySelector(".target-card.selected").dataset.target);
+    const opts = START_OPTIONS[target];
+    const sel = $("startValue");
+    const prev = Number(sel.value);
+    sel.innerHTML = "";
+    opts.forEach(v => {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v;
+      sel.appendChild(o);
+    });
+    if (opts.includes(prev)) sel.value = prev;
+  }
+
+  function syncNameFields(){
+    const count = Number($("playerCount").value);
+    [1,2,3,4].forEach(i => { $("p" + i).disabled = (i > count); });
+  }
+  $("playerCount").addEventListener("change", syncNameFields);
+  syncNameFields();
+  rebuildStartOptions();
+
+  document.querySelectorAll(".roll-btn").forEach(btn => {
+    btn.addEventListener("click", () => rollPlace(btn.dataset.place));
+  });
+  $("rollAllBtn").addEventListener("click", rollAll);
+  $("rollAllBtn2").addEventListener("click", rollAll);
+
+  $("readyBtn").addEventListener("click", () => {
+    if (state.mode === "individual" && state.awaitingReady){
+      soundPass();
+      nextTurn();
+      toast(`It's ${activePlayer().name}'s turn!`);
+      return;
+    }
+    if (state.started && !state.finished){
+      soundClick();
+      setLatest(`<b>${escapeHtml(activePlayer().name)}</b>, choose a die for your next move.`);
+      toast("Ready for the next move.");
+    }
+  });
+
+  $("startGameBtn").addEventListener("click", startGameFromSetup);
+  $("nextRoundBtn").addEventListener("click", nextRound);
+  $("newRoundBtn").addEventListener("click", () => {
+    if (!state.started) return;
+    state.round++;
+    startRound();
+    soundClick();
+    toast(`Round ${state.round} started — wins are kept!`);
+  });
+  $("backToSetupBtn").addEventListener("click", backToSetup);
+  $("backToSetupBtn2").addEventListener("click", backToSetup);
+
+  $("moveOkBtn").addEventListener("click", () => { soundClick(); closeMovePopup(); });
+  $("rejectOkBtn").addEventListener("click", () => { soundClick(); closeRejectPopup(); });
+
+  $("rulesBtn").addEventListener("click",  () => { soundClick(); openModal("rulesModal"); });
+  $("rulesBtn2").addEventListener("click", () => { soundClick(); openModal("rulesModal"); });
+  $("carryBtn").addEventListener("click",  () => { soundClick(); openModal("carryModal"); });
+  $("carryBtn2").addEventListener("click", () => { soundClick(); openModal("carryModal"); });
+
+  document.querySelectorAll("[data-close]").forEach(btn => {
+    btn.addEventListener("click", () => closeModal(btn.dataset.close));
+  });
+
+  document.querySelectorAll(".modal").forEach(m => {
+    m.addEventListener("click", e => {
+      if (e.target !== m) return;
+      if (m.id === "moveModal")   closeMovePopup();
+      else if (m.id === "rejectModal") closeRejectPopup();
+      else                        m.classList.remove("show");
+    });
+  });
+
+  if ("speechSynthesis" in window){
+    window.speechSynthesis.onvoiceschanged = () => {};
+    window.speechSynthesis.getVoices();
+  }
+
+  /* ============================================================
+     INIT
+  ============================================================ */
+  ["h","t","o"].forEach(p => makeDieFace(p, 1));
+  renderHistory();
+})();
+</script>
+</body>
+</html>
